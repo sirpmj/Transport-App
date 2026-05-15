@@ -1814,7 +1814,7 @@ let activeCompany = "";
 
 let financialYear =
 getFinancialYear();
-
+let originalCompanyName = "";
 
 let currentBillView = "Pending";
 
@@ -2924,8 +2924,8 @@ JSON.stringify(company)
 
 /* ACTIVE COMPANY */
 
-activeCompany =
-company.name || "Company";
+company.name =
+originalCompanyName;
 
 document.getElementById(
 "topCompanyName"
