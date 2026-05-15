@@ -1,0 +1,6461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>🚚 Transport Management System</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+
+input[type="number"]{
+  step:0.01;
+}
+	
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+padding:12px;
+color:#111827;
+}
+
+.app-title{
+position:sticky;
+top:0;
+z-index:1000;
+background:#f1f5f9;
+padding-bottom:10px;
+}
+
+.card{
+background:#fff;
+padding:10px;
+margin-bottom:7px;
+border-radius:14px;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:4px;
+}
+
+h2{
+font-size:18px;
+margin-bottom:10px;
+}
+
+input,select,button{
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1px solid #cbd5e1;
+font-size:14px;
+}
+
+button{
+background:#2563eb;
+color:#fff;
+border:none;
+cursor:pointer;
+font-weight:600;
+}
+
+button:hover{
+background:#1d4ed8;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-bottom:0px;
+}
+
+.dashboard .card{
+text-align:center;
+padding:18px;
+}
+
+.dashboard h3{
+font-size:26px;
+color:#2563eb;
+margin-bottom:5px;
+}
+
+@media(max-width:768px){
+
+.dashboard{
+grid-template-columns:repeat(3,1fr);
+}
+
+.dashboard .card{
+padding:10px 6px;
+}
+
+.dashboard h3{
+font-size:16px;
+}
+
+.dashboard p{
+font-size:11px;
+}
+
+}
+
+.mobile-action-row{
+display:flex;
+gap:8px;
+flex-wrap:nowrap;
+}
+
+.mobile-action-row button{
+flex:1;
+white-space:nowrap;
+font-size:12px;
+padding:10px 6px;
+}
+
+@media(max-width:768px){
+
+.mobile-action-row{
+overflow:auto;
+}
+
+}
+
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#fff;
+border-radius:14px;
+overflow:hidden;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+margin-bottom:15px;
+}
+
+thead{
+background:#2563eb;
+color:#fff;
+}
+
+th,td{
+padding:6px 8px;
+border-bottom:1px solid #e5e7eb;
+font-size:12px;
+text-align:left;
+white-space:nowrap;
+}
+
+.status{
+padding:5px 10px;
+border-radius:20px;
+font-size:12px;
+background:#dbeafe;
+color:#1d4ed8;
+display:inline-block;
+}
+
+.action-btn{
+width:auto;
+padding:7px 10px;
+font-size:13px;
+border-radius:8px;
+margin:1px;
+}
+
+.green{
+background:#16a34a;
+}
+
+.red{
+background:#dc2626;
+}
+
+.orange{
+background:#ea580c;
+}
+
+.purple{
+background:#7c3aed;
+}
+
+.gray{
+background:#475569;
+}
+
+@media(max-width:768px){
+
+table{
+display:block;
+overflow:auto;
+}
+
+.form-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+/* MODAL */
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.45);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:9999;
+padding:15px;
+backdrop-filter:blur(4px);
+}
+
+.modal-box{
+background:#fff;
+width:100%;
+max-width:520px;
+border-radius:22px;
+padding:20px;
+box-shadow:0 10px 40px rgba(0,0,0,.25);
+animation:popup .25s ease;
+}
+
+@keyframes popup{
+from{
+transform:scale(.9);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
+
+.modal-box h2{
+margin-bottom:16px;
+font-size:22px;
+}
+
+.modal-grid{
+display:grid;
+gap:12px;
+}
+
+.modal textarea{
+min-height:90px;
+resize:none;
+padding:12px;
+border-radius:12px;
+border:1px solid #cbd5e1;
+font-size:14px;
+}
+
+.modal-actions{
+display:flex;
+gap:10px;
+margin-top:18px;
+}
+
+.modal-actions button{
+flex:1;
+padding:12px;
+font-size:15px;
+border-radius:12px;
+}
+.field{
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+
+.field label{
+font-size:13px;
+font-weight:700;
+color:#334155;
+padding-left:2px;
+}
+
+
+
+.popup-overlay{
+
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+z-index:9999;
+
+}
+
+.popup-box{
+
+background:#fff;
+width:95%;
+max-width:500px;
+
+border-radius:14px;
+
+padding:20px;
+
+box-shadow:0 10px 30px rgba(0,0,0,.2);
+
+max-height:90vh;
+overflow:auto;
+
+}
+
+.popup-header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+margin-bottom:15px;
+
+}
+
+.close-btn{
+
+background:red;
+color:#fff;
+
+border:none;
+
+padding:6px 12px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+th:nth-child(7),
+td:nth-child(7){
+
+position:sticky;
+left:0;
+z-index:2;
+background:#fff;
+
+}
+
+thead th:nth-child(7){
+
+background:#2563eb;
+color:#fff;
+z-index:5;
+
+}
+
+.mobile-cards{
+display:none;
+}
+
+
+.mobile-cards{
+display:grid;
+gap:6px;
+margin-bottom:6px;
+}
+
+.mobile-cards .card{
+padding:10px;
+border-radius:16px;
+margin:0;
+}
+
+.mobile-cards h2{
+font-size:16px;
+margin-bottom:10px;
+}
+
+
+/* =========================
+MOBILE FINAL UI
+========================= */
+
+@media(max-width:768px){
+
+/* FORM GRID */
+
+.form-grid{
+grid-template-columns:repeat(2,1fr) !important;
+gap:4px;
+}
+
+/* CARD */
+
+.card{
+padding:8px;
+margin-bottom:2px;
+border-radius:12px;
+}
+
+
+/* MOBILE CARDS */
+
+.mobile-cards{
+display:grid;
+gap:5px;
+margin-bottom:5px;
+}
+
+.mobile-cards .card{
+padding:8px;
+}
+
+/* HEADINGS */
+
+.mobile-cards h2,
+.card h2{
+font-size:14px;
+margin-bottom:6px;
+}
+
+/* INPUT */
+
+input,
+select,
+textarea,
+button{
+
+font-size:12px;
+padding:8px;
+
+}
+
+/* TABLE */
+
+th,td{
+padding:4px 5px;
+font-size:11px;
+}
+
+/* BUTTON ROW */
+
+.mobile-action-row{
+gap:5px;
+}
+
+.mobile-action-row button{
+font-size:11px;
+padding:8px 5px;
+}
+
+}
+
+.section-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+cursor:pointer;
+padding:2px 0;
+}
+
+.section-head h2{
+margin:0;
+font-size:15px;
+}
+
+.section-body{
+margin-top:4px;
+display:none;
+}
+
+@media(max-width:768px){
+
+.section-body{
+display:none;
+}
+
+}
+
+
+.mobile-action-row{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:5px;
+width:100%;
+}
+
+.mobile-action-row button{
+min-width:0;
+font-size:11px;
+padding:8px 4px;
+white-space:nowrap;
+}
+
+.bill-tabs{
+display:flex;
+gap:6px;
+margin-bottom:0px;
+}
+
+.bill-tabs button{
+flex:1;
+padding:10px;
+font-size:13px;
+border-radius:10px;
+}
+
+
+
+.table-top-bar{
+background:#fff;
+padding:10px;
+border-bottom:1px solid #e5e7eb;
+}
+
+/* SEARCH ROW */
+
+.top-search-row{
+display:flex;
+gap:8px;
+align-items:center;
+flex-wrap:nowrap;
+overflow:auto;
+margin-bottom:8px;
+}
+
+.top-search-row #searchBox{
+flex:1;
+min-width:220px;
+}
+
+/* BILL */
+
+.bill-box{
+display:flex;
+align-items:center;
+gap:6px;
+min-width:220px;
+white-space:nowrap;
+}
+
+.bill-box label{
+font-size:12px;
+font-weight:700;
+margin:0;
+}
+
+/* BUTTONS */
+
+.btn-row{
+display:flex;
+gap:5px;
+}
+
+.btn-row button{
+padding:8px 0;
+font-size:11px;
+white-space:nowrap;
+min-width:105px;
+}
+
+/* TABS */
+
+.bill-tabs{
+display:flex;
+gap:6px;
+}
+
+.bill-tabs button{
+flex:1;
+padding:8px;
+font-size:12px;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+.top-search-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:6px;
+overflow:visible;
+}
+
+.top-search-row #searchBox{
+width:100%;
+min-width:0;
+}
+
+.bill-box{
+width:100%;
+min-width:0;
+}
+
+.bill-box input{
+width:100%;
+min-width:0;
+}
+
+.btn-row{
+grid-column:1 / -1;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:5px;
+}
+
+.btn-row button{
+width:100%;
+min-width:0;
+font-size:11px;
+padding:8px 0;
+}
+
+.bill-tabs button{
+font-size:11px;
+padding:8px;
+}
+
+}
+
+</style>
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+</head>
+
+<body>
+
+
+<!-- LOGIN SCREEN -->
+
+<div id="loginScreen"
+style="
+position:fixed;
+inset:0;
+background:#f1f5f9;
+z-index:999999;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+">
+
+<div style="
+background:#fff;
+padding:25px;
+border-radius:18px;
+width:100%;
+max-width:400px;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+">
+
+<h2 style="
+margin-bottom:20px;
+text-align:center;
+">
+🚚 Transport Login
+</h2>
+
+<input
+type="email"
+id="loginEmail"
+placeholder="Email"
+style="margin-bottom:12px;">
+
+<input
+type="password"
+id="loginPassword"
+placeholder="Password"
+style="margin-bottom:12px;">
+
+<button onclick="loginUser()">
+🔐 Login
+</button>
+
+<button
+onclick="registerUser()"
+style="
+margin-top:10px;
+background:#16a34a;
+">
+🆕 Register
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+TOP BAR
+========================= -->
+
+<div class="app-title"
+style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+">
+
+<div>
+🚚 Transport Management System
+</div>
+
+<div style="
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+">
+
+<button
+class="action-btn"
+onclick="openCompanySettings()">
+
+🏢 Company Settings
+
+</button>
+
+
+<select id="activeCompany"
+onchange="changeCompany()"
+style="
+width:220px;
+">
+
+<option value="default">
+Default Company
+</option>
+
+</select>
+
+<button
+class="action-btn green"
+onclick="addNewCompany()">
+
+🏢 Add Company
+
+</button>
+
+<button
+class="action-btn gray"
+onclick="backupData()">
+
+📦 Backup
+
+</button>
+
+<label
+class="action-btn purple"
+style="
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:10px 14px;
+color:#fff;
+">
+
+♻️ Restore
+
+<input
+type="file"
+accept=".json"
+onchange="restoreData(event)"
+hidden>
+
+</label>
+
+<button
+class="action-btn red"
+onclick="logoutUser()">
+
+🚪 Logout
+
+</button>
+</div>
+
+</div>
+
+<!-- =========================
+COMPANY SETTINGS POPUP
+========================= -->
+
+<div
+id="companyPopup"
+class="popup-overlay"
+style="display:none;">
+
+<div class="popup-box">
+
+<div class="popup-header">
+
+<h2>🏢 Company Settings</h2>
+
+
+
+</button>
+
+</div>
+
+<div class="field">
+<label>Company Name</label>
+<input type="text" id="setCompanyName">
+</div>
+
+<div class="field">
+  <label>Address</label>
+  <textarea id="setCompanyAddress" rows="3"></textarea>
+</div>
+
+<div class="field">
+<label>Mobile</label>
+<input type="text" id="setCompanyMobile">
+</div>
+
+<div class="field">
+<label>Email</label>
+<input type="text" id="setCompanyEmail">
+</div>
+
+<div class="field">
+<label>GSTIN</label>
+<input type="text" id="setCompanyGST">
+</div>
+
+<div class="field">
+
+<label>Terms & Conditions</label>
+
+<textarea
+id="setCompanyTerms"
+rows="6"
+style="width:100%;"></textarea>
+
+</div>
+
+<div style="
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+">
+
+<button onclick="saveCompanySettings()">
+💾 Save
+</button>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<div class="mobile-cards">
+
+<!-- CUSTOMER CARD -->
+
+<div class="card">
+
+<div class="section-head"
+onclick="toggleSection('customerSection')">
+
+<h2>👥 Customer</h2>
+
+<span>▼</span>
+
+</div>
+
+<div id="customerSection" class="section-body">
+
+<div class="form-grid">
+
+<div class="field">
+<label>Customer Name</label>
+<input
+type="text"
+id="customerName"
+placeholder="Customer Name">
+</div>
+
+<div class="field">
+<label>Mobile</label>
+<input
+type="text"
+id="customerMobile"
+placeholder="Mobile">
+</div>
+
+<div class="field">
+<label>GST No</label>
+<input
+type="text"
+id="customerGST"
+placeholder="GST No">
+</div>
+
+<div class="field">
+<label>Address</label>
+<textarea id="customerAddress"></textarea>
+</div>
+
+<div class="field">
+
+<label>&nbsp;</label>
+
+<button onclick="addCustomer()">
+➕ Add Customer
+</button>
+
+</div>
+
+<div class="field">
+
+<label>&nbsp;</label>
+
+<button
+class="purple"
+onclick="openCustomerModal()">
+
+👥 View Customers
+
+</button>
+
+</div>
+</div>
+</div>
+</div>
+
+<!-- TANKER CARD -->
+
+<div class="card">
+
+<div class="section-head"
+onclick="toggleSection('tankerSection')">
+
+<h2>🚛 Tanker</h2>
+
+<span>▼</span>
+
+</div>
+
+<div id="tankerSection" class="section-body">
+
+<div class="form-grid">
+
+<div class="field">
+<label>Vehicle No</label>
+<input
+type="text"
+id="tankerNo"
+placeholder="Vehicle No">
+</div>
+
+<div class="field">
+<label>Driver Name</label>
+<input
+type="text"
+id="driverName"
+placeholder="Driver Name">
+</div>
+
+<div class="field">
+<label>Mobile</label>
+<input
+type="text"
+id="driverMobile"
+placeholder="Mobile">
+</div>
+
+<div class="field">
+<label>Capacity</label>
+<input
+type="text"
+id="tankerCapacity"
+placeholder="Capacity">
+</div>
+
+<div class="field">
+
+<label>&nbsp;</label>
+
+<button onclick="addTanker()">
+➕ Add Tanker
+</button>
+
+</div>
+
+<div class="field">
+
+<label>&nbsp;</label>
+
+<button
+class="purple"
+onclick="openTankerModal()">
+
+🚛 View Tankers
+
+</button>
+
+</div>
+</div>
+</div>
+</div>
+
+<!-- ROUTE CARD -->
+
+<div class="card">
+
+<div class="section-head"
+onclick="toggleSection('routeSection')">
+
+<h2>🛣️ Route Freight</h2>
+
+<span>▼</span>
+
+</div>
+
+<div id="routeSection" class="section-body">
+
+<div class="form-grid">
+
+<div class="field">
+<label>From</label>
+
+<input
+type="text"
+id="routeFrom"
+placeholder="Loading Point">
+</div>
+
+<div class="field">
+<label>To</label>
+
+<input
+type="text"
+id="routeTo"
+placeholder="Unloading Point">
+</div>
+
+<div class="field">
+<label>Freight Rate</label>
+
+<input
+type="number"
+id="routeRate"
+placeholder="Freight Rate">
+</div>
+
+<div class="field">
+
+<label>&nbsp;</label>
+
+<button onclick="addRouteFreight()">
+➕ Add Route
+</button>
+
+</div>
+
+<div class="field">
+
+<label>&nbsp;</label>
+
+<button
+class="purple"
+onclick="openRouteModal()">
+
+🛣️ View Routes
+
+</button>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- EDIT CUSTOMER MODAL -->
+
+<div id="customerModal" class="modal">
+
+<div class="modal-box">
+
+<h2>✏️ Edit Customer</h2>
+
+<div class="modal-grid">
+
+<input type="text" id="editCustomerName" placeholder="Customer Name">
+
+<input type="text" id="editCustomerMobile" placeholder="Mobile">
+
+<input type="text" id="editCustomerGST" placeholder="GST No">
+
+<textarea id="editCustomerAddress" placeholder="Address"></textarea>
+
+</div>
+
+<div class="modal-actions">
+
+<button class="green" onclick="saveCustomerEdit()">
+💾 Save
+</button>
+
+<button class="red" onclick="closeCustomerModal()">
+✖ Close
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- TANKER MODAL -->
+
+<div id="tankerListModal" class="modal">
+
+<div class="modal-box" style="max-width:1000px;">
+
+<h2>🚛 Tanker List</h2>
+
+<div style="overflow:auto;">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Sr</th>
+<th>Vehicle</th>
+<th>Driver</th>
+<th>Mobile</th>
+<th>Capacity</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="tankerModalBody"></tbody>
+
+</table>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+class="red"
+onclick="closeTankerModal()">
+
+✖ Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- CUSTOMER MODAL -->
+
+<div id="customerListModal" class="modal">
+
+<div class="modal-box" style="max-width:1000px;">
+
+<h2>👥 Customer List</h2>
+
+<div style="overflow:auto;">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Sr</th>
+<th>Name</th>
+<th>Mobile</th>
+<th>GST</th>
+<th>Address</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="customerModalBody"></tbody>
+
+</table>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+class="red"
+onclick="closeCustomerListModal()">
+
+✖ Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- EDIT TRIP MODAL -->
+
+<div id="tripModal" class="modal">
+
+<div class="modal-box" style="max-width:950px;">
+
+<h2>✏️ Edit Trip</h2>
+
+<div class="form-grid">
+
+<div class="field">
+<label>L.R. No</label>
+<input type="text" id="editLR">
+</div>
+
+<div class="field">
+<label>Dispatch Date</label>
+<input type="date" id="editDispatchDate">
+</div>
+
+<div class="field">
+<label>A/C Customer</label>
+<input type="text" id="editParty">
+</div>
+
+<div class="field">
+<label>Consignor Name</label>
+<input type="text" id="editLoadingParty">
+</div>
+
+<div class="field">
+<label>Consignee Name</label>
+<input type="text" id="editConsignee">
+</div>
+
+<div class="field">
+<label>Material</label>
+<input type="text" id="editMaterial">
+</div>
+
+<div class="field">
+<label>Loading From</label>
+<input type="text" id="editLoadingPoint">
+</div>
+
+<div class="field">
+<label>Unload To</label>
+<input type="text" id="editUnloadingPoint">
+</div>
+
+<div class="field">
+<label>Vehicle No</label>
+<input type="text" id="editTanker">
+</div>
+
+<div class="field">
+<label>Quantity</label>
+<input type="number" id="editQty">
+</div>
+
+<div class="field">
+<label>Freight Rate</label>
+<input type="number" id="editRate">
+</div>
+
+<div class="field">
+<label>Invoice No</label>
+<input type="text" id="editInvoice">
+</div>
+
+</div>
+
+<div class="modal-actions">
+
+<button class="green" onclick="saveTripEdit()">
+💾 Save Changes
+</button>
+
+<button class="red" onclick="closeTripModal()">
+✖ Close
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- EDIT TANKER MODAL -->
+
+<div id="editTankerModal" class="modal">
+
+<div class="modal-box" style="max-width:700px;">
+
+<h2>✏️ Edit Tanker</h2>
+
+<div class="form-grid">
+
+<div class="field">
+<label>Vehicle No</label>
+<input type="text" id="editVehicleNo">
+</div>
+
+<div class="field">
+<label>Driver Name</label>
+<input type="text" id="editDriverName">
+</div>
+
+<div class="field">
+<label>Mobile</label>
+<input type="text" id="editDriverMobile">
+</div>
+
+<div class="field">
+<label>Capacity</label>
+<input type="text" id="editCapacity">
+</div>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+class="green"
+onclick="saveTankerEdit()">
+
+💾 Save
+
+</button>
+
+<button
+class="red"
+onclick="closeEditTankerModal()">
+
+✖ Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- ROUTE MODAL -->
+
+<div id="routeModal" class="modal">
+
+<div class="modal-box" style="max-width:900px;">
+
+<h2>🛣️ Trip Route Freight</h2>
+
+<div style="overflow:auto;">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Sr</th>
+<th>From</th>
+<th>To</th>
+<th>Freight</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="routeModalBody"></tbody>
+
+</table>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+class="red"
+onclick="closeRouteModal()">
+
+✖ Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ADD TRIP -->
+
+<div class="card">
+
+<div class="section-head"
+onclick="toggleSection('tripSection')">
+
+<h2>➕ Add Trip</h2>
+
+<span>▼</span>
+
+</div>
+
+<div id="tripSection" class="section-body">
+
+<div class="form-grid">
+
+<div class="field">
+<label>L.R. No</label>
+<input type="text" id="lrNo">
+</div>
+
+<div class="field">
+<label>Dispatch Date</label>
+<input type="date" id="dispatchDate">
+</div>
+
+<div class="field">
+<label>A/C Customer</label>
+<select id="partyName"></select>
+</div>
+
+<div class="field">
+<label>Consignor Name</label>
+<input
+type="text"
+id="loadingParty"
+list="loadingPartyList">
+</div>
+
+<div class="field">
+<label>Consignee Name</label>
+<input
+type="text"
+id="consigneeName"
+list="consigneeList">
+</div>
+
+<div class="field">
+<label>Material</label>
+<input
+type="text"
+id="material"
+list="materialList">
+</div>
+
+<div class="field">
+
+<label>Loading From</label>
+
+<select
+id="loadingPoint"
+onchange="applyRouteFreight()">
+</select>
+
+</div>
+
+<div class="field">
+
+<label>Unload To</label>
+
+<select
+id="unloadingPoint"
+onchange="applyRouteFreight()">
+</select>
+
+</div>
+
+
+<div class="field">
+<label>Vehicle No</label>
+<select id="tripTanker"></select>
+</div>
+
+
+<div class="field">
+<label>Quantity</label>
+<input
+type="number"
+id="tripQty"
+oninput="calculateFreight()">
+</div>
+
+<div class="field">
+<label>Freight Type</label>
+<select
+id="freightType"
+onchange="calculateFreight()">
+
+<option value="MT">Per MT</option>
+<option value="Trip">Per Trip</option>
+
+</select>
+</div>
+
+<div class="field">
+<label>Freight Rate</label>
+<input
+type="number"
+id="freightRate"
+oninput="calculateFreight()">
+</div>
+
+<div class="field">
+<label>Total Freight</label>
+<input
+type="number"
+id="totalFreight"
+placeholder="Total Freight">
+</div>
+
+<div class="field">
+<label>Invoice No</label>
+<input type="text" id="invoiceNo">
+</div>
+
+
+<button onclick="addTripAndPrint()">
+💾 Save & Print LR
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<div id="dashboard" class="dashboard"></div>
+
+
+
+
+<!-- TABLE AREA -->
+
+<div class="table-wrap">
+
+<!-- TOP BAR -->
+
+<div class="table-top-bar">
+
+<div class="top-search-row">
+
+<input
+type="text"
+id="searchBox"
+placeholder="Search..."
+oninput="showTrips()">
+
+<div class="bill-box">
+
+<label>
+Next Bill No
+</label>
+
+<input
+type="text"
+id="billNo"
+placeholder="Bill No">
+
+</div>
+
+<div class="btn-row">
+
+<button onclick="generateSelectedBills()">
+🧾 Generate Bill
+</button>
+
+<button onclick="openPendingBills()">
+🧾 Pending Bill
+</button>
+
+<button onclick="exportTrips()">
+📤 Export Excel
+</button>
+
+</div>
+
+</div>
+
+<!-- TABS -->
+
+<div class="bill-tabs">
+
+<button onclick="currentBillView='Pending';showTrips();">
+📄 Pending
+</button>
+
+<button onclick="currentBillView='Billed';showTrips();">
+✅ Billed
+</button>
+
+<button onclick="currentBillView='Paid';showTrips();">
+💰 Paid
+</button>
+
+</div>
+
+</div>
+
+<!-- TABLE -->
+
+<div id="pendingTrips">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+<input
+type="checkbox"
+onclick="toggleAllRows(this)">
+</th>
+
+<th>Sr</th>
+<th>Date</th>
+<th>A/C Customer</th>
+<th>Consignor</th>
+<th>Consignee</th>
+<th>Tanker</th>
+<th>From</th>
+<th>To</th>
+<th>Material</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Freight</th>
+<th>L.R.</th>
+<th>Invoice</th>
+<th>Bill No</th>
+<th>Status</th>
+<th>Bill</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tripBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+<script>
+
+/* =========================
+FIREBASE CONFIG
+========================= */
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBswidIUFRN-_6sOKYvQRUW1IhOO3Qt3lo",
+
+authDomain:
+"transport-management-64f24.firebaseapp.com",
+
+databaseURL:
+"https://transport-management-64f24-default-rtdb.firebaseio.com",
+
+projectId:
+"transport-management-64f24",
+
+storageBucket:
+"transport-management-64f24.firebasestorage.app",
+
+messagingSenderId:
+"50423021713",
+
+appId:
+"1:50423021713:web:7a5c488695a1595feabf30"
+
+};
+
+/* INIT */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+</script>
+<script>
+
+let activeCompany =
+localStorage.getItem("activeCompany")
+|| "default";
+
+let financialYear =
+getFinancialYear();
+
+
+let currentBillView = "Pending";
+
+let trips =
+JSON.parse(localStorage.getItem("trips") || "[]");
+
+let tankers =
+JSON.parse(localStorage.getItem("tankers") || "[]");
+
+let customers =
+JSON.parse(localStorage.getItem("customers") || "[]");
+
+async function saveData(){
+
+if(!currentUser) return;
+
+let data = {
+
+trips,
+tankers,
+customers,
+routeRates,
+companyInfo:
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+)
+
+};
+
+await db
+.collection("transportData")
+.doc(currentUser.uid)
+
+.collection("companies")
+.doc(activeCompany)
+
+.set(data);
+
+console.log(
+"Cloud Saved:",
+activeCompany
+);
+
+}
+
+
+async function loadCloudData(){
+
+if(!currentUser) return;
+
+let doc = await db
+
+.collection("transportData")
+.doc(currentUser.uid)
+
+.collection("companies")
+.doc(activeCompany)
+
+.get();
+
+if(doc.exists){
+
+let data = doc.data();
+
+trips = data.trips || [];
+
+tankers = data.tankers || [];
+
+customers = data.customers || [];
+
+routeRates = data.routeRates || [];
+
+/* COMPANY INFO */
+
+localStorage.setItem(
+"companyInfo",
+JSON.stringify(
+data.companyInfo || {}
+)
+);
+
+showTrips();
+
+loadCustomers();
+
+loadTankers();
+
+updateDashboard();
+
+showRouteFreight();
+
+loadRoutePoints();
+
+loadCompanySettings();
+
+console.log(
+"Loaded Company:",
+activeCompany
+);
+
+}else{
+
+trips = [];
+tankers = [];
+customers = [];
+routeRates = [];
+
+showTrips();
+
+loadCustomers();
+
+loadTankers();
+
+updateDashboard();
+
+console.log(
+"No data for company"
+);
+
+}
+
+}
+
+
+/* =========================
+AUTH
+========================= */
+
+let currentUser = null;
+
+/* REGISTER */
+
+function registerUser(){
+
+let email =
+document.getElementById("loginEmail").value;
+
+let password =
+document.getElementById("loginPassword").value;
+
+if(!email || !password){
+
+alert("Enter email & password");
+return;
+
+}
+
+auth.createUserWithEmailAndPassword(
+email,
+password
+)
+
+.then(()=>{
+
+alert("Registration Successful");
+
+})
+
+.catch(err=>{
+
+alert(err.message);
+
+});
+
+}
+
+/* LOGIN */
+
+function loginUser(){
+
+let email =
+document.getElementById("loginEmail").value;
+
+let password =
+document.getElementById("loginPassword").value;
+
+auth.signInWithEmailAndPassword(
+email,
+password
+)
+
+.catch(err=>{
+
+alert(err.message);
+
+});
+
+}
+
+/* AUTO LOGIN */
+
+auth.onAuthStateChanged(user=>{
+
+if(user){
+
+currentUser = user;
+
+document.getElementById(
+"loginScreen"
+).style.display = "none";
+
+loadCloudData();
+
+}else{
+
+document.getElementById(
+"loginScreen"
+).style.display = "flex";
+
+}
+
+});
+
+function logoutUser(){
+
+auth.signOut();
+
+}
+
+
+function getFinancialYear(){
+
+let d = new Date();
+
+let year = d.getFullYear();
+
+let month = d.getMonth() + 1;
+
+/* APRIL TO MARCH */
+
+if(month >= 4){
+
+return String(year).slice(2)
++
+String(year + 1).slice(2);
+
+}else{
+
+return String(year - 1).slice(2)
++
+String(year).slice(2);
+
+}
+
+}
+
+function addNewCompany(){
+
+let name =
+prompt("Enter Company Name");
+
+if(!name) return;
+
+let companies =
+JSON.parse(
+localStorage.getItem("companies")
+|| "[]"
+);
+
+if(companies.includes(name)){
+
+alert("Company already exists");
+return;
+
+}
+
+companies.push(name);
+
+localStorage.setItem(
+"companies",
+JSON.stringify(companies)
+);
+
+loadCompanies();
+
+}
+
+function loadCompanies(){
+
+let companies =
+JSON.parse(
+localStorage.getItem("companies")
+|| '["default"]'
+);
+
+let select =
+document.getElementById(
+"activeCompany"
+);
+
+select.innerHTML = "";
+
+companies.forEach(c=>{
+
+select.innerHTML += `
+
+<option
+value="${c}">
+
+${c}
+
+</option>
+
+`;
+
+});
+
+select.value = activeCompany;
+
+}
+
+function changeCompany(){
+
+activeCompany =
+document.getElementById(
+"activeCompany"
+).value;
+
+localStorage.setItem(
+"activeCompany",
+activeCompany
+);
+
+loadCloudData();
+
+}
+
+function formatAmount(num){
+
+return Number(num || 0).toLocaleString(
+"en-IN",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+);
+
+}
+
+
+function toggleSection(id){
+
+let box = document.getElementById(id);
+
+if(box.style.display === "block"){
+
+box.style.display = "none";
+
+}else{
+
+box.style.display = "block";
+
+}
+
+}
+
+function showBillType(type){
+
+if(type === "pending"){
+
+document.getElementById(
+"pendingTrips"
+).style.display = "block";
+
+document.getElementById(
+"billedTrips"
+).style.display = "none";
+
+}else{
+
+document.getElementById(
+"pendingTrips"
+).style.display = "none";
+
+document.getElementById(
+"billedTrips"
+).style.display = "block";
+
+loadBilledTrips();
+
+}
+
+}
+
+function loadBilledTrips(){
+
+let billed = trips.filter(
+t => t.billStatus === "Billed"
+);
+
+let html = `
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Sr</th>
+<th>Date</th>
+<th>Customer</th>
+<th>Tanker</th>
+<th>From</th>
+<th>To</th>
+<th>Qty</th>
+<th>Bill No</th>
+<th>Freight</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+`;
+
+billed.forEach((t,index)=>{
+
+html += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${formatDate(t.dispatchDate)}</td>
+
+<td>${t.party || ""}</td>
+
+<td>${t.tanker || ""}</td>
+
+<td>${t.loadingPoint || ""}</td>
+
+<td>${t.unloadingPoint || ""}</td>
+
+<td>${Number(t.qty || 0).toFixed(2)}</td>
+
+<td>${t.billNo || "-"}</td>
+
+<td>
+₹${formatAmount(t.totalFreight)}
+</td>
+
+</tr>
+`;
+
+});
+
+html += `
+</tbody>
+</table>
+</div>
+`;
+
+document.getElementById(
+"billedTripsData"
+).innerHTML = html;
+
+}
+
+/* CUSTOMER */
+
+function addCustomer(){
+
+let name =
+document.getElementById("customerName")
+.value.trim();
+
+if(!name){
+
+alert("Enter customer");
+return;
+
+}
+
+customers.push({
+
+name,
+mobile:
+document.getElementById("customerMobile").value,
+
+gst:
+document.getElementById("customerGST").value,
+
+address:
+document.getElementById("customerAddress").value
+
+});
+
+saveData();
+
+loadCustomers();
+
+document.querySelectorAll(
+"#customerName,#customerMobile,#customerGST,#customerAddress"
+).forEach(i=>i.value="");
+
+}
+
+let currentCustomerIndex = null;
+
+function editCustomer(index){
+
+currentCustomerIndex = index;
+
+let c = customers[index];
+
+/* HIDE VIEW MODAL */
+
+document.getElementById(
+"customerListModal"
+).style.display = "none";
+
+/* SET DATA */
+
+document.getElementById("editCustomerName").value =
+c.name || "";
+
+document.getElementById("editCustomerMobile").value =
+c.mobile || "";
+
+document.getElementById("editCustomerGST").value =
+c.gst || "";
+
+document.getElementById("editCustomerAddress").value =
+c.address || "";
+
+/* OPEN EDIT MODAL */
+
+document.getElementById(
+"customerModal"
+).style.display = "flex";
+
+}
+
+function closeCustomerModal(){
+
+document.getElementById(
+"customerModal"
+).style.display = "none";
+
+/* REOPEN LIST */
+
+openCustomerModal();
+
+}
+
+function saveCustomerEdit(){
+
+if(currentCustomerIndex === null) return;
+
+customers[currentCustomerIndex] = {
+
+...customers[currentCustomerIndex],
+
+name:
+document.getElementById("editCustomerName").value,
+
+mobile:
+document.getElementById("editCustomerMobile").value,
+
+gst:
+document.getElementById("editCustomerGST").value,
+
+address:
+document.getElementById("editCustomerAddress").value
+
+};
+
+saveData();
+
+showCustomers();
+
+loadCustomers();
+
+closeCustomerModal();
+
+closeCustomerListModal();
+
+}
+
+
+function openCustomerModal(){
+
+showCustomers();
+
+document.getElementById(
+"customerListModal"
+).style.display = "flex";
+
+}
+
+function closeCustomerListModal(){
+
+document.getElementById(
+"customerListModal"
+).style.display = "none";
+
+}
+
+/* OPEN */
+
+function openTankerModal(){
+
+showTankers();
+
+document.getElementById(
+"tankerListModal"
+).style.display = "flex";
+
+}
+
+/* CLOSE */
+
+function closeTankerModal(){
+
+document.getElementById(
+"tankerListModal"
+).style.display = "none";
+
+}
+
+
+let routeRates =
+JSON.parse(
+localStorage.getItem("routeRates") || "[]"
+);
+
+
+function addRouteFreight(){
+
+let from =
+document.getElementById("routeFrom").value.trim();
+
+let to =
+document.getElementById("routeTo").value.trim();
+
+let rate =
+document.getElementById("routeRate").value;
+
+if(!from || !to || !rate){
+
+alert("Fill all fields");
+return;
+
+}
+
+routeRates.push({
+
+from,
+to,
+rate
+
+});
+
+localStorage.setItem(
+"routeRates",
+JSON.stringify(routeRates)
+);
+
+showRouteFreight();
+loadRoutePoints();
+loadRouteDropdown();
+
+document.getElementById("routeFrom").value="";
+document.getElementById("routeTo").value="";
+document.getElementById("routeRate").value="";
+
+}
+
+
+function openRouteModal(){
+
+showRouteFreight();
+
+document.getElementById(
+"routeModal"
+).style.display = "flex";
+
+}
+
+
+function closeRouteModal(){
+
+document.getElementById(
+"routeModal"
+).style.display = "none";
+
+}
+
+function showRouteFreight(){
+
+let body =
+document.getElementById(
+"routeModalBody"
+);
+
+body.innerHTML = "";
+
+routeRates.forEach((r,index)=>{
+
+body.innerHTML += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${r.from}</td>
+
+<td>${r.to}</td>
+
+<td>₹${r.rate}</td>
+
+<td>
+
+<button
+class="action-btn red"
+onclick="deleteRoute(${index})">
+
+🗑️
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+function deleteRoute(index){
+
+if(!confirm("Delete Route?"))
+return;
+
+routeRates.splice(index,1);
+
+localStorage.setItem(
+"routeRates",
+JSON.stringify(routeRates)
+);
+
+showRouteFreight();
+
+loadRouteDropdown();
+
+}
+
+function loadRouteDropdown(){
+
+let select =
+document.getElementById("routeFreight");
+
+if(!select) return;
+
+select.innerHTML = `
+<option value="">
+Select Route
+</option>
+`;
+
+routeRates.forEach(r=>{
+
+select.innerHTML += `
+
+<option
+value="${r.rate}">
+
+${r.from} → ${r.to}
+(₹${r.rate})
+
+</option>
+
+`;
+
+});
+
+}
+
+function applyRouteFreight(){
+
+let from =
+document.getElementById(
+"loadingPoint"
+).value;
+
+let to =
+document.getElementById(
+"unloadingPoint"
+).value;
+
+/* FIND ROUTE */
+
+let route = routeRates.find(r =>
+
+r.from == from &&
+r.to == to
+
+);
+
+/* APPLY */
+
+if(route){
+
+document.getElementById(
+"freightRate"
+).value = route.rate;
+
+calculateFreight();
+
+}else{
+
+document.getElementById(
+"freightRate"
+).value = "";
+
+}
+
+}
+
+
+function openCompanySettings(){
+
+document.getElementById(
+"companyPopup"
+).style.display = "flex";
+
+loadCompanySettings();
+
+}
+
+function closeCompanySettings(){
+
+document.getElementById(
+"companyPopup"
+).style.display = "none";
+
+}
+
+
+
+/* =========================
+SAVE COMPANY
+========================= */
+
+function saveCompanySettings(){
+
+let company = {
+
+name:
+document.getElementById(
+"setCompanyName"
+).value,
+
+address:
+document.getElementById(
+"setCompanyAddress"
+).value,
+
+mobile:
+document.getElementById(
+"setCompanyMobile"
+).value,
+
+email:
+document.getElementById(
+"setCompanyEmail"
+).value,
+
+gstin:
+document.getElementById(
+"setCompanyGST"
+).value,
+
+terms:
+document.getElementById(
+"setCompanyTerms"
+).value
+
+};
+
+/* SAVE */
+
+localStorage.setItem(
+"companyInfo",
+JSON.stringify(company)
+);
+
+/* CLOSE POPUP */
+
+closeCompanySettings();
+
+/* SUCCESS */
+
+alert("Company Saved");
+
+}
+
+/* =========================
+LOAD COMPANY
+========================= */
+
+function loadCompanySettings(){
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+console.log(company);
+
+/* SETTINGS FORM */
+
+if(document.getElementById(
+"setCompanyName"
+)){
+
+document.getElementById(
+"setCompanyName"
+).value =
+company.name || "";
+
+}
+
+if(document.getElementById(
+"setCompanyAddress"
+)){
+
+document.getElementById(
+"setCompanyAddress"
+).value =
+company.address || "";
+
+}
+
+if(document.getElementById(
+"setCompanyMobile"
+)){
+
+document.getElementById(
+"setCompanyMobile"
+).value =
+company.mobile || "";
+
+}
+
+if(document.getElementById(
+"setCompanyEmail"
+)){
+
+document.getElementById(
+"setCompanyEmail"
+).value =
+company.email || "";
+
+}
+
+if(document.getElementById(
+"setCompanyGST"
+)){
+
+document.getElementById(
+"setCompanyGST"
+).value =
+company.gstin || "";
+
+}
+
+if(document.getElementById(
+"setCompanyTerms"
+)){
+
+document.getElementById(
+"setCompanyTerms"
+).value =
+company.terms || "";
+
+}
+
+/* LR */
+
+let lrName =
+document.getElementById(
+"lrCompanyName"
+);
+
+if(lrName){
+
+lrName.innerText =
+company.name || "";
+
+document.getElementById(
+"lrCompanyAddress"
+).innerText =
+company.address || "";
+
+document.getElementById(
+"lrCompanyMobile"
+).innerText =
+company.mobile || "";
+
+document.getElementById(
+"lrCompanyGST"
+).innerText =
+company.gstin || "";
+
+}
+
+/* BILL */
+
+let billName =
+document.getElementById(
+"billCompanyName"
+);
+
+if(billName){
+
+billName.innerText =
+company.name || "";
+
+document.getElementById(
+"billCompanyAddress"
+).innerText =
+company.address || "";
+
+document.getElementById(
+"billCompanyMobile"
+).innerText =
+company.mobile || "";
+
+document.getElementById(
+"billCompanyGST"
+).innerText =
+company.gstin || "";
+
+}
+
+}
+
+/* SAVE + PRINT */
+
+function addTripAndPrint(){
+
+let trip = {
+
+id: Date.now(),
+
+dispatchDate:
+document.getElementById("dispatchDate").value,
+
+party:
+document.getElementById("partyName").value,
+
+loadingParty:
+document.getElementById("loadingParty").value,
+
+consigneeName:
+document.getElementById("consigneeName").value,
+
+material:
+document.getElementById("material").value,
+
+loadingPoint:
+document.getElementById("loadingPoint").value,
+
+unloadingPoint:
+document.getElementById("unloadingPoint").value,
+
+tanker:
+document.getElementById("tripTanker").value,
+
+qty:
+Number(document.getElementById("tripQty").value || 0),
+
+freightRate:
+Number(document.getElementById("freightRate").value || 0),
+
+totalFreight:
+Number(document.getElementById("totalFreight").value || 0),
+
+lrNo:
+document.getElementById("lrNo").value,
+
+invoiceNo:
+document.getElementById("invoiceNo").value,
+
+status:"Pending",
+
+billStatus:"Pending",
+
+billNo:""
+
+};
+
+
+/* VALIDATION */
+
+if(
+!trip.dispatchDate ||
+!trip.party ||
+!trip.tanker
+){
+
+alert("Fill required fields");
+return;
+
+}
+
+
+/* SAVE */
+
+trips.push(trip);
+
+
+/* SAVE DROPDOWN DATA */
+
+saveDropdownValue("partyList",trip.party);
+
+saveDropdownValue(
+"loadingPartyList",
+trip.loadingParty
+);
+
+saveDropdownValue(
+"consigneeList",
+trip.consigneeName
+);
+
+saveDropdownValue(
+"materialList",
+trip.material
+);
+
+saveDropdownValue(
+"loadingPointList",
+trip.loadingPoint
+);
+
+saveDropdownValue(
+"unloadingPointList",
+trip.unloadingPoint
+);
+
+
+/* TANKER STATUS */
+
+let tanker =
+tankers.find(
+t=>t.vehicleNo===trip.tanker
+);
+
+if(tanker){
+tanker.status="Transit";
+}
+
+
+/* SAVE */
+
+saveData();
+
+showTrips();
+
+loadTankers();
+
+updateDashboard();
+
+
+/* PRINT LR */
+
+printLR(trip.id);
+
+
+/* CLEAR FORM */
+
+document.getElementById("dispatchDate").value="";
+document.getElementById("partyName").value="";
+document.getElementById("loadingParty").value="";
+document.getElementById("consigneeName").value="";
+document.getElementById("material").value="";
+document.getElementById("loadingPoint").value="";
+document.getElementById("unloadingPoint").value="";
+document.getElementById("tripQty").value="";
+document.getElementById("freightRate").value="";
+document.getElementById("totalFreight").value="";
+document.getElementById("lrNo").value="";
+document.getElementById("invoiceNo").value="";
+
+}
+
+/* SHOW */
+
+function showTankers(){
+
+let body =
+document.getElementById(
+"tankerModalBody"
+);
+
+if(!body) return;
+
+body.innerHTML = "";
+
+tankers.forEach((t,index)=>{
+
+body.innerHTML += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${t.vehicleNo || ""}</td>
+
+<td>${t.driverName || ""}</td>
+
+<td>${t.mobile || ""}</td>
+
+<td>${t.capacity || ""}</td>
+
+<td>
+
+<button
+class="action-btn orange"
+onclick="editTanker(${index})">
+
+✏️
+
+</button>
+
+<button
+class="action-btn red"
+onclick="deleteTanker(${index})">
+
+🗑️
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function deleteTanker(index){
+
+if(!confirm("Delete this tanker?"))
+return;
+
+tankers.splice(index,1);
+
+saveData();
+
+showTankers();
+
+loadTankers();
+
+}
+
+
+let currentTankerIndex = null;
+
+/* OPEN EDIT */
+
+function editTanker(index){
+
+currentTankerIndex = index;
+
+let t = tankers[index];
+
+document.getElementById("editVehicleNo").value =
+t.vehicleNo || "";
+
+document.getElementById("editDriverName").value =
+t.driverName || "";
+
+document.getElementById("editDriverMobile").value =
+t.mobile || "";
+
+document.getElementById("editCapacity").value =
+t.capacity || "";
+
+document.getElementById(
+"editTankerModal"
+).style.display = "flex";
+
+}
+
+/* CLOSE */
+
+function closeEditTankerModal(){
+
+document.getElementById(
+"editTankerModal"
+).style.display = "none";
+
+}
+
+/* SAVE */
+
+function saveTankerEdit(){
+
+if(currentTankerIndex === null) return;
+
+tankers[currentTankerIndex] = {
+
+vehicleNo:
+document.getElementById("editVehicleNo").value,
+
+driverName:
+document.getElementById("editDriverName").value,
+
+mobile:
+document.getElementById("editDriverMobile").value,
+
+capacity:
+document.getElementById("editCapacity").value
+
+};
+
+saveData();
+
+showTankers();
+
+loadTankers();
+
+closeEditTankerModal();
+
+}
+
+/* LOAD CUSTOMERS */
+
+function loadCustomers(){
+
+let select =
+document.getElementById("partyName");
+
+select.innerHTML =
+'<option value="">Select Customer</option>';
+
+customers.forEach(c=>{
+
+select.innerHTML += `
+<option value="${c.name}">
+${c.name}
+</option>
+`;
+
+});
+
+}
+
+let currentTripIndex = null;
+
+
+function loadRoutePoints(){
+
+let loading =
+document.getElementById("loadingPoint");
+
+let unloading =
+document.getElementById("unloadingPoint");
+
+if(!loading || !unloading) return;
+
+/* RESET */
+
+
+
+/* UNIQUE POINTS */
+
+let points = [];
+
+/* FROM */
+
+routeRates.forEach(r=>{
+
+if(!points.includes(r.from)){
+points.push(r.from);
+}
+
+if(!points.includes(r.to)){
+points.push(r.to);
+}
+
+});
+
+/* ADD */
+
+points.forEach(p=>{
+
+loading.innerHTML += `
+<option value="${p}">
+${p}
+</option>
+`;
+
+unloading.innerHTML += `
+<option value="${p}">
+${p}
+</option>
+`;
+
+});
+
+}
+
+
+/* OPEN EDIT */
+
+function editTrip(index){
+
+currentTripIndex = index;
+
+let t = trips[index];
+
+document.getElementById("editDispatchDate").value =
+t.dispatchDate || "";
+
+document.getElementById("editParty").value =
+t.party || "";
+
+document.getElementById("editLoadingParty").value =
+t.loadingParty || "";
+
+document.getElementById("editConsignee").value =
+t.consigneeName || "";
+
+document.getElementById("editMaterial").value =
+t.material || "";
+
+document.getElementById("editLoadingPoint").value =
+t.loadingPoint || "";
+
+document.getElementById("editUnloadingPoint").value =
+t.unloadingPoint || "";
+
+document.getElementById("editTanker").value =
+t.tanker || "";
+
+document.getElementById("editQty").value =
+t.qty || "";
+
+document.getElementById("editRate").value =
+t.freightRate || "";
+
+document.getElementById("editLR").value =
+t.lrNo || "";
+
+document.getElementById("editInvoice").value =
+t.invoiceNo || "";
+
+document.getElementById("tripModal").style.display =
+"flex";
+
+}
+
+/* CLOSE */
+
+function closeTripModal(){
+
+document.getElementById("tripModal").style.display =
+"none";
+
+}
+
+/* SAVE */
+
+function saveTripEdit(){
+
+if(currentTripIndex === null) return;
+
+let qty =
+Number(document.getElementById("editQty").value || 0);
+
+let rate =
+Number(document.getElementById("editRate").value || 0);
+
+trips[currentTripIndex] = {
+
+...trips[currentTripIndex],
+
+dispatchDate:
+document.getElementById("editDispatchDate").value,
+
+party:
+document.getElementById("editParty").value,
+
+loadingParty:
+document.getElementById("editLoadingParty").value,
+
+consigneeName:
+document.getElementById("editConsignee").value,
+
+material:
+document.getElementById("editMaterial").value,
+
+loadingPoint:
+document.getElementById("editLoadingPoint").value,
+
+unloadingPoint:
+document.getElementById("editUnloadingPoint").value,
+
+tanker:
+document.getElementById("editTanker").value,
+
+qty: qty,
+
+freightRate: rate,
+
+totalFreight: qty * rate,
+
+lrNo:
+document.getElementById("editLR").value,
+
+invoiceNo:
+document.getElementById("editInvoice").value
+
+};
+
+
+
+saveData();
+
+showTrips();
+
+updateDashboard();
+
+closeTripModal();
+
+}
+
+/* =========================================
+🗑️ DELETE CUSTOMER
+========================================= */
+
+function deleteCustomer(index){
+
+if(!confirm("Delete Customer?"))
+return;
+
+customers.splice(index,1);
+
+saveData();
+
+loadCustomers();
+
+showCustomers();
+
+}
+
+/* OPEN */
+
+function openCustomerModal(){
+
+showCustomers();
+
+document.getElementById(
+"customerListModal"
+).style.display = "flex";
+
+}
+
+/* CLOSE */
+
+function closeCustomerListModal(){
+
+document.getElementById(
+"customerListModal"
+).style.display = "none";
+
+}
+
+/* SHOW */
+
+function showCustomers(){
+
+let body =
+document.getElementById(
+"customerModalBody"
+);
+
+if(!body) return;
+
+body.innerHTML = "";
+
+customers.forEach((c,index)=>{
+
+body.innerHTML += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${c.name || ""}</td>
+
+<td>${c.mobile || ""}</td>
+
+<td>${c.gst || ""}</td>
+
+<td>${c.address || ""}</td>
+
+<td>
+
+<button
+class="action-btn orange"
+onclick="editCustomer(${index})">
+
+✏️
+
+</button>
+
+<button
+class="action-btn red"
+onclick="deleteCustomer(${index})">
+
+🗑️
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+/* TANKER */
+
+function addTanker(){
+
+let vehicleNo =
+document.getElementById("tankerNo").value.trim();
+
+if(!vehicleNo){
+
+alert("Enter Vehicle No");
+
+return;
+
+}
+
+let tanker = {
+
+vehicleNo: vehicleNo,
+
+driverName:
+document.getElementById("driverName").value,
+
+mobile:
+document.getElementById("driverMobile").value,
+
+capacity:
+document.getElementById("tankerCapacity").value
+
+};
+
+tankers.push(tanker);
+
+saveData();
+
+showTankers();
+
+loadTankers();
+
+document.getElementById("tankerNo").value = "";
+document.getElementById("driverName").value = "";
+document.getElementById("driverMobile").value = "";
+document.getElementById("tankerCapacity").value = "";
+
+alert("✅ Tanker Added");
+
+}
+
+/* LOAD TANKERS */
+
+function loadTankers(){
+
+let select =
+document.getElementById("tripTanker");
+
+if(!select) return;
+
+select.innerHTML = "";
+
+tankers.forEach(t=>{
+
+select.innerHTML += `
+
+<option value="${t.vehicleNo}">
+
+${t.vehicleNo}
+
+</option>
+
+`;
+
+});
+
+}
+
+/* FREIGHT */
+
+function calculateFreight(){
+
+let qty =
+Number(document.getElementById("tripQty").value || 0);
+
+let rate =
+Number(document.getElementById("freightRate").value || 0);
+
+let total = qty * rate;
+
+document.getElementById(
+"totalFreight"
+).value = total;
+
+}
+
+
+function autoFreight(){
+
+let from =
+document.getElementById("loadingPoint")
+.value.trim();
+
+let to =
+document.getElementById("unloadingPoint")
+.value.trim();
+
+/* ALL ROUTES */
+
+let routes =
+JSON.parse(
+localStorage.getItem("routes") || "[]"
+);
+
+/* FIND MATCH */
+
+let route =
+routes.find(r =>
+
+r.from == from &&
+r.to == to
+
+);
+
+/* AUTO FILL */
+
+if(route){
+
+document.getElementById(
+"freightRate"
+).value = route.freight;
+
+calculateFreight();
+
+}else{
+
+document.getElementById(
+"freightRate"
+).value = "";
+
+}
+
+}
+
+/* =========================================
+📦 BACKUP DATA
+========================================= */
+
+function backupData(){
+
+let data = {
+
+trips,
+tankers,
+customers
+
+};
+
+let blob = new Blob(
+[JSON.stringify(data,null,2)],
+{type:"application/json"}
+);
+
+let a =
+document.createElement("a");
+
+a.href =
+URL.createObjectURL(blob);
+
+a.download =
+"transport_backup.json";
+
+a.click();
+
+}
+
+/* =========================================
+♻️ RESTORE DATA
+========================================= */
+
+function restoreData(event){
+
+let file =
+event.target.files[0];
+
+if(!file) return;
+
+let reader =
+new FileReader();
+
+reader.onload = function(e){
+
+let data =
+JSON.parse(e.target.result);
+
+trips =
+data.trips || [];
+
+tankers =
+data.tankers || [];
+
+customers =
+data.customers || [];
+
+saveData();
+
+loadCustomers();
+
+loadTankers();
+
+showTrips();
+
+updateDashboard();
+
+alert("Backup Restored Successfully");
+
+};
+
+reader.readAsText(file);
+
+}
+
+/* ADD TRIP */
+
+function addTrip(){
+
+let trip = {
+
+id: Date.now(),
+
+dispatchDate:
+document.getElementById("dispatchDate").value,
+
+party:
+document.getElementById("partyName").value,
+
+loadingParty:
+document.getElementById("loadingParty").value,
+
+consigneeName:
+document.getElementById("consigneeName").value,
+
+material:
+document.getElementById("material").value,
+
+loadingPoint:
+document.getElementById("loadingPoint").value,
+
+unloadingPoint:
+document.getElementById("unloadingPoint").value,
+
+tanker:
+document.getElementById("tripTanker").value,
+
+qty:
+Number(document.getElementById("tripQty").value || 0),
+
+freightRate:
+Number(document.getElementById("freightRate").value || 0),
+
+totalFreight:
+Number(document.getElementById("totalFreight").value || 0),
+
+lrNo:
+document.getElementById("lrNo").value,
+
+invoiceNo:
+document.getElementById("invoiceNo").value,
+
+status:"Pending",
+
+billStatus:"Pending",
+
+billNo:""
+
+};
+
+
+if(
+!trip.dispatchDate ||
+!trip.party ||
+!trip.tanker
+){
+
+alert("Fill required fields");
+return;
+
+}
+
+
+trips.push(trip);
+
+
+/* FIXED TANKER FIND */
+
+let tanker =
+tankers.find(
+t => t.vehicleNo === trip.tanker
+);
+
+if(tanker){
+tanker.status = "Transit";
+}
+
+
+saveData();
+
+showTrips();
+
+loadTankers();
+
+updateDashboard();
+
+
+/* CLEAR FORM */
+
+document.getElementById("lrNo").value = "";
+document.getElementById("dispatchDate").value = "";
+document.getElementById("partyName").value = "";
+document.getElementById("loadingParty").value = "";
+document.getElementById("consigneeName").value = "";
+document.getElementById("material").value = "";
+document.getElementById("loadingPoint").value = "";
+document.getElementById("unloadingPoint").value = "";
+document.getElementById("tripQty").value = "";
+document.getElementById("freightRate").value = "";
+document.getElementById("totalFreight").value = "";
+document.getElementById("invoiceNo").value = "";
+
+alert("✅ Trip Added Successfully");
+
+}
+
+/* SHOW TRIPS */
+
+function showTrips(){
+
+let body =
+document.getElementById("tripBody");
+
+body.innerHTML="";
+
+let search =
+document.getElementById("searchBox")
+.value.toLowerCase();
+
+/* BILL FILTER */
+
+let filteredTrips = trips.filter(t => {
+
+if(currentBillView === "Pending"){
+  return t.billStatus === "Pending";
+}
+
+if(currentBillView === "Billed"){
+  return t.billStatus === "Billed";
+}
+
+if(currentBillView === "Paid"){
+  return t.billStatus === "Paid";
+}
+
+return true;
+
+});
+
+filteredTrips.forEach((t,index)=>{
+
+/* SKIP EMPTY */
+
+if(
+!t ||
+(
+!t.party &&
+!t.tanker &&
+!t.dispatchDate
+)
+){
+return;
+}
+
+let party =
+(t.party || "")
+.toLowerCase();
+
+let tanker =
+(t.tanker || "")
+.toLowerCase();
+
+/* SEARCH */
+
+if(
+!party.includes(search)
+&&
+!tanker.includes(search)
+){
+return;
+}
+
+body.innerHTML += `
+
+<tr ondblclick="editTrip(${index})">
+
+<td>
+<input
+type="checkbox"
+class="trip-check"
+value="${t.id}">
+</td>
+
+<td>${index+1}</td>
+
+<!-- DATE -->
+
+<td>
+${formatDate(t.dispatchDate)}
+</td>
+
+<!-- PARTY -->
+
+<td>
+${t.party || ""}
+</td>
+
+<!-- LOADING PARTY -->
+
+<td>
+${t.loadingParty || ""}
+</td>
+
+<!-- CONSIGNEE -->
+
+<td>
+${t.consigneeName || ""}
+</td>
+
+<!-- TANKER -->
+
+<td class="freeze-col">
+${t.tanker || ""}
+</td>
+
+<!-- LOADING POINT -->
+
+<td>
+${t.loadingPoint || ""}
+</td>
+
+<!-- UNLOADING POINT -->
+
+<td>
+${t.unloadingPoint || ""}
+</td>
+
+<!-- MATERIAL -->
+
+<td>
+${t.material || ""}
+</td>
+
+<!-- QTY -->
+
+<td>
+${Number(t.qty || 0).toFixed(2)}
+</td>
+
+<!-- RATE -->
+
+<td>
+${Number(t.freightRate || 0).toFixed(2)}
+</td>
+
+<!-- TOTAL -->
+
+<td>
+₹${formatAmount(t.totalFreight)}
+</td>
+
+<!-- LR -->
+
+<td>
+${t.lrNo || ""}
+</td>
+
+<!-- INVOICE -->
+
+<td>
+${t.invoiceNo || ""}
+</td>
+
+<!-- BILL -->
+
+<td>
+${t.billNo || "-"}
+</td>
+
+<!-- STATUS -->
+
+<td>
+
+<select onclick="event.stopPropagation()"
+onchange="changeStatus(${index},this.value)">
+
+<option ${t.status=="Pending"?"selected":""}>
+Pending
+</option>
+
+<option ${t.status=="Transit"?"selected":""}>
+Transit
+</option>
+
+<option ${t.status=="Completed"?"selected":""}>
+Completed
+</option>
+
+</select>
+
+</td>
+
+<!-- BILL STATUS -->
+
+<td>
+
+<select onclick="event.stopPropagation()"
+onchange="changeBill(${index},this.value)">
+
+<option ${t.billStatus=="Pending"?"selected":""}>
+Pending
+</option>
+
+<option ${t.billStatus=="Billed"?"selected":""}>
+Billed
+</option>
+
+<option ${t.billStatus=="Paid"?"selected":""}>
+Paid
+</option>
+
+</select>
+
+</td>
+
+<!-- ACTION -->
+
+<td>
+
+<button
+class="action-btn green"
+onclick="editTrip(${index})">
+✏️
+</button>
+
+<button
+class="action-btn orange"
+onclick="printLR(${t.id})">
+📄
+</button>
+
+<button
+class="action-btn purple"
+onclick="printSingleBill(${t.id})">
+🖨️
+</button>
+
+<button
+class="action-btn red"
+onclick="deleteTrip(${index})">
+🗑️
+</button>
+
+</td>
+</tr>
+
+`;
+
+});
+
+}
+
+
+
+
+/* STATUS */
+
+function changeStatus(index,status){
+
+trips[index].status=status;
+
+if(status==="Completed"){
+
+let tanker =
+tankers.find(
+t=>t.vehicleNo===trips[index].tanker
+);
+
+if(tanker)
+tanker.status="Available";
+
+}
+
+saveData();
+
+loadTankers();
+
+showTrips();
+
+}
+
+
+/* BILL STATUS */
+
+function changeBill(index,status){
+
+trips[index].billStatus=status;
+
+saveData();
+
+showTrips();
+
+}
+
+
+/* DELETE */
+
+function deleteTrip(index){
+
+if(!confirm("Delete Trip?"))
+return;
+
+trips.splice(index,1);
+
+saveData();
+
+showTrips();
+
+updateDashboard();
+
+}
+
+
+function toggleAllRows(el){
+
+document
+.querySelectorAll("#tripBody tr")
+.forEach(row=>{
+
+if(row.style.display !== "none"){
+
+let cb =
+row.querySelector(".trip-check");
+
+if(cb){
+cb.checked = el.checked;
+}
+
+}
+
+});
+
+}
+
+/* SAVE DROPDOWN VALUES */
+
+function saveDropdownValue(key,value){
+
+if(!value) return;
+
+let arr =
+JSON.parse(
+localStorage.getItem(key) || "[]"
+);
+
+if(!arr.includes(value)){
+
+arr.push(value);
+
+localStorage.setItem(
+key,
+JSON.stringify(arr)
+);
+
+}
+
+}
+
+
+/* LOAD DATALIST */
+
+function loadDropdown(id,key){
+
+let el = document.getElementById(id);
+
+if(!el) return;
+
+let arr =
+JSON.parse(
+localStorage.getItem(key) || "[]"
+);
+
+let html="";
+
+arr.forEach(v=>{
+
+html += `<option value="${v}">`;
+
+});
+
+el.innerHTML = html;
+
+}
+
+
+/* DASHBOARD */
+
+function updateDashboard(){
+
+let totalTrips =
+trips.length;
+
+let totalFreight =
+trips.reduce(
+(a,b)=>
+a + Number(b.totalFreight || 0),
+0
+);
+
+let running =
+trips.filter(
+t=>t.status!="Completed"
+).length;
+
+document.getElementById(
+"dashboard"
+).innerHTML = `
+
+<div class="card">
+<h3>${totalTrips}</h3>
+<p>Total Trips</p>
+</div>
+
+<div class="card">
+<h3>${running}</h3>
+<p>Running</p>
+</div>
+
+<div class="card">
+<h3>₹${formatAmount(totalFreight)}</h3>
+<p>Total Freight</p>
+</div>
+
+`;
+
+}
+
+/* PENDING BILL */
+
+function openPendingBills(){
+
+let pending =
+trips.filter(
+t=>t.billStatus==="Pending"
+);
+
+if(pending.length===0){
+
+alert("No Pending Bills");
+return;
+
+}
+
+let html="";
+
+pending.forEach((t,i)=>{
+
+html += `
+
+<tr>
+
+<td>
+<input
+type="checkbox"
+checked
+value="${t.id}"
+class="bill-check">
+</td>
+
+<td>${i+1}</td>
+<td>${t.party}</td>
+<td>${t.tanker}</td>
+<td>${t.totalFreight}</td>
+
+</tr>
+
+`;
+
+});
+
+let win = window.open();
+
+win.document.write(`
+
+<h2>Pending Bills</h2>
+
+<table border="1" cellpadding="10">
+
+<tr>
+<th>Select</th>
+<th>Sr</th>
+<th>Party</th>
+<th>Tanker</th>
+<th>Amount</th>
+</tr>
+
+${html}
+
+</table>
+
+<br>
+
+<button onclick="generateBill()">
+Generate Bill
+</button>
+
+<script>
+
+function generateBill(){
+
+let ids=[];
+
+document.querySelectorAll(
+".bill-check:checked"
+).forEach(c=>{
+
+ids.push(Number(c.value));
+
+});
+
+window.opener.finalBill(ids);
+
+}
+
+<\/script>
+
+`);
+
+}
+
+/* DATE FORMAT DD/MM/YYYY */
+
+function formatDate(dateStr){
+
+if(!dateStr) return "";
+
+let d = new Date(dateStr);
+
+if(isNaN(d)) return dateStr;
+
+let day =
+String(d.getDate()).padStart(2,"0");
+
+let month =
+String(d.getMonth()+1).padStart(2,"0");
+
+let year =
+d.getFullYear();
+
+return `${day}/${month}/${year}`;
+
+}
+
+
+function getCustomerAddress(name){
+
+let c = customers.find(
+x => x.name === name
+);
+
+return c
+? (c.address || "").trim()
+: "";
+
+}
+
+
+function getBillStyle(){
+
+return `
+<style>
+
+/* ================= BODY ================= */
+body{
+  font-family:Arial;
+  padding:20px;
+  color:#111;
+  background:#fff;
+  font-size:11px;
+}
+
+/* ================= BILL CONTAINER ================= */
+.bill{
+  max-width:1400px;
+  margin:auto;
+  border:2px solid #000;
+  padding:20px;
+  background:#fff;
+  overflow-x:auto;
+ box-sizing:border-box;
+}
+
+/* ================= TOP (FIXED LETTERHEAD STYLE) ================= */
+.top{
+  text-align:center;
+  margin-bottom:20px;
+  border-bottom:2px solid #000;
+  padding-bottom:10px;
+}
+
+.company{
+  font-size:28px;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+.tagline{
+  font-size:14px;
+  font-weight:600;
+  margin-top:3px;
+}
+
+.address{
+  font-size:13px;
+  margin-top:5px;
+  color:#333;
+
+  white-space:pre-line;   /* 🔥 THIS IS MAIN FIX */
+}
+
+.info{
+  line-height:1.8;
+  font-size:13px;
+}
+
+/* ================= TITLE ================= */
+.title{
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  border:2px solid #000;
+  padding:10px;
+  margin:20px 0;
+}
+
+/* ================= PARTY ================= */
+.party{
+  border:1px solid #000;
+  padding:10px 12px;
+  margin-bottom:15px;
+  position:relative;
+  min-height:85px;
+}
+
+.party-left{
+  padding-right:220px;
+  line-height:1.4;
+}
+
+.party-address{
+  font-size:13px;
+  color:#555;
+  white-space:pre-line;
+  margin-top:4px;
+}
+
+.party-right{
+  position:absolute;
+  top:10px;
+  right:12px;
+  text-align:right;
+  font-size:13px;
+}
+
+/* ================= TABLE ================= */
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+/* CELL STYLE */
+th,td{
+  border:1px solid #000;
+  padding:5px;
+  font-size:11px;
+  text-align:center;
+  vertical-align:middle;
+
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+/* HEADER */
+th{
+  background:#eee;
+  font-weight:bold;
+}
+
+/* ================= COLUMN FIX ================= */
+th:nth-child(1), td:nth-child(1){width:15px;}
+th:nth-child(2), td:nth-child(2){width:55px;}
+th:nth-child(3), td:nth-child(3){width:45px;}
+th:nth-child(4), td:nth-child(4){width:35px;}
+th:nth-child(5), td:nth-child(5){width:30px;}
+th:nth-child(6), td:nth-child(6){width:50px;}
+th:nth-child(7), td:nth-child(7){width:50px;}
+th:nth-child(8), td:nth-child(8){width:55px;}
+th:nth-child(9), td:nth-child(9){width:55px;}
+th:nth-child(10), td:nth-child(10){width:55px;}
+th:nth-child(11), td:nth-child(11){width:35px;}
+th:nth-child(12), td:nth-child(12){width:30px;}
+
+/* LAST COLUMN */
+th:nth-child(13), td:nth-child(13){
+  width:70px;
+  min-width:70px;
+  max-width:70px;
+  text-align:right;
+  padding-right:8px;
+  white-space:nowrap;
+  font-weight:bold;
+}
+
+/* ================= TOTAL ================= */
+.total-row td{
+  font-size:13px;
+  font-weight:bold;
+  padding:8px;
+}
+
+.total-label{
+  text-align:right;
+  padding-right:10px;
+}
+
+.total-amount{
+  font-size:15px;
+  white-space:nowrap;
+}
+
+/* ================= WORDS ================= */
+.amount-words{
+  margin-top:12px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+/* ================= BOTTOM SECTION ================= */
+
+.bottom-section{
+  margin-top:25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+}
+
+/* TERMS LEFT */
+
+.bank{
+  width:55%;
+  font-size:11px;
+  line-height:1.7;
+}
+
+.bank h3{
+  margin:0 0 8px;
+  font-size:14px;
+}
+
+/* SIGN RIGHT */
+
+.sign{
+  width:40%;
+  display:flex;
+  justify-content:flex-end;
+}
+
+/* SIGN BOX */
+
+.sign-box{
+  width:220px;
+  text-align:center;
+  font-size:12px;
+  font-weight:600;
+  margin-top:60px;
+}
+
+.sign-line{
+  margin-top:50px;
+  border-top:1px solid #000;
+  padding-top:6px;
+}
+
+
+/* ================= FOOTER ================= */
+.footer{
+  margin-top:30px;
+  text-align:center;
+  font-size:11px;
+  color:#666;
+}
+
+/* ================= PRINT ================= */
+@media print{
+
+  @page{
+    size:A4 portrait;
+    margin:8mm;
+  }
+
+  body{
+    padding:0;
+    font-size:10px;
+  }
+
+  .bill{
+    border:none;
+    padding:5mm;
+  }
+
+  th,td{
+    font-size:10px;
+    padding:4px;
+  }
+
+  th{
+    background:#eee !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  th:nth-child(13), td:nth-child(13){
+    width:70px;
+    white-space:nowrap;
+    text-align:right;
+  }
+}
+
+/* ================= PRINT ================= */
+
+@media print{
+
+  @page{
+    size:A4 portrait;
+    margin:6mm;
+  }
+
+  html,body{
+    width:210mm;
+    height:297mm;
+    margin:0;
+    padding:0;
+    background:#fff;
+  }
+
+  body{
+    font-size:10px;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .bill{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+
+    border:2px solid #000;
+    padding:10px;
+
+    margin:0;
+    overflow:hidden;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
+
+  th,td{
+    font-size:9.5px;
+    padding:4px;
+  }
+
+  th{
+    background:#eee !important;
+  }
+
+  .footer{
+    margin-top:15px;
+    text-align:center;
+    font-size:10px;
+  }
+
+  /* last column safe */
+
+  th:nth-child(13),
+  td:nth-child(13){
+    width:70px;
+    white-space:nowrap;
+  }
+
+}
+</style>
+`;
+
+}
+
+
+/* FINAL BILL */
+
+function finalBill(ids){
+
+let selectedTrips =
+trips.filter(t => ids.includes(t.id));
+
+if(selectedTrips.length===0){
+
+let incomplete = selectedTrips.filter(
+t => t.status !== "Completed"
+);
+
+if(incomplete.length > 0){
+
+alert(
+"Only Completed trips allowed for billing"
+);
+
+return;
+
+}
+
+alert("No trips selected");
+return;
+
+}
+
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+
+/* Invoice No*/
+
+let fyKey =
+"lastBill_" +
+activeCompany +
+"_" +
+financialYear;
+
+let lastBill =
+localStorage.getItem(fyKey)
+||
+financialYear + "-001";
+
+/* USER INPUT */
+
+let enteredBill =
+document.getElementById("billNo").value.trim();
+
+if(!enteredBill){
+
+alert("Enter Bill No");
+return;
+
+}
+
+let billNo = enteredBill;
+
+/* SAVE CURRENT */
+
+selectedTrips.forEach(t=>{
+t.billNo = billNo;
+t.billStatus = "Billed";
+
+});
+
+/* GET LAST NUMBER */
+
+let parts = billNo.split("-");
+
+let lastNum =
+Number(parts[1] || 0);
+
+/* NEXT BILL */
+
+let nextBill =
+parts[0] + "-" +
+String(lastNum + 1).padStart(3,"0");
+
+/* SAVE NEXT */
+
+localStorage.setItem(
+"lastBill",
+nextBill
+);
+
+/* SHOW NEXT */
+
+document.getElementById("billNo").value =
+nextBill;
+
+saveData();
+
+showTrips();
+
+/* ROWS */
+
+let total = 0;
+let rows = "";
+
+selectedTrips.forEach((t,index)=>{
+
+total += Number(t.totalFreight || 0);
+
+rows += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${formatDate(t.dispatchDate)}</td>
+
+<td>${t.invoiceNo || ""}</td>
+
+<td>${t.tanker}</td>
+
+<td>${t.lrNo}</td>
+
+<td>${t.loadingParty || ""}</td>
+
+<td>${t.consigneeName || ""}</td>
+
+<td>${t.loadingPoint}</td>
+
+<td>${t.unloadingPoint}</td>
+
+<td>${t.material}</td>
+
+<td>${Number(t.qty).toFixed(3)}</td>
+
+<td>${t.freightRate}</td>
+
+<td>
+${Number(t.totalFreight || 0).toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+</td>
+
+</tr>
+
+`;
+
+});
+
+/* WINDOW */
+
+let win =
+window.open("","_blank","width=1200,height=800");
+
+win.document.write(`
+
+<html>
+
+<head>
+
+<title>Transport Invoice</title>
+
+${getBillStyle()}
+
+</head>
+
+<body>
+
+<div class="bill">
+
+<div class="top">
+
+<div>
+
+<div class="company">
+
+${company.name || ""}
+
+</div>
+
+<div class="info">
+
+${(company.address || "").replace(/\n/g,"<br>")}
+
+<br>
+
+Mobile:
+${company.mobile || ""}
+
+<br>
+
+Email:
+${company.email || ""}
+
+<br>
+
+GSTIN:
+${company.gstin || ""}
+
+</div>
+
+</div>
+
+<div class="info">
+
+
+</div>
+
+</div>
+
+<div class="title">
+
+Transport Invoice
+
+</div>
+
+<div class="party" style="
+border:1px solid #000;
+padding:10px 12px;
+margin-bottom:15px;
+position:relative;
+min-height:85px;
+">
+
+<div style="
+padding-right:220px;
+line-height:1.4;
+">
+
+<b>Customer :</b>
+${selectedTrips[0].party}
+
+<div style="
+font-size:13px;
+color:#555;
+white-space:pre-line;
+margin-top:4px;
+line-height:1.4;
+">
+${getCustomerAddress(selectedTrips[0].party)}
+</div>
+
+</div>
+
+<div style="
+position:absolute;
+top:10px;
+right:12px;
+text-align:right;
+font-size:13px;
+line-height:1.8;
+">
+
+<div>
+<b>Invoice No   :</b>
+${billNo || "-"}
+</div>
+
+<div>
+<b>Invoice Date   :</b>
+${formatDate(new Date())}
+</div>
+
+</div>
+
+</div>
+<table>
+
+<tr>
+
+<th>Sr</th>
+<th>Date</th>
+<th>L.R. No</th>
+<th>Invoice No</th>
+<th>Vehicle No</th>
+<th>Loading Party</th>
+<th>Consignee</th>
+<th>From</th>
+<th>To</th>
+<th>Material</th>
+<th>Weight</th>
+<th>Rate</th>
+<th>Total</th>
+
+</tr>
+
+${rows}
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:13px;
+font-weight:bold;
+padding:6px;
+">
+
+Round Off
+
+</td>
+
+<td style="
+font-size:13px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+">
+${(Number((Math.round(total) - total)).toFixed(2))}
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:14px;
+font-weight:bold;
+padding:6px;
+white-space:nowrap;
+">
+
+Grand Total
+
+</td>
+
+<td style="
+font-size:15px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+min-width:120px;
+">
+₹${Math.round(total).toLocaleString("en-IN")}
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="13"
+style="
+text-align:left;
+font-size:14px;
+font-weight:bold;
+padding:10px;
+">
+
+Amount in Words :
+${numberToWords(Math.round(total))} Rupees Only
+
+</td>
+
+</tr>
+
+</table>
+
+
+<div class="bottom-section">
+
+<div class="bank">
+
+<h3>
+Terms & Conditions
+</h3>
+
+${(company.terms || "")
+.replace(/\n/g,"<br>")}
+
+</div>
+
+<div class="sign">
+
+<div class="sign-box">
+
+For ${company.name || ""}
+
+<br><br><br><br>
+
+Authorised Signatory
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+This is a computer generated freight bill.
+
+</div>
+
+</div>
+
+
+
+</body>
+
+</html>
+
+`);
+
+win.document.close();
+
+win.focus();
+
+}
+
+
+/* VIEW BILL */
+
+function viewBill(id){
+
+let t =
+trips.find(x=>x.id===id);
+
+if(!t){
+
+alert("Bill not found");
+return;
+
+}
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+
+/* SAME BILL NO TRIPS */
+
+let billTrips =
+trips.filter(x => x.billNo === t.billNo);
+
+if(billTrips.length===0){
+
+billTrips = [t];
+
+}
+
+let total = 0;
+let rows = "";
+
+billTrips.forEach((b,index)=>{
+
+total += Number(b.totalFreight || 0);
+
+rows += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${formatDate(b.dispatchDate)}</td>
+
+<td>${b.invoiceNo || ""}</td>
+
+<td>${b.tanker || ""}</td>
+
+<td>${b.lrNo || ""}</td>
+
+<td>${b.loadingParty || ""}</td>
+
+<td>${b.consigneeName || ""}</td>
+
+<td>${b.loadingPoint || ""}</td>
+
+<td>${b.unloadingPoint || ""}</td>
+
+<td>${b.material || ""}</td>
+
+<td>${Number(b.qty || 0).toFixed(3)}</td>
+
+<td>${Number(b.freightRate || 0).toLocaleString("en-IN")}</td>
+
+<td>
+${Number(b.totalFreight || 0).toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+</td>
+
+</tr>
+
+`;
+
+});
+
+let win =
+window.open("","_blank");
+
+win.document.write(`
+
+<html>
+
+<head>
+
+<title>View Bill</title>
+
+${getBillStyle()}
+
+</head>
+
+<body>
+
+<div class="bill">
+
+<div class="top">
+
+<div>
+
+<div class="company">
+
+${company.name || ""}
+
+</div>
+
+<div class="info">
+
+${(company.address || "").replace(/\n/g,"<br>")}
+
+<br>
+
+Mobile:
+${company.mobile || ""}
+
+<br>
+
+Email:
+${company.email || ""}
+
+<br>
+
+GSTIN:
+${company.gstin || ""}
+
+</div>
+
+</div>
+
+<div class="info">
+
+<b>Invoice No   :</b>
+${t.billNo ? t.billNo : "Not Generated"}
+<br><br>
+
+<b>Invoice Date :</b>
+${formatDate(new Date())}
+
+</div>
+
+</div>
+
+<div class="title">
+
+Transport Invoice
+
+</div>
+
+<div class="party">
+
+<div style="line-height:1.2;">
+
+<b>Party :</b>
+${t.party || ""}
+
+<div style="
+font-size:13px;
+color:#555;
+white-space:pre-line;
+margin-top:2px;
+padding:0;
+line-height:1.2;
+">
+${getCustomerAddress(t.party)}
+</div>
+
+
+
+</div>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>Sr</th>
+<th>Date</th>
+<th>Invoice No</th>
+<th>Vehicle No</th>
+<th>L.R. No</th>
+<th>Consignor</th>
+<th>Consignee</th>
+<th>From</th>
+<th>To</th>
+<th>Particulars</th>
+<th>Weight</th>
+<th>Rate</th>
+<th>Total</th>
+
+</tr>
+
+${rows}
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:13px;
+font-weight:bold;
+padding:6px;
+">
+
+Round Off
+
+</td>
+
+<td style="
+font-size:13px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+">
+${(Math.round(total) - total).toFixed(2)}
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:14px;
+font-weight:bold;
+padding:6px;
+white-space:nowrap;
+">
+
+Grand Total
+
+</td>
+
+<td style="
+font-size:15px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+min-width:120px;
+">
+₹${Math.round(total).toLocaleString("en-IN")}
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="13"
+style="
+text-align:left;
+font-size:14px;
+font-weight:bold;
+padding:10px;
+">
+
+Amount in Words :
+${numberToWords(Math.round(total))} Rupees Only
+
+</td>
+
+</tr>
+
+</table>
+
+
+<div class="bottom-section">
+
+<div class="bank">
+
+<h3>
+Terms & Conditions
+</h3>
+
+${(company.terms || "")
+.replace(/\n/g,"<br>")}
+
+</div>
+
+<div class="sign">
+
+<div class="sign-box">
+
+For ${company.name || ""}
+
+<br><br><br><br>
+
+Authorised Signatory
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+This is a computer generated freight bill.
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+`);
+
+win.document.close();
+
+}
+
+/* PRINT BILL */
+
+function printSingleBill(id){
+
+let t =
+trips.find(x=>x.id===id);
+
+if(!t){
+
+alert("Bill not found");
+return;
+
+}
+
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+
+/* SAME BILL NO TRIPS */
+
+let billTrips =
+trips.filter(x => x.billNo === t.billNo);
+
+if(billTrips.length===0){
+
+billTrips = [t];
+
+}
+
+let total = 0;
+let rows = "";
+
+billTrips.forEach((b,index)=>{
+
+total += Number(b.totalFreight || 0);
+
+rows += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${formatDate(b.dispatchDate)}</td>
+
+<td>${b.invoiceNo || ""}</td>
+
+<td>${b.tanker || ""}</td>
+
+<td>${b.lrNo || ""}</td>
+
+<td>${b.loadingParty || ""}</td>
+
+<td>${b.consigneeName || ""}</td>
+
+<td>${b.loadingPoint || ""}</td>
+
+<td>${b.unloadingPoint || ""}</td>
+
+<td>${b.material || ""}</td>
+
+<td>${Number(b.qty || 0).toFixed(3)}</td>
+
+<td>${Number(b.freightRate || 0).toLocaleString("en-IN")}</td>
+
+<td>
+${Number(b.totalFreight || 0).toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+</td>
+
+</tr>
+
+`;
+
+});
+
+let win =
+window.open("","_blank");
+
+win.document.write(`
+
+<html>
+
+<head>
+
+<title>Print Bill</title>
+
+${getBillStyle()}
+
+</head>
+
+<body>
+
+<div class="bill">
+
+<div class="top">
+
+<div>
+
+<div class="company">
+
+${company.name || ""}
+
+</div>
+
+<div class="info">
+
+${(company.address || "").replace(/\n/g,"<br>")}
+
+<br>
+
+Mobile:
+${company.mobile || ""}
+
+<br>
+
+Email:
+${company.email || ""}
+
+<br>
+
+GSTIN:
+${company.gstin || ""}
+
+</div>
+
+</div>
+
+<div class="info">
+
+</div>
+
+</div>
+
+<div class="title">
+
+Transport Invoice
+
+</div>
+
+<div class="party" style="
+border:1px solid #000;
+padding:10px 12px;
+margin-bottom:15px;
+position:relative;
+min-height:85px;
+">
+
+<div style="
+padding-right:220px;
+line-height:1.4;
+">
+
+<b>Customer :</b>
+${t.party}
+
+<div style="
+font-size:13px;
+color:#555;
+white-space:pre-line;
+margin-top:4px;
+line-height:1.4;
+">
+${getCustomerAddress(t.party)}
+</div>
+
+</div>
+
+<div style="
+position:absolute;
+top:10px;
+right:12px;
+text-align:right;
+font-size:13px;
+line-height:1.8;
+">
+
+<div>
+<b>Invoice No   :</b>
+${t.billNo || "-"}
+</div>
+
+<div>
+<b>Invoice Date  :</b>
+${formatDate(new Date())}
+</div>
+
+</div>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>Sr</th>
+<th>Date</th>
+<th>Invoice No</th>
+<th>Vehicle No</th>
+<th>L.R. No</th>
+<th>Consignor</th>
+<th>Consignee</th>
+<th>From</th>
+<th>To</th>
+<th>Particulars</th>
+<th>Weight</th>
+<th>Rate</th>
+<th>Total</th>
+
+</tr>
+
+${rows}
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:13px;
+font-weight:bold;
+padding:6px;
+">
+
+Round Off
+
+</td>
+
+<td style="
+font-size:13px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+">
+₹${(Math.round(total) - total).toFixed(2)}
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:14px;
+font-weight:bold;
+padding:6px;
+white-space:nowrap;
+">
+
+Grand Total
+
+</td>
+
+<td style="
+font-size:15px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+min-width:120px;
+">
+₹${Math.round(total).toLocaleString("en-IN")}
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="13"
+style="
+text-align:left;
+font-size:14px;
+font-weight:bold;
+padding:10px;
+">
+
+Amount in Words :
+${numberToWords(Math.round(total))} Rupees Only
+
+</td>
+
+</tr>
+
+</table>
+
+
+<div class="bottom-section">
+
+<div class="bank">
+
+<h3>
+Terms & Conditions
+</h3>
+
+${(company.terms || "")
+.replace(/\n/g,"<br>")}
+
+</div>
+
+<div class="sign">
+
+<div class="sign-box">
+
+For ${company.name || ""}
+
+<br><br><br><br>
+
+Authorised Signatory
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+This is a computer generated freight bill.
+
+</div>
+
+</div>
+
+
+
+</body>
+
+</html>
+
+`);
+
+win.document.close();
+
+win.focus();
+
+}
+
+
+
+function printLR(id){
+
+let t =
+trips.find(x=>x.id===id);
+
+if(!t){
+
+alert("LR not found");
+return;
+
+}
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+let win =
+window.open("","_blank");
+
+win.document.write(`
+
+<html>
+
+<head>
+
+<title>Lorry Receipt</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#fff;
+padding:8px;
+color:#000;
+}
+
+.lr{
+max-width:1200px;
+margin:auto;
+border:2px solid #000;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+border-bottom:2px solid #000;
+}
+
+.company-section{
+width:70%;
+padding:12px;
+border-right:2px solid #000;
+}
+
+.lr-section{
+width:30%;
+}
+
+.company{
+font-size:30px;
+font-weight:bold;
+letter-spacing:1px;
+}
+
+.address{
+font-size:12px;
+line-height:1.8;
+margin-top:6px;
+}
+
+.lr-head{
+text-align:center;
+font-size:28px;
+font-weight:bold;
+padding:10px;
+border-bottom:2px solid #000;
+letter-spacing:2px;
+}
+
+.lr-copy{
+text-align:center;
+padding:8px;
+font-size:13px;
+font-weight:bold;
+border-bottom:1px solid #000;
+}
+
+.lr-row{
+display:flex;
+border-bottom:1px solid #000;
+}
+
+.lr-box{
+flex:1;
+padding:10px;
+border-right:1px solid #000;
+min-height:70px;
+}
+
+.label{
+font-size:12px;
+font-weight:bold;
+text-transform:uppercase;
+margin-bottom:6px;
+}
+
+/* NORMAL VALUE */
+.value{
+font-size:14px;
+font-weight:600;
+word-break:break-word;
+}
+
+/* ONLY BIG VALUE */
+.big-value{
+font-size:24px;
+font-weight:bold;
+letter-spacing:1px;
+}
+
+.party-table{
+width:100%;
+border-collapse:collapse;
+}
+
+.party-table td{
+border:1px solid #000;
+padding:10px;
+font-size:13px;
+vertical-align:top;
+height:110px;
+}
+
+.big-name{
+font-size:20px;
+font-weight:bold;
+margin-top:5px;
+line-height:1.5;
+}
+
+.ac-name{
+font-size:14px;
+margin-top:10px;
+font-weight:600;
+}
+
+.route{
+display:flex;
+border-left:1px solid #000;
+border-right:1px solid #000;
+border-bottom:1px solid #000;
+}
+
+.route-box{
+width:50%;
+padding:10px;
+font-size:15px;
+font-weight:bold;
+}
+
+.route-box:first-child{
+border-right:1px solid #000;
+}
+
+.route-city{
+font-size:22px;
+font-weight:bold;
+margin-left:10px;
+}
+
+.goods{
+width:100%;
+border-collapse:collapse;
+}
+
+.goods th,
+.goods td{
+border:1px solid #000;
+padding:8px;
+font-size:13px;
+text-align:center;
+}
+
+.goods th{
+background:#f3f4f6;
+}
+
+.goods td:nth-child(2){
+text-align:left;
+}
+
+.bank{
+padding:12px;
+font-size:12px;
+line-height:1.9;
+border-top:1px solid #000;
+}
+
+.bottom{
+display:flex;
+justify-content:space-between;
+padding:30px 15px 15px;
+}
+
+.sign{
+width:220px;
+text-align:center;
+font-size:13px;
+}
+
+.line{
+border-top:1px solid #000;
+padding-top:5px;
+margin-top:8px;
+}
+
+.note{
+border-top:1px solid #000;
+padding:8px;
+font-size:11px;
+line-height:1.8;
+text-align:center;
+}
+
+@media print{
+
+@page{
+size:A4 portrait;
+margin:5mm;
+}
+
+body{
+padding:0;
+background:#fff;
+}
+
+.lr{
+
+width:100%;
+max-width:780px;
+
+margin:0 auto 10px;
+
+border:2px solid #000;
+
+zoom:0.78;
+
+page-break-inside:avoid;
+
+}
+
+.company{
+font-size:22px;
+}
+
+.route-city{
+font-size:18px;
+}
+
+.big-name{
+font-size:16px;
+}
+
+.big-value{
+font-size:18px;
+}
+
+.goods th,
+.goods td{
+font-size:11px;
+padding:5px;
+}
+
+.address,
+.value,
+.label,
+.bank,
+.note{
+font-size:11px;
+}
+
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="lr">
+
+<div class="top">
+
+<div class="company-section">
+
+<div class="company-section">
+
+<div class="company">
+
+${company.name || ""}
+
+</div>
+
+<div class="address">
+
+${(company.address || "").replace(/\n/g,"<br>")}
+
+<br>
+
+Mobile:
+${company.mobile || ""}
+
+<br>
+
+Email:
+${company.email || ""}
+
+<br>
+
+GSTIN:
+${company.gstin || ""}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="lr-section">
+
+<div class="lr-head">
+
+L.R.
+
+</div>
+
+<div class="lr-copy">
+
+GOODS CONSIGNMENT NOTE
+
+</div>
+
+<div class="lr-row">
+
+<div class="lr-box">
+
+<div class="label">
+
+L.R. No
+
+</div>
+
+<div class="value big-value">
+${t.lrNo || "-"}
+</div>
+
+</div>
+
+<div class="lr-box">
+
+<div class="label">
+
+Date
+
+</div>
+
+<div class="value">
+
+${formatDate(t.dispatchDate)}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="lr-row">
+
+<div class="lr-box">
+
+<div class="label">
+
+Vehicle No
+
+</div>
+
+<div class="value">
+
+${t.tanker || "-"}
+
+</div>
+
+</div>
+
+<div class="lr-box">
+
+<div class="label">
+
+Invoice No
+
+</div>
+
+<div class="value">
+
+${t.invoiceNo || "-"}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<table class="party-table">
+
+<tr>
+
+<td width="50%">
+
+<b>Consignor :</b>
+
+<div class="big-name">
+
+${t.loadingParty || "-"}
+
+</div>
+
+</td>
+
+<td width="50%">
+
+<b>Consignee :</b>
+
+<div class="big-name">
+
+${t.consigneeName || "-"}
+
+</div>
+
+<div class="ac-name">
+
+A/C:
+${t.party || "-"}
+
+</div>
+
+</td>
+
+</tr>
+
+</table>
+
+<!-- ROUTE -->
+
+<div class="route">
+
+<div class="route-box">
+
+From :
+<span class="route-city">
+
+${t.loadingPoint || "-"}
+
+</span>
+
+</div>
+
+<div class="route-box">
+
+To :
+<span class="route-city">
+
+${t.unloadingPoint || "-"}
+
+</span>
+
+</div>
+
+</div>
+
+<!-- GOODS -->
+
+<table class="goods">
+
+<tr>
+
+<th width="8%">Sr.</th>
+<th>Description Of Goods</th>
+<th width="15%">Quantity</th>
+<th width="10%">Unit</th>
+<th width="15%">Vehicle Type</th>
+
+</tr>
+
+<tr>
+
+<td>1</td>
+
+<td>
+
+${t.material || "-"}
+
+</td>
+
+<td>
+
+${Number(t.qty || 0).toFixed(3)}
+
+</td>
+
+<td>
+
+MT
+
+</td>
+
+<td>
+
+TANKER
+
+</td>
+
+</tr>
+
+</table>
+
+<!-- REMARK -->
+
+<div class="bank">
+
+<h3>
+Terms & Conditions
+</h3>
+
+1. Goods booked at owner's risk.<br>
+
+2. Company not responsible for leakage, shortage or damage.<br>
+
+3. Subject to Vapi jurisdiction only.<br>
+
+4. Please check material condition at delivery point.
+
+</div>
+
+<!-- SIGN -->
+
+<div class="bottom">
+
+<div class="sign">
+
+<div style="height:70px"></div>
+
+<div class="line">
+
+Receiver Signature
+
+</div>
+
+</div>
+
+<div class="sign">
+
+<div style="height:70px"></div>
+
+<div class="line">
+
+Driver Signature
+
+</div>
+
+</div>
+
+<div class="sign-box">
+
+For ${company.name || ""}
+
+<br><br><br><br>
+
+Authorised Signatory
+
+
+</div>
+
+</div>
+
+</div>
+
+<div class="note">
+
+This is a computer generated Lorry Receipt.
+
+</div>
+
+</div>
+
+<script>
+
+window.onload = function(){
+
+setTimeout(()=>{
+window.print();
+
+},500);
+
+};
+
+<\/script>
+
+</body>
+
+</html>
+
+`);
+
+win.document.close();
+
+win.focus();
+
+}
+/* EXPORT */
+
+function exportTrips(){
+
+let ws =
+XLSX.utils.json_to_sheet(trips);
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Trips"
+);
+
+XLSX.writeFile(
+wb,
+"Transport_Report.xlsx"
+);
+
+}
+
+function generateSelectedBills(){
+
+let ids = [];
+
+document
+.querySelectorAll(".trip-check:checked")
+.forEach(cb=>{
+
+ids.push(Number(cb.value));
+
+});
+
+if(ids.length === 0){
+
+alert("Select Trips");
+return;
+
+}
+
+finalBill(ids);
+
+}
+
+
+/* AUTO CURRENT DATE */
+
+window.onload = function(){
+
+let today = new Date();
+
+let yyyy = today.getFullYear();
+
+let mm = String(today.getMonth()+1).padStart(2,'0');
+
+let dd = String(today.getDate()).padStart(2,'0');
+
+let currentDate = `${yyyy}-${mm}-${dd}`;
+
+document.getElementById("dispatchDate").value = currentDate;
+
+};
+
+
+function numberToWords(num){
+
+const a = [
+"", "One", "Two", "Three", "Four", "Five",
+"Six", "Seven", "Eight", "Nine", "Ten",
+"Eleven", "Twelve", "Thirteen", "Fourteen",
+"Fifteen", "Sixteen", "Seventeen",
+"Eighteen", "Nineteen"
+];
+
+const b = [
+"", "", "Twenty", "Thirty", "Forty",
+"Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+];
+
+function inWords(n){
+
+if(n < 20) return a[n];
+
+if(n < 100)
+return b[Math.floor(n/10)] + " " + a[n%10];
+
+if(n < 1000)
+return a[Math.floor(n/100)] +
+" Hundred " +
+inWords(n%100);
+
+if(n < 100000)
+return inWords(Math.floor(n/1000)) +
+" Thousand " +
+inWords(n%1000);
+
+if(n < 10000000)
+return inWords(Math.floor(n/100000)) +
+" Lakh " +
+inWords(n%100000);
+
+return inWords(Math.floor(n/10000000)) +
+" Crore " +
+inWords(n%10000000);
+
+}
+
+return inWords(num).replace(/\s+/g," ").trim();
+
+}
+
+/* INIT */
+loadCompanySettings();
+showCustomers();
+loadCustomers();
+loadTankers();
+showTrips();
+updateDashboard();
+
+
+window.onload = function(){
+
+document.getElementById("billNo").value =
+localStorage.getItem("lastBill") || "2526-001";
+
+  // TODAY DATE AUTO
+  let today = new Date().toISOString().split("T")[0];
+
+  document.getElementById("dispatchDate").value = today;
+
+loadTankers();
+loadRoutePoints();
+showTrips();
+
+updateDashboard();
+
+
+/* DROPDOWNS */
+
+loadDropdown(
+"partyList",
+"partyList"
+);
+
+loadDropdown(
+"loadingPartyList",
+"loadingPartyList"
+);
+
+loadDropdown(
+"consigneeList",
+"consigneeList"
+);
+
+loadDropdown(
+"materialList",
+"materialList"
+);
+
+}
+</script>
+<datalist id="partyList"></datalist>
+
+<datalist id="loadingPartyList"></datalist>
+
+<datalist id="consigneeList"></datalist>
+
+<datalist id="materialList"></datalist>
+
+</body>
+</html>
