@@ -2894,39 +2894,92 @@ document.getElementById(
 
 async function loadCompanyList(){
 
-let select =
+let companyList =
 document.getElementById(
-"companySelect"
+"companyList"
 );
 
-if(!select) return;
+if(!companyList) return;
 
-select.innerHTML = "";
+companyList.innerHTML = "";
 
-let snap = await db
+/* GET ALL COMPANIES */
+
+let snapshot =
+await db
 .collection("companies")
 .get();
 
-if(snap.empty){
+/* NO COMPANY */
 
-select.innerHTML =
-`<option value="">
+if(snapshot.empty){
+
+companyList.innerHTML = `
+
+<div style="
+padding:20px;
+text-align:center;
+color:red;
+font-weight:bold;
+">
+
 No Company Found
-</option>`;
+
+</div>
+
+`;
 
 return;
 
 }
 
-snap.forEach(doc=>{
+/* SHOW LIST */
 
-select.innerHTML += `
+snapshot.forEach(doc=>{
 
-<option value="${doc.id}">
-${doc.id}
-</option>
+let company =
+doc.data().companyInfo || {};
+
+let div =
+document.createElement("div");
+
+div.className =
+"company-item";
+
+div.innerHTML = `
+
+🏢 ${doc.id}
 
 `;
+
+div.onclick = async function(){
+
+activeCompany = doc.id;
+
+/* LOAD CLOUD */
+
+await loadCloudData();
+
+/* TOP NAME */
+
+document.getElementById(
+"topCompanyName"
+).innerHTML =
+"🏢 " + activeCompany;
+
+/* CLOSE */
+
+document.getElementById(
+"companyPopup"
+).style.display = "none";
+
+/* REFRESH */
+
+showTrips();
+
+};
+
+companyList.appendChild(div);
 
 });
 
