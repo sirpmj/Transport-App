@@ -1934,6 +1934,22 @@ console.log(
 
 }
 
+function loadNextBillNo(){
+
+  let fyKey =
+    "lastBill_" +
+    activeCompany +
+    "_" +
+    financialYear;
+
+  let nextBill =
+    localStorage.getItem(fyKey) ||
+    financialYear + "-001";
+
+  document.getElementById("billNo").value = nextBill;
+}
+
+
 
 /* =========================
 AUTH
@@ -2922,20 +2938,6 @@ return;
 
 
 
-function loadNextBillNo(){
-
-  let fyKey =
-    "lastBill_" +
-    activeCompany +
-    "_" +
-    financialYear;
-
-  let nextBill =
-    localStorage.getItem(fyKey) ||
-    financialYear + "-001";
-
-  document.getElementById("billNo").value = nextBill;
-}
 
 
 
