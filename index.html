@@ -1862,9 +1862,9 @@ activeCompany
 
 async function loadCloudData(){
 
-if(!currentUser) return;
-
 if(!activeCompany) return;
+
+try{
 
 let doc = await db
 
@@ -1875,7 +1875,9 @@ let doc = await db
 
 if(doc.exists){
 
-let data = doc.data();
+let data = doc.data() || {};
+
+/* LOAD DATA */
 
 trips =
 data.trips || [];
@@ -1889,7 +1891,7 @@ data.customers || [];
 routeRates =
 data.routeRates || [];
 
-/* LOCAL BACKUP */
+/* LOCAL CACHE */
 
 localStorage.setItem(
 "trips",
@@ -1911,19 +1913,18 @@ localStorage.setItem(
 JSON.stringify(routeRates)
 );
 
+/* COMPANY INFO */
+
+if(data.companyInfo){
+
 localStorage.setItem(
 "companyInfo",
-JSON.stringify(
-data.companyInfo || {}
-)
+JSON.stringify(data.companyInfo)
 );
 
-console.log(
-"Cloud Loaded:",
-activeCompany
-);
+}
 
-/* REFRESH UI */
+/* REFRESH */
 
 showTrips();
 
@@ -1931,11 +1932,28 @@ loadTankers();
 
 loadCustomers();
 
+console.log(
+"Cloud Loaded:",
+activeCompany
+);
+
 }else{
 
 console.log(
-"No Cloud Data Found"
+"No Data Found"
 );
+
+trips = [];
+
+showTrips();
+
+}
+
+}catch(err){
+
+console.error(err);
+
+alert(err.message);
 
 }
 
