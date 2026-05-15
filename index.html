@@ -733,22 +733,23 @@ onclick="openCompanySettings()">
 
 </button>
 
-
-<select id="activeCompany"
-onchange="changeCompany()"
+<div id="topCompanyName"
 style="
-width:220px;
+font-weight:700;
+font-size:15px;
+padding:8px 14px;
+background:#eff6ff;
+border-radius:10px;
+color:#2563eb;
 ">
 
-<option value="default">
-Default Company
-</option>
+🏢 No Company
 
-</select>
+</div>
 
 <button
 class="action-btn green"
-onclick="addNewCompany()">
+onclick="openCompanySettings()">
 
 🏢 Add Company
 
@@ -869,6 +870,42 @@ margin-top:15px;
 
 </div>
 
+
+<div id="companySelectModal"
+style="
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:999999;
+">
+
+<div style="
+background:#fff;
+padding:25px;
+border-radius:18px;
+width:95%;
+max-width:420px;
+">
+
+<h2 style="margin-bottom:15px;">
+🏢 Select Company
+</h2>
+
+<select
+id="companySelect"
+style="margin-bottom:15px;">
+</select>
+
+<button onclick="continueCompany()">
+➡ Continue
+</button>
+
+</div>
+
+</div>
 
 
 
@@ -1678,6 +1715,7 @@ onclick="toggleAllRows(this)">
 </div>
 <script>
 
+
 /* =========================
 FIREBASE CONFIG
 ========================= */
@@ -1717,9 +1755,7 @@ const db = firebase.firestore();
 </script>
 <script>
 
-let activeCompany =
-localStorage.getItem("activeCompany")
-|| "default";
+let activeCompany = "";
 
 let financialYear =
 getFinancialYear();
@@ -1927,7 +1963,13 @@ document.getElementById(
 "loginScreen"
 ).style.display = "none";
 
-loadCloudData();
+/* SHOW COMPANY SELECT */
+
+loadCompanyList();
+
+document.getElementById(
+"companySelectModal"
+).style.display = "flex";
 
 }else{
 
@@ -1944,6 +1986,10 @@ function logoutUser(){
 auth.signOut();
 
 }
+
+
+
+
 
 
 function getFinancialYear(){
@@ -2563,9 +2609,18 @@ loadCompanySettings();
 
 function closeCompanySettings(){
 
+let popup =
 document.getElementById(
 "companyPopup"
-).style.display = "none";
+);
+
+if(popup){
+
+popup.style.display = "none";
+popup.style.visibility = "hidden";
+popup.style.opacity = "0";
+
+}
 
 }
 
@@ -2618,15 +2673,184 @@ localStorage.setItem(
 JSON.stringify(company)
 );
 
+/* ACTIVE COMPANY */
+
+activeCompany =
+company.name || "Company";
+
+document.getElementById(
+"topCompanyName"
+).innerHTML =
+"🏢 " + activeCompany;
+
+/* FIREBASE */
+
+if(currentUser){
+
+db.collection("transportData")
+.doc(currentUser.uid)
+
+.collection("companies")
+.doc(company.name)
+
+.set({
+
+companyInfo: company
+
+})
+
+.then(()=>{
+
+console.log("Company Saved");
+
+/* RELOAD LIST */
+
+loadCompanyList();
+
 /* CLOSE POPUP */
 
-closeCompanySettings();
+document.getElementById(
+"companyPopup"
+).style.display = "none";
 
 /* SUCCESS */
 
-alert("Company Saved");
+alert("Company Saved Successfully");
+
+})
+
+.catch(err=>{
+
+console.error(err);
+
+alert(err.message);
+
+});
+
+}else{
+
+document.getElementById(
+"companyPopup"
+).style.display = "none";
 
 }
+
+}
+
+
+async function loadCompanyList(){
+
+let select =
+document.getElementById(
+"companySelect"
+);
+
+if(!select) return;
+
+select.innerHTML = "";
+
+let snap = await db
+
+.collection("transportData")
+.doc(currentUser.uid)
+
+.collection("companies")
+.get();
+
+if(snap.empty){
+
+select.innerHTML =
+`<option value="">
+No Company Found
+</option>`;
+
+return;
+
+}
+
+snap.forEach(doc=>{
+
+select.innerHTML += `
+
+<option value="${doc.id}">
+${doc.id}
+</option>
+
+`;
+
+});
+
+}
+
+async function continueCompany(){
+
+activeCompany =
+document.getElementById(
+"companySelect"
+).value;
+
+if(!activeCompany){
+
+alert("Select Company");
+return;
+
+}
+
+/* TOP COMPANY NAME */
+
+document.getElementById(
+"topCompanyName"
+).innerHTML =
+"🏢 " + activeCompany;
+
+/* HIDE MODAL */
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+/* LOAD DATA */
+
+await loadCloudData();
+
+loadNextBillNo();
+
+}
+
+/* ESC CLOSE */
+
+document.addEventListener(
+"keydown",
+function(e){
+
+if(e.key === "Escape"){
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+}
+
+});
+
+/* OUTSIDE CLICK CLOSE */
+
+document.getElementById(
+"companySelectModal"
+).addEventListener(
+"click",
+function(e){
+
+if(e.target.id ===
+"companySelectModal"){
+
+this.style.display = "none";
+
+}
+
+});
+
+
 
 /* =========================
 LOAD COMPANY
