@@ -1713,6 +1713,12 @@ onclick="toggleAllRows(this)">
 
 </div>
 
+
+<div id="billedTrips" style="display:none;">
+
+<div id="billedTripsData"></div>
+
+</div>
 </div>
 
 
@@ -1813,6 +1819,7 @@ getFinancialYear();
 let currentBillView = "Pending";
 
 let trips =
+
 JSON.parse(localStorage.getItem("trips") || "[]");
 
 let tankers =
@@ -2272,6 +2279,8 @@ function showBillType(type){
 
 if(type === "pending"){
 
+currentBillView = "Pending";
+
 document.getElementById(
 "pendingTrips"
 ).style.display = "block";
@@ -2280,7 +2289,11 @@ document.getElementById(
 "billedTrips"
 ).style.display = "none";
 
+showTrips();
+
 }else{
+
+currentBillView = "Billed";
 
 document.getElementById(
 "pendingTrips"
@@ -4076,46 +4089,60 @@ function showTrips(){
 let body =
 document.getElementById("tripBody");
 
-body.innerHTML="";
+if(!body) return;
+
+/* SEARCH */
 
 let search =
 document.getElementById("searchBox")
-.value.toLowerCase();
+?.value
+?.toLowerCase() || "";
+
+/* CLEAR */
+
+body.innerHTML = "";
+
+/* SAFE ARRAY */
+
+if(!Array.isArray(trips)){
+trips = [];
+}
+
+/* FILTER */
+
+let filteredTrips =
+trips.filter(t=>{
+
+if(!t) return false;
+
+/* FIX OLD DATA */
+
+if(!t.billStatus){
+t.billStatus = "Pending";
+}
 
 /* BILL FILTER */
 
-let filteredTrips = trips.filter(t => {
-
 if(currentBillView === "Pending"){
-  return t.billStatus === "Pending";
+return t.billStatus === "Pending";
 }
 
 if(currentBillView === "Billed"){
-  return t.billStatus === "Billed";
+return t.billStatus === "Billed";
 }
 
 if(currentBillView === "Paid"){
-  return t.billStatus === "Paid";
+return t.billStatus === "Paid";
 }
 
 return true;
 
 });
 
-filteredTrips.forEach((t,index)=>{
+/* SEARCH FILTER */
 
-/* SKIP EMPTY */
-
-if(
-!t ||
-(
-!t.party &&
-!t.tanker &&
-!t.dispatchDate
-)
-){
-return;
-}
+filteredTrips =
+filteredTrips.filter(t=>{
 
 let party =
 (t.party || "")
@@ -4125,19 +4152,50 @@ let tanker =
 (t.tanker || "")
 .toLowerCase();
 
-/* SEARCH */
+return (
+party.includes(search) ||
+tanker.includes(search)
+);
 
-if(
-!party.includes(search)
-&&
-!tanker.includes(search)
-){
+});
+
+/* NO DATA */
+
+if(filteredTrips.length === 0){
+
+body.innerHTML = `
+
+<tr>
+
+<td colspan="19"
+style="
+text-align:center;
+padding:20px;
+font-weight:bold;
+color:red;
+">
+
+NO DATA FOUND
+
+</td>
+
+</tr>
+`;
+
 return;
+
 }
+
+/* TABLE ROWS */
+
+filteredTrips.forEach((t,index)=>{
+
+let originalIndex =
+trips.findIndex(x => x.id === t.id);
 
 body.innerHTML += `
 
-<tr ondblclick="editTrip(${index})">
+<tr>
 
 <td>
 <input
@@ -4146,108 +4204,68 @@ class="trip-check"
 value="${t.id}">
 </td>
 
-<td>${index+1}</td>
+<td>${index + 1}</td>
 
-<!-- DATE -->
+<td>${formatDate(t.dispatchDate)}</td>
 
-<td>
-${formatDate(t.dispatchDate)}
-</td>
+<td>${t.party || ""}</td>
 
-<!-- PARTY -->
+<td>${t.loadingParty || ""}</td>
 
-<td>
-${t.party || ""}
-</td>
-
-<!-- LOADING PARTY -->
-
-<td>
-${t.loadingParty || ""}
-</td>
-
-<!-- CONSIGNEE -->
-
-<td>
-${t.consigneeName || ""}
-</td>
-
-<!-- TANKER -->
+<td>${t.consigneeName || ""}</td>
 
 <td class="freeze-col">
 ${t.tanker || ""}
 </td>
 
-<!-- LOADING POINT -->
+<td>${t.loadingPoint || ""}</td>
 
-<td>
-${t.loadingPoint || ""}
-</td>
+<td>${t.unloadingPoint || ""}</td>
 
-<!-- UNLOADING POINT -->
-
-<td>
-${t.unloadingPoint || ""}
-</td>
-
-<!-- MATERIAL -->
-
-<td>
-${t.material || ""}
-</td>
-
-<!-- QTY -->
+<td>${t.material || ""}</td>
 
 <td>
 ${Number(t.qty || 0).toFixed(2)}
 </td>
 
-<!-- RATE -->
-
 <td>
 ${Number(t.freightRate || 0).toFixed(2)}
 </td>
 
-<!-- TOTAL -->
-
 <td>
-₹${formatAmount(t.totalFreight)}
+₹${formatAmount(t.totalFreight || 0)}
 </td>
 
-<!-- LR -->
+<td>${t.lrNo || ""}</td>
 
-<td>
-${t.lrNo || ""}
-</td>
+<td>${t.invoiceNo || ""}</td>
 
-<!-- INVOICE -->
-
-<td>
-${t.invoiceNo || ""}
-</td>
-
-<!-- BILL -->
-
-<td>
-${t.billNo || "-"}
-</td>
-
-<!-- STATUS -->
+<td>${t.billNo || "-"}</td>
 
 <td>
 
-<select onclick="event.stopPropagation()"
-onchange="changeStatus(${index},this.value)">
+<select
+onchange="
+changeStatus(
+${originalIndex},
+this.value
+)">
 
-<option ${t.status=="Pending"?"selected":""}>
+<option
+value="Pending"
+${t.status=="Pending"?"selected":""}>
 Pending
 </option>
 
-<option ${t.status=="Transit"?"selected":""}>
+<option
+value="Transit"
+${t.status=="Transit"?"selected":""}>
 Transit
 </option>
 
-<option ${t.status=="Completed"?"selected":""}>
+<option
+value="Completed"
+${t.status=="Completed"?"selected":""}>
 Completed
 </option>
 
@@ -4255,22 +4273,30 @@ Completed
 
 </td>
 
-<!-- BILL STATUS -->
-
 <td>
 
-<select onclick="event.stopPropagation()"
-onchange="changeBill(${index},this.value)">
+<select
+onchange="
+changeBill(
+${originalIndex},
+this.value
+)">
 
-<option ${t.billStatus=="Pending"?"selected":""}>
+<option
+value="Pending"
+${t.billStatus=="Pending"?"selected":""}>
 Pending
 </option>
 
-<option ${t.billStatus=="Billed"?"selected":""}>
+<option
+value="Billed"
+${t.billStatus=="Billed"?"selected":""}>
 Billed
 </option>
 
-<option ${t.billStatus=="Paid"?"selected":""}>
+<option
+value="Paid"
+${t.billStatus=="Paid"?"selected":""}>
 Paid
 </option>
 
@@ -4278,35 +4304,22 @@ Paid
 
 </td>
 
-<!-- ACTION -->
-
 <td>
 
 <button
 class="action-btn green"
-onclick="editTrip(${index})">
+onclick="editTrip(${originalIndex})">
 ✏️
 </button>
 
 <button
-class="action-btn orange"
-onclick="printLR(${t.id})">
-📄
-</button>
-
-<button
-class="action-btn purple"
-onclick="printSingleBill(${t.id})">
-🖨️
-</button>
-
-<button
 class="action-btn red"
-onclick="deleteTrip(${index})">
+onclick="deleteTrip(${originalIndex})">
 🗑️
 </button>
 
 </td>
+
 </tr>
 
 `;
@@ -4314,8 +4327,6 @@ onclick="deleteTrip(${index})">
 });
 
 }
-
-
 
 
 /* STATUS */
@@ -6646,7 +6657,7 @@ window.onload = function(){
 
 setTimeout(()=>{
 window.print();
-
+showTrips();
 },500);
 
 };
@@ -6834,6 +6845,8 @@ navigator.serviceWorker.register(
 );
 
 }
+
+
 
 </script>
 <datalist id="partyList"></datalist>
