@@ -2924,8 +2924,11 @@ JSON.stringify(company)
 
 /* ACTIVE COMPANY */
 
-company.name =
-originalCompanyName;
+activeCompany =
+company.name || "Company";
+
+originalCompanyName =
+activeCompany;
 
 document.getElementById(
 "topCompanyName"
