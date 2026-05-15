@@ -1864,24 +1864,52 @@ async function loadCloudData(){
 
 if(!currentUser) return;
 
+if(!activeCompany) return;
+
 let doc = await db
+
 .collection("companies")
 .doc(activeCompany)
+
 .get();
 
 if(doc.exists){
 
 let data = doc.data();
 
-trips = data.trips || [];
+trips =
+data.trips || [];
 
-tankers = data.tankers || [];
+tankers =
+data.tankers || [];
 
-customers = data.customers || [];
+customers =
+data.customers || [];
 
-routeRates = data.routeRates || [];
+routeRates =
+data.routeRates || [];
 
-/* COMPANY INFO */
+/* LOCAL BACKUP */
+
+localStorage.setItem(
+"trips",
+JSON.stringify(trips)
+);
+
+localStorage.setItem(
+"tankers",
+JSON.stringify(tankers)
+);
+
+localStorage.setItem(
+"customers",
+JSON.stringify(customers)
+);
+
+localStorage.setItem(
+"routeRates",
+JSON.stringify(routeRates)
+);
 
 localStorage.setItem(
 "companyInfo",
@@ -1890,42 +1918,23 @@ data.companyInfo || {}
 )
 );
 
-showTrips();
-
-loadCustomers();
-
-loadTankers();
-
-updateDashboard();
-
-showRouteFreight();
-
-loadRoutePoints();
-
-loadCompanySettings();
-
 console.log(
-"Loaded Company:",
+"Cloud Loaded:",
 activeCompany
 );
 
-}else{
-
-trips = [];
-tankers = [];
-customers = [];
-routeRates = [];
+/* REFRESH UI */
 
 showTrips();
 
-loadCustomers();
-
 loadTankers();
 
-updateDashboard();
+loadCustomers();
+
+}else{
 
 console.log(
-"No data for company"
+"No Cloud Data Found"
 );
 
 }
@@ -2821,6 +2830,10 @@ JSON.stringify(company)
 
 activeCompany =
 company.name || "Company";
+
+/* LOAD CLOUD DATA */
+
+await loadCloudData();
 
 document.getElementById(
 "topCompanyName"
