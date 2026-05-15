@@ -1830,7 +1830,34 @@ JSON.parse(localStorage.getItem("customers") || "[]");
 
 async function saveData(){
 
-if(!currentUser) return;
+/* OFFLINE SAVE */
+
+localStorage.setItem(
+"trips",
+JSON.stringify(trips)
+);
+
+localStorage.setItem(
+"tankers",
+JSON.stringify(tankers)
+);
+
+localStorage.setItem(
+"customers",
+JSON.stringify(customers)
+);
+
+localStorage.setItem(
+"routeRates",
+JSON.stringify(routeRates)
+);
+
+/* ONLINE SAVE */
+
+if(
+navigator.onLine &&
+currentUser
+){
 
 let data = {
 
@@ -1838,18 +1865,27 @@ trips,
 tankers,
 customers,
 routeRates,
+
 companyInfo:
+
 JSON.parse(
+
 localStorage.getItem(
 "companyInfo"
 ) || "{}"
-)
+
+),
+
+updatedAt:
+Date.now()
 
 };
 
 await db
+
 .collection("companies")
 .doc(activeCompany)
+
 .set(data);
 
 console.log(
@@ -1859,12 +1895,56 @@ activeCompany
 
 }
 
+}
 
 async function loadCloudData(){
 
-if(!activeCompany) return;
+/* OFFLINE FIRST */
 
-try{
+trips =
+JSON.parse(
+localStorage.getItem("trips")
+|| "[]"
+);
+
+tankers =
+JSON.parse(
+localStorage.getItem("tankers")
+|| "[]"
+);
+
+customers =
+JSON.parse(
+localStorage.getItem("customers")
+|| "[]"
+);
+
+routeRates =
+JSON.parse(
+localStorage.getItem("routeRates")
+|| "[]"
+);
+
+/* SHOW OFFLINE */
+
+showTrips();
+
+loadCustomers();
+
+loadTankers();
+
+updateDashboard();
+
+showRouteFreight();
+
+loadRoutePoints();
+
+/* ONLINE CLOUD */
+
+if(
+navigator.onLine &&
+currentUser
+){
 
 let doc = await db
 
@@ -1875,9 +1955,9 @@ let doc = await db
 
 if(doc.exists){
 
-let data = doc.data() || {};
+let data = doc.data();
 
-/* LOAD DATA */
+/* LOAD CLOUD */
 
 trips =
 data.trips || [];
@@ -1891,7 +1971,7 @@ data.customers || [];
 routeRates =
 data.routeRates || [];
 
-/* LOCAL CACHE */
+/* SAVE LOCAL */
 
 localStorage.setItem(
 "trips",
@@ -1915,45 +1995,43 @@ JSON.stringify(routeRates)
 
 /* COMPANY INFO */
 
-if(data.companyInfo){
-
 localStorage.setItem(
 "companyInfo",
-JSON.stringify(data.companyInfo)
-);
 
-}
+JSON.stringify(
+data.companyInfo || {}
+)
+
+);
 
 /* REFRESH */
 
 showTrips();
 
-loadTankers();
-
 loadCustomers();
 
+loadTankers();
+
+updateDashboard();
+
+showRouteFreight();
+
+loadRoutePoints();
+
+loadCompanySettings();
+
 console.log(
-"Cloud Loaded:",
+"Loaded Company:",
 activeCompany
 );
 
 }else{
 
 console.log(
-"No Data Found"
+"No cloud data"
 );
 
-trips = [];
-
-showTrips();
-
 }
-
-}catch(err){
-
-console.error(err);
-
-alert(err.message);
 
 }
 
@@ -1961,31 +2039,17 @@ alert(err.message);
 
 function loadNextBillNo(){
 
-let fyKey =
+  let fyKey =
+    "lastBill_" +
+    activeCompany +
+    "_" +
+    financialYear;
 
-"lastBill_" +
-activeCompany +
-"_" +
-financialYear +
-"_" +
-currentUser.uid;
+  let nextBill =
+    localStorage.getItem(fyKey) ||
+    financialYear + "-001";
 
-/* NEXT BILL */
-
-let nextBill =
-
-localStorage.getItem(fyKey)
-
-||
-
-financialYear + "-001";
-
-/* SHOW */
-
-document.getElementById(
-"billNo"
-).value = nextBill;
-
+  document.getElementById("billNo").value = nextBill;
 }
 
 
@@ -2815,7 +2879,7 @@ popup.style.opacity = "0";
 SAVE COMPANY
 ========================= */
 
-async function saveCompanySettings(){
+function saveCompanySettings(){
 
 let company = {
 
@@ -2862,10 +2926,6 @@ JSON.stringify(company)
 
 activeCompany =
 company.name || "Company";
-
-/* LOAD CLOUD DATA */
-
-await loadCloudData();
 
 document.getElementById(
 "topCompanyName"
@@ -2926,92 +2986,43 @@ document.getElementById(
 
 async function loadCompanyList(){
 
-let companyList =
+let select =
 document.getElementById(
-"companyList"
+"companySelect"
 );
 
-if(!companyList) return;
+if(!select) return;
 
-companyList.innerHTML = "";
+select.innerHTML = "";
 
-/* GET ALL COMPANIES */
+let snap = await db
 
-let snapshot =
-await db
+.collection("transportData")
+.doc(currentUser.uid)
+
 .collection("companies")
 .get();
 
-/* NO COMPANY */
+if(snap.empty){
 
-if(snapshot.empty){
-
-companyList.innerHTML = `
-
-<div style="
-padding:20px;
-text-align:center;
-color:red;
-font-weight:bold;
-">
-
+select.innerHTML =
+`<option value="">
 No Company Found
-
-</div>
-
-`;
+</option>`;
 
 return;
 
 }
 
-/* SHOW LIST */
+snap.forEach(doc=>{
 
-snapshot.forEach(doc=>{
+select.innerHTML += `
 
-let company =
-doc.data().companyInfo || {};
-
-let div =
-document.createElement("div");
-
-div.className =
-"company-item";
-
-div.innerHTML = `
-
-🏢 ${doc.id}
+<option value="${doc.id}">
+${doc.id}
+</option>
 
 `;
-
-div.onclick = async function(){
-
-activeCompany = doc.id;
-
-/* LOAD CLOUD */
-
-await loadCloudData();
-
-/* TOP NAME */
-
-document.getElementById(
-"topCompanyName"
-).innerHTML =
-"🏢 " + activeCompany;
-
-/* CLOSE */
-
-document.getElementById(
-"companyPopup"
-).style.display = "none";
-
-/* REFRESH */
-
-showTrips();
-
-};
-
-companyList.appendChild(div);
 
 });
 
@@ -4164,15 +4175,6 @@ alert("✅ Trip Added Successfully");
 
 }
 
-
-function getUserBillKey(){
-
-return
-"billNo_" +
-currentUser.uid;
-
-}
-
 /* SHOW TRIPS */
 
 function showTrips(){
@@ -5096,13 +5098,10 @@ localStorage.getItem(
 /* Invoice No*/
 
 let fyKey =
-
 "lastBill_" +
 activeCompany +
 "_" +
-financialYear +
-"_" +
-currentUser.uid;
+financialYear;
 
 let lastBill =
 localStorage.getItem(fyKey)
@@ -6894,12 +6893,7 @@ loadNextBillNo();
 window.onload = function(){
 
 document.getElementById("billNo").value =
-
-localStorage.getItem(
-getUserBillKey()
-)
-
-|| "2526-001";
+localStorage.getItem("lastBill") || "2526-001";
 
   // TODAY DATE AUTO
   let today = new Date().toISOString().split("T")[0];
