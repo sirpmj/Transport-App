@@ -1961,17 +1961,31 @@ alert(err.message);
 
 function loadNextBillNo(){
 
-  let fyKey =
-    "lastBill_" +
-    activeCompany +
-    "_" +
-    financialYear;
+let fyKey =
 
-  let nextBill =
-    localStorage.getItem(fyKey) ||
-    financialYear + "-001";
+"lastBill_" +
+activeCompany +
+"_" +
+financialYear +
+"_" +
+currentUser.uid;
 
-  document.getElementById("billNo").value = nextBill;
+/* NEXT BILL */
+
+let nextBill =
+
+localStorage.getItem(fyKey)
+
+||
+
+financialYear + "-001";
+
+/* SHOW */
+
+document.getElementById(
+"billNo"
+).value = nextBill;
+
 }
 
 
@@ -4150,6 +4164,15 @@ alert("✅ Trip Added Successfully");
 
 }
 
+
+function getUserBillKey(){
+
+return
+"billNo_" +
+currentUser.uid;
+
+}
+
 /* SHOW TRIPS */
 
 function showTrips(){
@@ -5073,10 +5096,13 @@ localStorage.getItem(
 /* Invoice No*/
 
 let fyKey =
+
 "lastBill_" +
 activeCompany +
 "_" +
-financialYear;
+financialYear +
+"_" +
+currentUser.uid;
 
 let lastBill =
 localStorage.getItem(fyKey)
@@ -6868,7 +6894,12 @@ loadNextBillNo();
 window.onload = function(){
 
 document.getElementById("billNo").value =
-localStorage.getItem("lastBill") || "2526-001";
+
+localStorage.getItem(
+getUserBillKey()
+)
+
+|| "2526-001";
 
   // TODAY DATE AUTO
   let today = new Date().toISOString().split("T")[0];
