@@ -750,7 +750,7 @@ color:#2563eb;
 
 <button
 class="action-btn green"
-onclick="openCompanySettings()">
+onclick="addCompanyMode()">
 
 🏢 Add Company
 
@@ -811,10 +811,6 @@ style="display:none;">
 
 <h2>🏢 Company Settings</h2>
 
-
-
-</button>
-
 </div>
 
 <div class="field">
@@ -823,8 +819,8 @@ style="display:none;">
 </div>
 
 <div class="field">
-  <label>Address</label>
-  <textarea id="setCompanyAddress" rows="3"></textarea>
+<label>Address</label>
+<textarea id="setCompanyAddress" rows="3"></textarea>
 </div>
 
 <div class="field">
@@ -854,23 +850,39 @@ style="width:100%;"></textarea>
 </div>
 
 <div style="
-display:flex;
-gap:10px;
-flex-wrap:wrap;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px;
 margin-top:15px;
 ">
 
-<button onclick="saveCompanySettings()">
+<button
+class="green"
+onclick="saveCompanySettings()">
+
 💾 Save
+
+<button
+class="orange"
+onclick="enableCompanyEdit()">
+
+✏️ Edit
+
 </button>
 
+<button
+class="red"
+onclick="closeCompanySettings()">
+
+❌ Cancel
+
+</button>
 
 </div>
 
 </div>
 
 </div>
-
 
 <div id="companySelectModal"
 style="
@@ -1948,6 +1960,8 @@ currentUser
 
 let doc = await db
 
+.collection("transportData")
+.doc(currentUser.uid)
 .collection("companies")
 .doc(activeCompany)
 
@@ -2053,6 +2067,104 @@ function loadNextBillNo(){
 }
 
 
+function openCompanySettings(){
+
+let popup =
+document.getElementById(
+"companyPopup"
+);
+
+if(popup){
+
+popup.style.display = "flex";
+
+}
+
+/* LOAD DATA */
+
+loadCompanySettings();
+
+/* READONLY */
+
+setCompanyFieldsReadonly(true);
+
+}
+
+function addCompanyMode(){
+
+let popup =
+document.getElementById(
+"companyPopup"
+);
+
+if(popup){
+
+popup.style.display = "flex";
+
+}
+
+/* BLANK FORM */
+
+document.getElementById(
+"setCompanyName"
+).value = "";
+
+document.getElementById(
+"setCompanyAddress"
+).value = "";
+
+document.getElementById(
+"setCompanyMobile"
+).value = "";
+
+document.getElementById(
+"setCompanyEmail"
+).value = "";
+
+document.getElementById(
+"setCompanyGST"
+).value = "";
+
+document.getElementById(
+"setCompanyTerms"
+).value = "";
+
+}
+
+function closeCompanySettings(){
+
+let popup =
+document.getElementById(
+"companyPopup"
+);
+
+if(popup){
+
+popup.style.display = "none";
+
+}
+
+}
+
+
+function setCompanyFieldsReadonly(readonly){
+
+document.querySelectorAll(
+"#companyPopup input, #companyPopup textarea"
+).forEach(el=>{
+
+el.readOnly = readonly;
+
+});
+
+}
+
+
+function enableCompanyEdit(){
+
+setCompanyFieldsReadonly(false);
+
+}
 
 /* =========================
 AUTH
@@ -2846,13 +2958,37 @@ document.getElementById(
 }
 
 
-function openCompanySettings(){
+function addCompanyMode(){
 
 document.getElementById(
 "companyPopup"
 ).style.display = "flex";
 
-loadCompanySettings();
+/* BLANK FORM */
+
+document.getElementById(
+"setCompanyName"
+).value = "";
+
+document.getElementById(
+"setCompanyAddress"
+).value = "";
+
+document.getElementById(
+"setCompanyMobile"
+).value = "";
+
+document.getElementById(
+"setCompanyEmail"
+).value = "";
+
+document.getElementById(
+"setCompanyGST"
+).value = "";
+
+document.getElementById(
+"setCompanyTerms"
+).value = "";
 
 }
 
@@ -2939,12 +3075,16 @@ document.getElementById(
 
 if(currentUser){
 
-db.collection("companies")
+db
+.collection("transportData")
+.doc(currentUser.uid)
+.collection("companies")
 .doc(activeCompany)
 
 .set({
 
-companyInfo: company
+companyInfo: company,
+updatedAt: Date.now()
 
 })
 
