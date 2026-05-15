@@ -1,4 +1,4 @@
-const CACHE_NAME = "tanker-app-v1";
+const CACHE_NAME = "transport-app-v1";
 const urlsToCache = [
   "./",
   "./index.html",
