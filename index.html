@@ -2703,46 +2703,41 @@ document.getElementById(
 
 function addCustomer(){
 
-let name =
-document.getElementById("customerName")
-.value.trim();
+/* NEW MODE */
 
-if(!name){
+editingCustomerIndex = -1;
 
-alert("Enter customer");
-return;
+/* CLEAR FORM */
 
-}
+document.getElementById(
+"editCustomerName"
+).value = "";
 
-customers.push({
+document.getElementById(
+"editCustomerMobile"
+).value = "";
 
-name,
-mobile:
-document.getElementById("customerMobile").value,
+document.getElementById(
+"editCustomerGST"
+).value = "";
 
-gst:
-document.getElementById("customerGST").value,
+document.getElementById(
+"editCustomerAddress"
+).value = "";
 
-address:
-document.getElementById("customerAddress").value
+/* OPEN POPUP */
 
-});
-
-saveData();
-
-loadCustomers();
-
-document.querySelectorAll(
-"#customerName,#customerMobile,#customerGST,#customerAddress"
-).forEach(i=>i.value="");
+document.getElementById(
+"customerModal"
+).style.display = "flex";
 
 }
 
-let currentCustomerIndex = null;
+let editingCustomerIndex = -1;
 
 function editCustomer(index){
 
-currentCustomerIndex = index;
+editingCustomerIndex = index;
 
 let c = customers[index];
 
@@ -2775,7 +2770,7 @@ document.getElementById(
 }
 
 function closeCustomerModal(){
-
+editingCustomerIndex = -1;
 document.getElementById(
 "customerModal"
 ).style.display = "none";
@@ -2788,35 +2783,91 @@ openCustomerModal();
 
 function saveCustomerEdit(){
 
-if(currentCustomerIndex === null) return;
+let name =
+document.getElementById(
+"editCustomerName"
+)
+.value
+.trim();
 
-customers[currentCustomerIndex] = {
+if(!name){
 
-...customers[currentCustomerIndex],
+showToast(
+"Enter Customer Name",
+"error"
+);
 
-name:
-document.getElementById("editCustomerName").value,
+return;
+
+}
+
+let customer = {
+
+name: name,
 
 mobile:
-document.getElementById("editCustomerMobile").value,
+document.getElementById(
+"editCustomerMobile"
+)
+.value
+.trim(),
 
 gst:
-document.getElementById("editCustomerGST").value,
+document.getElementById(
+"editCustomerGST"
+)
+.value
+.trim(),
 
 address:
-document.getElementById("editCustomerAddress").value
+document.getElementById(
+"editCustomerAddress"
+)
+.value
+.trim()
 
 };
 
+/* ADD */
+
+if(
+editingCustomerIndex === -1
+){
+
+customers.push(customer);
+
+}
+
+/* EDIT */
+
+else{
+
+customers[editingCustomerIndex] =
+customer;
+
+}
+
+/* SAVE */
+
 saveData();
+
+/* REFRESH */
 
 showCustomers();
 
 loadCustomers();
 
+/* CLOSE */
+
 closeCustomerModal();
 
 closeCustomerListModal();
+
+/* SUCCESS */
+
+showToast(
+"Customer Saved Successfully"
+);
 
 }
 
@@ -2952,18 +3003,21 @@ body.innerHTML += `
 
 <td>₹${r.rate}</td>
 
-<td>
+<td class="route-actions">
+
+<button
+class="action-btn green"
+onclick="editRouteFreight(${index})">
+✏️
+</button>
 
 <button
 class="action-btn red"
 onclick="deleteRoute(${index})">
-
 🗑️
-
 </button>
 
 </td>
-
 </tr>
 
 `;
@@ -3989,21 +4043,31 @@ let currentTankerIndex = null;
 
 function editTanker(index){
 
-currentTankerIndex = index;
+editingTankerIndex = index;
 
 let t = tankers[index];
 
-document.getElementById("editVehicleNo").value =
+document.getElementById(
+"editVehicleNo"
+).value =
 t.vehicleNo || "";
 
-document.getElementById("editDriverName").value =
+document.getElementById(
+"editDriverName"
+).value =
 t.driverName || "";
 
-document.getElementById("editDriverMobile").value =
+document.getElementById(
+"editDriverMobile"
+).value =
 t.mobile || "";
 
-document.getElementById("editCapacity").value =
+document.getElementById(
+"editCapacity"
+).value =
 t.capacity || "";
+
+/* OPEN POPUP */
 
 document.getElementById(
 "editTankerModal"
@@ -4025,31 +4089,66 @@ document.getElementById(
 
 function saveTankerEdit(){
 
-if(currentTankerIndex === null) return;
+if(editingTankerIndex === -1)
+return;
 
-tankers[currentTankerIndex] = {
+/* UPDATE */
+
+tankers[editingTankerIndex] = {
 
 vehicleNo:
-document.getElementById("editVehicleNo").value,
+document.getElementById(
+"editVehicleNo"
+).value,
 
 driverName:
-document.getElementById("editDriverName").value,
+document.getElementById(
+"editDriverName"
+).value,
 
 mobile:
-document.getElementById("editDriverMobile").value,
+document.getElementById(
+"editDriverMobile"
+).value,
 
 capacity:
-document.getElementById("editCapacity").value
+document.getElementById(
+"editCapacity"
+).value
 
 };
 
+/* SAVE */
+
 saveData();
+
+/* REFRESH */
 
 showTankers();
 
 loadTankers();
 
+/* CLOSE */
+
 closeEditTankerModal();
+
+/* SUCCESS */
+
+showToast(
+"Tanker Updated Successfully"
+);
+
+}
+
+function closeTankerEditModal(){
+
+editingTankerIndex = -1;
+
+document.getElementById(
+"tankerModal"
+).style.display = "none";
+
+openTankerModal();
 
 }
 
@@ -4357,46 +4456,33 @@ onclick="deleteCustomer(${index})">
 
 function addTanker(){
 
-let vehicleNo =
-document.getElementById("tankerNo").value.trim();
+/* NEW MODE */
 
-if(!vehicleNo){
+editingTankerIndex = -1;
 
-alert("Enter Vehicle No");
+/* CLEAR FORM */
 
-return;
+document.getElementById(
+"editVehicleNo"
+).value = "";
 
-}
+document.getElementById(
+"editDriverName"
+).value = "";
 
-let tanker = {
+document.getElementById(
+"editDriverMobile"
+).value = "";
 
-vehicleNo: vehicleNo,
+document.getElementById(
+"editCapacity"
+).value = "";
 
-driverName:
-document.getElementById("driverName").value,
+/* OPEN POPUP */
 
-mobile:
-document.getElementById("driverMobile").value,
-
-capacity:
-document.getElementById("tankerCapacity").value
-
-};
-
-tankers.push(tanker);
-
-saveData();
-
-showTankers();
-
-loadTankers();
-
-document.getElementById("tankerNo").value = "";
-document.getElementById("driverName").value = "";
-document.getElementById("driverMobile").value = "";
-document.getElementById("tankerCapacity").value = "";
-
-alert("✅ Tanker Added");
+document.getElementById(
+"editTankerModal"
+).style.display = "flex";
 
 }
 
