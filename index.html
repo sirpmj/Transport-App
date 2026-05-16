@@ -1940,7 +1940,7 @@ await db
 .doc(currentUser.uid)
 .collection("companies")
 .doc(saveCompanySettings())
-.set(data);
+.set(data,{merge:true})
 
 console.log(
 "Cloud Saved:",
@@ -3267,7 +3267,7 @@ await db
 companyInfo: company,
 updatedAt: Date.now()
 
-});
+},{merge:true})
 
 }
 
