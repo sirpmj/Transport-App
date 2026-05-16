@@ -2770,14 +2770,12 @@ document.getElementById(
 }
 
 function closeCustomerModal(){
-editingCustomerIndex = -1;
+
 document.getElementById(
 "customerModal"
 ).style.display = "none";
 
-/* REOPEN LIST */
-
-openCustomerModal();
+currentCustomerIndex = null;
 
 }
 
@@ -3251,13 +3249,18 @@ oldCompany
 
 if(!currentUser) return;
 
-/* SAVE NEW */
+/* KEEP SAME DOC */
+
+let docName =
+oldCompany || companyName;
+
+/* SAVE */
 
 await db
 .collection("transportData")
 .doc(currentUser.uid)
 .collection("companies")
-.doc(companyName)
+.doc(docName)
 .set({
 
 companyInfo: company,
@@ -3265,35 +3268,7 @@ updatedAt: Date.now()
 
 });
 
-/* DELETE OLD */
-
-if(
-oldCompany &&
-oldCompany !== companyName
-){
-
-try{
-
-await db
-.collection("transportData")
-.doc(currentUser.uid)
-.collection("companies")
-.doc(oldCompany)
-.delete();
-
-}catch(deleteErr){
-
-console.warn(
-"Old company delete failed",
-deleteErr
-);
-
 }
-
-}
-
-}
-
 
 function updateCompanyUI(
 companyName
