@@ -1934,11 +1934,12 @@ Date.now()
 
 };
 
-await db
 
+await db
+.collection("transportData")
+.doc(currentUser.uid)
 .collection("companies")
 .doc(activeCompany)
-
 .set(data);
 
 console.log(
@@ -4012,7 +4013,6 @@ loadTankers();
 }
 
 
-let currentTankerIndex = null;
 
 /* OPEN EDIT */
 
@@ -4062,40 +4062,56 @@ document.getElementById(
 
 /* SAVE */
 
-function saveTankerEdit(){
+async function saveTankerEdit(){
 
-if(editingTankerIndex === -1)
-return;
+/* ADD MODE */
 
-/* UPDATE */
+if(editingTankerIndex === -1){
 
-tankers[editingTankerIndex] = {
+let tanker = {
 
 vehicleNo:
 document.getElementById(
 "editVehicleNo"
-).value,
+).value.trim(),
 
 driverName:
 document.getElementById(
 "editDriverName"
-).value,
+).value.trim(),
 
 mobile:
 document.getElementById(
 "editDriverMobile"
-).value,
+).value.trim(),
 
 capacity:
 document.getElementById(
 "editCapacity"
-).value
+).value.trim()
 
 };
 
+/* VALIDATION */
+
+if(!tanker.vehicleNo){
+
+showToast(
+"Enter Vehicle No",
+"error"
+);
+
+return;
+
+}
+
+/* ADD */
+
+tankers.push(tanker);
+
 /* SAVE */
 
-saveData();
+await saveData();
 
 /* REFRESH */
 
@@ -4110,8 +4126,71 @@ closeEditTankerModal();
 /* SUCCESS */
 
 showToast(
-"Tanker Updated Successfully"
+"Vehicle Added Successfully"
 );
+
+return;
+
+}
+
+/* UPDATE MODE */
+
+tankers[editingTankerIndex] = {
+
+vehicleNo:
+document.getElementById(
+"editVehicleNo"
+).value.trim(),
+
+driverName:
+document.getElementById(
+"editDriverName"
+).value.trim(),
+
+mobile:
+document.getElementById(
+"editDriverMobile"
+).value.trim(),
+
+capacity:
+document.getElementById(
+"editCapacity"
+).value.trim()
+
+};
+
+try{
+
+/* SAVE */
+
+await saveData();
+
+/* REFRESH */
+
+showTankers();
+
+loadTankers();
+
+/* CLOSE */
+
+closeEditTankerModal();
+
+/* SUCCESS */
+
+showToast(
+"Vehicle Updated Successfully"
+);
+
+}catch(err){
+
+console.error(err);
+
+showToast(
+"Save Failed",
+"error"
+);
+
+}
 
 }
 
@@ -4429,7 +4508,7 @@ onclick="deleteCustomer(${index})">
 
 /* TANKER */
 
-function addTanker(){
+async function addTanker(){
 
 /* NEW MODE */
 
@@ -4459,6 +4538,7 @@ document.getElementById(
 "editTankerModal"
 ).style.display = "flex";
 
+console.log(tankers);
 }
 
 /* LOAD TANKERS */
@@ -4521,7 +4601,7 @@ document.getElementById("unloadingPoint")
 
 let routes =
 JSON.parse(
-localStorage.getItem("routes") || "[]"
+routeRates || "[]"
 );
 
 /* FIND MATCH */
