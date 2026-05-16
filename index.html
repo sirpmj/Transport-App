@@ -2129,12 +2129,6 @@ loadCompanySettings();
 
 setCompanyFieldsReadonly(true);
 
-/* LOCK COMPANY NAME */
-
-document.getElementById(
-"setCompanyName"
-).readOnly = true;
-
 /* BUTTONS */
 
 document.getElementById(
@@ -2157,7 +2151,6 @@ let popup =
 document.getElementById(
 "companyPopup"
 );
-
 
 if(popup){
 
@@ -2258,27 +2251,6 @@ document.querySelectorAll(
 el.readOnly = readonly;
 
 });
-
-/* KEEP COMPANY NAME LOCKED */
-
-let companyNameField =
-document.getElementById(
-"setCompanyName"
-);
-
-if(companyNameField){
-
-if(companyEditMode){
-
-companyNameField.readOnly = true;
-
-}else{
-
-companyNameField.readOnly = false;
-
-}
-
-}
 
 }
 
