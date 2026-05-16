@@ -345,6 +345,42 @@ cursor:pointer;
 
 }
 
+.toast{
+
+position:fixed;
+bottom:20px;
+right:20px;
+background:#222;
+color:#fff;
+padding:12px 18px;
+border-radius:8px;
+z-index:99999;
+opacity:0;
+transform:translateY(20px);
+transition:0.3s;
+
+}
+
+.toast.show{
+
+opacity:1;
+transform:translateY(0);
+
+}
+
+.toast.success{
+
+background:#28a745;
+
+}
+
+.toast.error{
+
+background:#dc3545;
+
+}
+
+
 th:nth-child(7),
 td:nth-child(7){
 
@@ -1832,6 +1868,7 @@ let financialYear =
 getFinancialYear();
 let originalCompanyName = "";
 let companyEditMode = false;
+let isSavingCompany = false;
 let currentBillView = "Pending";
 
 let trips =
@@ -2160,6 +2197,32 @@ document.getElementById(
 document.getElementById(
 "companySaveBtn"
 ).style.display = "block";
+
+}
+
+function showToast(message,type="success"){
+
+let toast =
+document.createElement("div");
+
+toast.className =
+`toast ${type}`;
+
+toast.innerText = message;
+
+document.body.appendChild(toast);
+
+setTimeout(()=>{
+
+toast.classList.add("show");
+
+},100);
+
+setTimeout(()=>{
+
+toast.remove();
+
+},3000);
 
 }
 
@@ -3002,6 +3065,248 @@ document.getElementById(
 
 
 
+function resetCompanyButton(){
+
+let saveBtn =
+document.getElementById(
+"companySaveBtn"
+);
+
+if(saveBtn){
+
+saveBtn.disabled = false;
+
+saveBtn.innerHTML =
+"💾 Save";
+
+}
+
+isSavingCompany = false;
+
+}
+
+
+function validateCompanyForm(
+companyName,
+mobile,
+email,
+oldCompany
+){
+
+/* NAME */
+
+if(!companyName){
+
+showToast(
+"Enter Company Name",
+"error"
+);
+
+return false;
+
+}
+
+/* MOBILE */
+
+if(
+mobile &&
+!/^\d{10}$/.test(mobile)
+){
+
+showToast(
+"Invalid Mobile Number",
+"error"
+);
+
+return false;
+
+}
+
+/* EMAIL */
+
+if(
+email &&
+!/^\S+@\S+\.\S+$/.test(email)
+){
+
+showToast(
+"Invalid Email",
+"error"
+);
+
+return false;
+
+}
+
+/* DUPLICATE */
+
+let exists = false;
+
+let options =
+document.querySelectorAll(
+"#companySelect option"
+);
+
+options.forEach(opt=>{
+
+if(
+
+opt.value
+.trim()
+.toLowerCase()
+
+===
+
+companyName
+.trim()
+.toLowerCase()
+
+&&
+
+opt.value !== oldCompany
+
+){
+
+exists = true;
+
+}
+
+});
+
+if(exists){
+
+showToast(
+"Company Already Exists",
+"error"
+);
+
+return false;
+
+}
+
+return true;
+
+}
+
+
+async function saveCompanyToFirebase(
+company,
+companyName,
+oldCompany
+){
+
+if(!currentUser) return;
+
+/* SAVE NEW */
+
+await db
+.collection("transportData")
+.doc(currentUser.uid)
+.collection("companies")
+.doc(companyName)
+.set({
+
+companyInfo: company,
+updatedAt: Date.now()
+
+});
+
+/* DELETE OLD */
+
+if(
+oldCompany &&
+oldCompany !== companyName
+){
+
+try{
+
+await db
+.collection("transportData")
+.doc(currentUser.uid)
+.collection("companies")
+.doc(oldCompany)
+.delete();
+
+}catch(deleteErr){
+
+console.warn(
+"Old company delete failed",
+deleteErr
+);
+
+}
+
+}
+
+}
+
+
+function updateCompanyUI(
+companyName
+){
+
+/* ACTIVE */
+
+activeCompany =
+companyName;
+
+originalCompanyName =
+companyName;
+
+/* TOP NAME */
+
+let topName =
+document.getElementById(
+"topCompanyName"
+);
+
+if(topName){
+
+topName.textContent =
+"🏢 " + activeCompany;
+
+}
+
+/* RELOAD LIST */
+
+loadCompanyList();
+
+/* READONLY */
+
+setCompanyFieldsReadonly(true);
+
+/* BUTTONS */
+
+let saveBtn =
+document.getElementById(
+"companySaveBtn"
+);
+
+let editBtn =
+document.getElementById(
+"companyEditBtn"
+);
+
+if(saveBtn){
+
+saveBtn.style.display =
+"none";
+
+}
+
+if(editBtn){
+
+editBtn.style.display =
+"block";
+
+}
+
+/* CLOSE */
+
+closeCompanySettings();
+
+}
+
 
 
 
@@ -3009,135 +3314,182 @@ document.getElementById(
 SAVE COMPANY
 ========================= */
 
-function saveCompanySettings(){
+async function saveCompanySettings(){
+
+/* STOP MULTIPLE CLICK */
+
+if(isSavingCompany) return;
+
+isSavingCompany = true;
+
+/* SAVE BUTTON */
+
+let saveBtn =
+document.getElementById(
+"companySaveBtn"
+);
+
+if(saveBtn){
+
+saveBtn.disabled = true;
+
+saveBtn.innerHTML =
+"Saving...";
+
+}
+
+try{
+
+/* FORM VALUES */
+
+let companyName =
+document.getElementById(
+"setCompanyName"
+)
+.value
+.trim()
+.replace(/\s+/g," ");
+
+let mobile =
+document.getElementById(
+"setCompanyMobile"
+)
+.value
+.trim();
+
+let email =
+document.getElementById(
+"setCompanyEmail"
+)
+.value
+.trim()
+.toLowerCase();
+
+let address =
+document.getElementById(
+"setCompanyAddress"
+)
+.value
+.trim();
+
+let gstin =
+document.getElementById(
+"setCompanyGST"
+)
+.value
+.trim();
+
+let terms =
+document.getElementById(
+"setCompanyTerms"
+)
+.value
+.trim();
+
+/* OLD COMPANY */
+
+let oldCompany =
+originalCompanyName ||
+activeCompany;
+
+/* VALIDATION */
+
+let valid =
+validateCompanyForm(
+companyName,
+mobile,
+email,
+oldCompany
+);
+
+if(!valid){
+
+resetCompanyButton();
+return;
+
+}
+
+/* COMPANY OBJECT */
 
 let company = {
 
-name:
-document.getElementById(
-"setCompanyName"
-).value,
+name: companyName,
 
-address:
-document.getElementById(
-"setCompanyAddress"
-).value,
+address: address,
 
-mobile:
-document.getElementById(
-"setCompanyMobile"
-).value,
+mobile: mobile,
 
-email:
-document.getElementById(
-"setCompanyEmail"
-).value,
+email: email,
 
-gstin:
-document.getElementById(
-"setCompanyGST"
-).value,
+gstin: gstin,
 
-terms:
-document.getElementById(
-"setCompanyTerms"
-).value
+terms: terms
 
 };
 
-/* SAVE */
+/* LOCAL SAVE */
 
 localStorage.setItem(
 "companyInfo",
 JSON.stringify(company)
 );
 
-
-if(!company.name){
-
-alert("Enter Company Name");
-return;
-
-}
-
-/* ACTIVE COMPANY */
-
-activeCompany =
-company.name || "Company";
-
-originalCompanyName =
-activeCompany;
-
-document.getElementById(
-"topCompanyName"
-).innerHTML =
-"🏢 " + activeCompany;
-
 /* FIREBASE */
 
-if(currentUser){
+await saveCompanyToFirebase(
+company,
+companyName,
+oldCompany
+);
 
-db
-.collection("transportData")
-.doc(currentUser.uid)
-.collection("companies")
-.doc(activeCompany)
+/* UI UPDATE */
 
-.set({
-
-companyInfo: company,
-updatedAt: Date.now()
-
-})
-
-.then(()=>{
-
-console.log("Company Saved");
-
-/* RELOAD LIST */
-
-loadCompanyList();
-
-/* CLOSE POPUP */
-
-document.getElementById(
-"companyPopup"
-).style.display = "none";
+updateCompanyUI(
+companyName
+);
 
 /* SUCCESS */
 
-setCompanyFieldsReadonly(true);
+showToast(
+"Company Saved Successfully"
+);
 
-document.getElementById(
-"companySaveBtn"
-).style.display = "none";
-
-document.getElementById(
-"companyEditBtn"
-).style.display = "block";
-
-alert("Company Saved Successfully");
-
-})
-
-.catch(err=>{
+}catch(err){
 
 console.error(err);
 
-alert(err.message);
+showToast(
+err.message,
+"error"
+);
 
-});
+}finally{
 
-}else{
+resetCompanyButton();
 
+}
+
+}
+
+
+
+function resetCompanySaveButton(){
+
+let saveBtn =
 document.getElementById(
-"companyPopup"
-).style.display = "none";
+"companySaveBtn"
+);
+
+if(saveBtn){
+
+saveBtn.disabled = false;
+saveBtn.innerHTML = "💾 Save";
 
 }
 
-}
+isSavingCompany = false;
 
+}
 
 async function loadCompanyList(){
 
@@ -4556,13 +4908,25 @@ Paid
 
 <button
 class="action-btn green"
-onclick="editTrip(${originalIndex})">
+onclick="editTrip(${index})">
 ✏️
 </button>
 
 <button
+class="action-btn orange"
+onclick="printLR(${t.id})">
+LR📄
+</button>
+
+<button
+class="action-btn purple"
+onclick="printSingleBill(${t.id})">
+🖨️
+</button>
+
+<button
 class="action-btn red"
-onclick="deleteTrip(${originalIndex})">
+onclick="deleteTrip(${index})">
 🗑️
 </button>
 
