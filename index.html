@@ -1939,7 +1939,7 @@ await db
 .collection("transportData")
 .doc(currentUser.uid)
 .collection("companies")
-.doc(saveCompanySettings())
+.doc(activeCompany)
 .set(data,{merge:true})
 
 console.log(
