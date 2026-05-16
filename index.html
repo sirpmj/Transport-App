@@ -1939,7 +1939,7 @@ await db
 .collection("transportData")
 .doc(currentUser.uid)
 .collection("companies")
-.doc(activeCompany)
+.doc(saveCompanySettings())
 .set(data);
 
 console.log(
@@ -3261,7 +3261,7 @@ await db
 .collection("transportData")
 .doc(currentUser.uid)
 .collection("companies")
-.doc(docName)
+.doc(companyName)
 .set({
 
 companyInfo: company,
@@ -3465,13 +3465,13 @@ JSON.stringify(company)
 );
 
 /* FIREBASE */
-
+activeCompany = companyName;
 await saveCompanyToFirebase(
 company,
 companyName,
 oldCompany
 );
-
+await loadCompanyList();
 /* UI UPDATE */
 
 updateCompanyUI(
@@ -3523,45 +3523,69 @@ isSavingCompany = false;
 
 async function loadCompanyList(){
 
-let select =
-document.getElementById(
-"companySelect"
+let selects =
+document.querySelectorAll(
+"#companySelect"
 );
 
-if(!select) return;
+if(!selects.length) return;
 
-select.innerHTML = "";
+try{
 
-let snap = await db
+if(!currentUser) return;
 
+let snapshot = await db
 .collection("transportData")
 .doc(currentUser.uid)
-
 .collection("companies")
 .get();
 
-if(snap.empty){
+/* RESET */
 
-select.innerHTML =
-`<option value="">
-No Company Found
-</option>`;
+selects.forEach(select=>{
 
-return;
+select.innerHTML = `
 
-}
-
-snap.forEach(doc=>{
-
-select.innerHTML += `
-
-<option value="${doc.id}">
-${doc.id}
+<option value="">
+Select Company
 </option>
 
 `;
 
 });
+
+/* LOAD */
+
+snapshot.forEach(doc=>{
+
+let companyName = doc.id;
+
+selects.forEach(select=>{
+
+select.innerHTML += `
+
+<option value="${companyName}">
+
+${companyName}
+
+</option>
+
+`;
+
+});
+
+});
+
+}catch(err){
+
+console.error(err);
+
+showToast(
+"Company Load Failed",
+"error"
+);
+
+}
 
 }
 
