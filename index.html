@@ -858,12 +858,16 @@ margin-top:15px;
 
 <button
 class="green"
+id="companySaveBtn"
 onclick="saveCompanySettings()">
 
 💾 Save
 
+</button>
+
 <button
 class="orange"
+id="companyEditBtn"
 onclick="enableCompanyEdit()">
 
 ✏️ Edit
@@ -1827,7 +1831,7 @@ let activeCompany = "";
 let financialYear =
 getFinancialYear();
 let originalCompanyName = "";
-
+let companyEditMode = false;
 let currentBillView = "Pending";
 
 let trips =
@@ -2069,18 +2073,18 @@ function loadNextBillNo(){
 
 function openCompanySettings(){
 
+companyEditMode = true;
+
+/* OPEN POPUP */
+
 let popup =
 document.getElementById(
 "companyPopup"
 );
 
-if(popup){
-
 popup.style.display = "flex";
 
-}
-
-/* LOAD DATA */
+/* LOAD CURRENT COMPANY */
 
 loadCompanySettings();
 
@@ -2088,9 +2092,23 @@ loadCompanySettings();
 
 setCompanyFieldsReadonly(true);
 
+/* BUTTONS */
+
+document.getElementById(
+"companyEditBtn"
+).style.display = "block";
+
+document.getElementById(
+"companySaveBtn"
+).style.display = "none";
+
 }
 
 function addCompanyMode(){
+
+companyEditMode = false;
+
+/* OPEN POPUP */
 
 let popup =
 document.getElementById(
@@ -2102,6 +2120,10 @@ if(popup){
 popup.style.display = "flex";
 
 }
+
+/* ENABLE EDIT */
+
+setCompanyFieldsReadonly(false);
 
 /* BLANK FORM */
 
@@ -2128,6 +2150,16 @@ document.getElementById(
 document.getElementById(
 "setCompanyTerms"
 ).value = "";
+
+/* BUTTONS */
+
+document.getElementById(
+"companyEditBtn"
+).style.display = "none";
+
+document.getElementById(
+"companySaveBtn"
+).style.display = "block";
 
 }
 
@@ -2164,7 +2196,18 @@ function enableCompanyEdit(){
 
 setCompanyFieldsReadonly(false);
 
+/* BUTTONS */
+
+document.getElementById(
+"companySaveBtn"
+).style.display = "block";
+
+document.getElementById(
+"companyEditBtn"
+).style.display = "none";
+
 }
+
 
 /* =========================
 AUTH
@@ -2958,56 +3001,7 @@ document.getElementById(
 }
 
 
-function addCompanyMode(){
 
-document.getElementById(
-"companyPopup"
-).style.display = "flex";
-
-/* BLANK FORM */
-
-document.getElementById(
-"setCompanyName"
-).value = "";
-
-document.getElementById(
-"setCompanyAddress"
-).value = "";
-
-document.getElementById(
-"setCompanyMobile"
-).value = "";
-
-document.getElementById(
-"setCompanyEmail"
-).value = "";
-
-document.getElementById(
-"setCompanyGST"
-).value = "";
-
-document.getElementById(
-"setCompanyTerms"
-).value = "";
-
-}
-
-function closeCompanySettings(){
-
-let popup =
-document.getElementById(
-"companyPopup"
-);
-
-if(popup){
-
-popup.style.display = "none";
-popup.style.visibility = "hidden";
-popup.style.opacity = "0";
-
-}
-
-}
 
 
 
@@ -3058,6 +3052,14 @@ localStorage.setItem(
 JSON.stringify(company)
 );
 
+
+if(!company.name){
+
+alert("Enter Company Name");
+return;
+
+}
+
 /* ACTIVE COMPANY */
 
 activeCompany =
@@ -3103,6 +3105,16 @@ document.getElementById(
 ).style.display = "none";
 
 /* SUCCESS */
+
+setCompanyFieldsReadonly(true);
+
+document.getElementById(
+"companySaveBtn"
+).style.display = "none";
+
+document.getElementById(
+"companyEditBtn"
+).style.display = "block";
 
 alert("Company Saved Successfully");
 
