@@ -8189,13 +8189,30 @@ window.onload = function(){
 let fyKey =
 "lastBill_" + getFinancialYear();
 
-document.getElementById("billNo").value =
+let savedBill =
+localStorage.getItem(fyKey);
 
-localStorage.getItem(fyKey)
+/* FIX OLD FORMAT */
 
+if(
+!savedBill
 ||
+!savedBill.startsWith("HL/")
+){
 
+savedBill =
 `HL/${getFinancialYear()}/001`;
+
+localStorage.setItem(
+fyKey,
+savedBill
+);
+
+}
+
+document.getElementById(
+"billNo"
+).value = savedBill;
 
   // TODAY DATE AUTO
   let today = new Date().toISOString().split("T")[0];
