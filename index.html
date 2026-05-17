@@ -712,6 +712,20 @@ font-weight:600;
 cursor:pointer;
 
 }
+
+.customer-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:6px;
+}
+
+.customer-row .card{
+margin:0;
+}
+
+.customer-row button{
+width:100%;
+}
 </style>
 
 <!-- FIREBASE -->
@@ -735,7 +749,7 @@ position:fixed;
 inset:0;
 background:#f1f5f9;
 z-index:999999;
-display:flex;
+display:none;
 align-items:center;
 justify-content:center;
 padding:20px;
@@ -1015,7 +1029,7 @@ style="margin-bottom:15px;">
 
 <!-- CUSTOMER CARD -->
 
-<div class="dashboard-actions">
+<div class="dashboard-actions customer-row">
 
 <div class="card">
 <button onclick="addCustomer()">
@@ -1037,7 +1051,7 @@ onclick="openCustomerModal()">
 
 <!-- TANKER CARD -->
 
-<div class="dashboard-actions">
+<div class="dashboard-actions customer-row">
 
 <div class="card">
 
@@ -1063,7 +1077,7 @@ onclick="openTankerModal()">
 
 <!-- ROUTE CARD -->
 
-<div class="dashboard-actions">
+<div class="dashboard-actions customer-row">
 
 <div class="card">
 
@@ -1295,15 +1309,31 @@ onclick="closeCustomerListModal()">
 💾 Save Changes
 </button>
 
+<button
+class="purple"
+onclick="printLR(trips[currentTripIndex].id)">
+
+🖨️ LR Print
+
+</button>
+
+<button
+class="gray"
+onclick="shareLRPDF(trips[currentTripIndex].id)">
+
+📤 Share LR
+
+</button>
+
 <button class="red" onclick="closeTripModal()">
 ✖ Close
 </button>
 
 </div>
-
 </div>
 
 </div>
+
 
 
 <!-- EDIT TANKER MODAL -->
@@ -2422,7 +2452,7 @@ alert(err.message);
 
 /* AUTO LOGIN */
 
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(async user=>{
 
 if(user){
 
@@ -2434,32 +2464,41 @@ document.getElementById(
 
 updateAdminUI();
 
-/* SAVE USER COMPANIES */
+await loadCompanies();
 
-let allowedCompanies;
+/* AUTO COMPANY LOAD */
 
-if(isAdmin()){
+let savedCompany =
+localStorage.getItem(
+"activeCompany"
+);
 
-allowedCompanies = [
-"Hariom Logistics",
-"Hariom Roadlines"
-];
+if(savedCompany){
+
+activeCompany = savedCompany;
+
+/* TOP NAME */
+
+document.getElementById(
+"topCompanyName"
+).innerHTML =
+"🏢 " + activeCompany;
+
+/* HIDE MODAL */
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+/* LOAD DATA */
+
+await loadCloudData();
+
+loadNextBillNo();
 
 }else{
 
-allowedCompanies =
-userCompanyAccess[
-user.email.toLowerCase().trim()
-] || [];
-
-}
-
-
-console.log(allowedCompanies);
-
-/* SHOW COMPANY SELECT */
-
-loadCompanies();
+/* FIRST TIME ONLY */
 
 document.getElementById(
 "companySelectModal"
@@ -2467,31 +2506,51 @@ document.getElementById(
 
 }
 
+}else{
+
+currentUser = null;
+
+/* SHOW LOGIN */
+
+document.getElementById(
+"loginScreen"
+).style.display = "flex";
+
+/* HIDE COMPANY */
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+}
+
 });
 
-function logoutUser(){
+async function logoutUser(){
 
-localStorage.removeItem(
-"activeCompany"
-);
+localStorage.removeItem("activeCompany");
 
-localStorage.removeItem(
-"trips"
-);
+localStorage.removeItem("trips");
 
-localStorage.removeItem(
-"customers"
-);
+localStorage.removeItem("customers");
 
-localStorage.removeItem(
-"tankers"
-);
+localStorage.removeItem("tankers");
 
-localStorage.removeItem(
-"routeRates"
-);
+localStorage.removeItem("routeRates");
 
-auth.signOut();
+await auth.signOut();
+
+currentUser = null;
+
+document.getElementById(
+"loginScreen"
+).style.display = "flex";
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+showToast("Logged Out");
 
 }
 
@@ -4213,7 +4272,7 @@ document.getElementById("freightRate").value="";
 document.getElementById("totalFreight").value="";
 document.getElementById("lrNo").value="";
 document.getElementById("invoiceNo").value="";
-
+document.getElementById("tripSection").style.display = "none";
 }
 
 /* SHOW */
@@ -4683,6 +4742,8 @@ updateDashboard();
 closeTripModal();
 
 }
+
+
 
 /* =========================================
 🗑️ DELETE CUSTOMER
@@ -5337,10 +5398,18 @@ LR📄
 
 <button
 class="action-btn purple"
-onclick="printSingleBill(${t.id})">
-🖨️
-</button>
+onclick="shareBillPDF(${originalIndex})">
 
+📤
+
+</button>
+<button
+class="action-btn purple"
+onclick="printSingleBill(${t.id})">
+
+🖨️
+
+</button>
 <button
 class="action-btn red"
 onclick="deleteTrip(${index})">
@@ -7344,19 +7413,19 @@ Driver Signature
 
 </div>
 
-<div class="sign company-sign">
+<div class="sign">
 
-<div class="company-sign-name">
-${company.name || ""}
-</div>
+For ${company.name || ""}
 
-<div class="line">
+<br><br><br><br>
+
 Authorised Signatory
 </div>
 
 </div>
 
 </div>
+
 <div class="note">
 
 This is a computer generated Lorry Receipt.
@@ -7626,22 +7695,13 @@ font-weight:600;
 
 display:flex;
 justify-content:space-between;
-align-items:flex-start;
-
-padding:2px 8px 2px;
-
-margin-top:-8px;
+padding:8px 8px 4px;
 
 }
 
 .sign{
 
 width:180px;
-
-display:flex;
-flex-direction:column;
-justify-content:flex-end;
-
 text-align:center;
 font-size:11px;
 font-weight:700;
@@ -7653,32 +7713,9 @@ font-weight:700;
 border-top:1px solid #000;
 padding-top:3px;
 margin-top:3px;
-margin-bottom:2px;
-
-}
-.company-sign{
-
-display:flex;
-flex-direction:column;
-justify-content:flex-start;
-align-items:center;
 
 }
 
-.company-sign-name{
-
-font-size:12px;
-font-weight:bold;
-
-height:12px;
-
-display:flex;
-align-items:flex-start;
-justify-content:center;
-
-margin-bottom:24px;
-
-}
 /* NOTE */
 
 .note{
@@ -7767,6 +7804,124 @@ win.focus();
 
 }
 
+
+async function shareLRPDF(id){
+
+let trip = trips.find(t => t.id === id);
+
+if(!trip){
+
+alert("Trip Not Found");
+return;
+
+}
+
+/* MOBILE SHARE */
+
+if(navigator.share){
+
+try{
+
+await navigator.share({
+
+title:"LR Copy",
+
+text:
+
+`LR No: ${trip.lrNo || ""}
+
+From: ${trip.from || ""}
+
+To: ${trip.to || ""}
+
+Vehicle: ${trip.tanker || ""}
+
+Party: ${trip.party || ""}`
+
+});
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}else{
+
+/* DESKTOP */
+
+printLR(id);
+
+alert(
+"LR Opened. Attach it manually in WhatsApp Web."
+);
+
+}
+
+}
+
+
+async function shareBillPDF(index){
+
+let trip = trips[index];
+
+if(!trip){
+
+alert("Trip Not Found");
+return;
+
+}
+
+if(
+(trip.status || "").trim() !== "Completed"
+){
+
+alert(
+"Only Completed Status Trip Allowed"
+);
+
+return;
+
+}
+
+/* MOBILE SHARE */
+
+if(navigator.share){
+
+try{
+
+await navigator.share({
+
+title:"Transport Bill",
+
+text:
+`Bill No: ${trip.billNo}
+
+Party: ${trip.party}
+
+Amount: ${trip.freight}`
+
+});
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}else{
+
+/* DESKTOP */
+
+printSingleBill(trip.id);
+
+alert(
+"PDF Opened. Attach it manually in WhatsApp Web."
+);
+
+}
+
+}
 /* EXPORT */
 
 function exportTrips(){
@@ -7805,6 +7960,25 @@ ids.push(Number(cb.value));
 if(ids.length === 0){
 
 alert("Select Trips");
+return;
+
+}
+
+let selectedTrips = trips.filter(
+t => ids.includes(t.id)
+);
+
+let incompleteTrips =
+selectedTrips.filter(
+t => (t.status || "").trim() !== "Completed"
+);
+
+if(incompleteTrips.length){
+
+alert(
+"Only Completed Status Trips Allowed for invoice"
+);
+
 return;
 
 }
