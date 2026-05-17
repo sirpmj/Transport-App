@@ -1863,7 +1863,7 @@ const db = firebase.firestore();
 
 </script>
 <script>
-const MASTER_ADMIN_UID = "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
+const MASTER_ADMIN_UID = "gQTT87GxE7eYVwPKtP0SvVTF4L92";
 let activeCompany = "";
 
 let financialYear =
@@ -1939,7 +1939,7 @@ Date.now()
 
 await db
 .collection("transportData")
-.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
+.doc("gQTT87GxE7eYVwPKtP0SvVTF4L92")
 .collection("companies")
 .doc(activeCompany)
 .set(data,{merge:true})
@@ -2003,7 +2003,7 @@ currentUser
 ){
 
 let dataUID =
-"BjwjW1RB8IY5mkf3rVZxlInrOlI3";
+"gQTT87GxE7eYVwPKtP0SvVTF4L92";
 
 let doc = await db
 
@@ -3415,7 +3415,7 @@ oldCompany || companyName;
 
 await db
 .collection("transportData")
-.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
+.doc("gQTT87GxE7eYVwPKtP0SvVTF4L92")
 .collection("companies")
 .doc(companyName)
 .set({
@@ -3699,7 +3699,7 @@ try{
 
 if(!currentUser) return;
 
-let dataUID = "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
+let dataUID = "gQTT87GxE7eYVwPKtP0SvVTF4L92";
 
 let snapshot = await db
 
