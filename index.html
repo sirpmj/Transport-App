@@ -666,6 +666,52 @@ padding:8px;
 
 }
 
+.trip-toggle{
+
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+}
+
+#tripSection{
+
+display:none;
+
+}
+
+.dashboard-actions{
+
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(240px,1fr));
+
+gap:12px;
+margin-bottom:4px;
+width:100%;
+
+}
+
+.dashboard-actions .card{
+
+padding:0;
+background:transparent;
+box-shadow:none;
+
+}
+
+.dashboard-actions button{
+
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+
+}
 </style>
 
 <!-- FIREBASE -->
@@ -969,14 +1015,15 @@ style="margin-bottom:15px;">
 
 <!-- CUSTOMER CARD -->
 
+<div class="dashboard-actions">
+
 <div class="card">
-
-<div class="mobile-action-row customer-actions">
-
 <button onclick="addCustomer()">
 👥 ➕ Add Customer
 </button>
+</div>
 
+<div class="card">
 <button
 class="purple"
 onclick="openCustomerModal()">
@@ -984,19 +1031,23 @@ onclick="openCustomerModal()">
 📋 View Customers
 
 </button>
-
 </div>
+
 </div>
 
 <!-- TANKER CARD -->
 
-<div class="card">
+<div class="dashboard-actions">
 
-<div class="mobile-action-row tanker-actions">
+<div class="card">
 
 <button onclick="addTanker()">
 🚛 ➕ Add Tanker
 </button>
+
+</div>
+
+<div class="card">
 
 <button
 class="purple"
@@ -1005,17 +1056,24 @@ onclick="openTankerModal()">
 📋 View Tankers
 
 </button>
+
 </div>
+
 </div>
 
 <!-- ROUTE CARD -->
 
+<div class="dashboard-actions">
+
 <div class="card">
-<div class="mobile-action-row route-actions-top">
 
 <button onclick="openAddRoutePopup()">
 🛣️ ➕ Add Route
 </button>
+
+</div>
+
+<div class="card">
 
 <button
 class="purple"
@@ -1024,7 +1082,9 @@ onclick="openRouteModal()">
 📋 View Routes
 
 </button>
+
 </div>
+
 </div>
 
 <!-- EDIT CUSTOMER MODAL -->
@@ -1421,11 +1481,11 @@ onclick="closeAddRoutePopup()">
 
 <div class="card">
 
-<div class="section-head"
+<div
+class="section-head trip-toggle"
 onclick="toggleSection('tripSection')">
 
-<h2>➕ Add Trip</h2>
-
+<h2>➕ Add Trip Form</h2>
 
 </div>
 
@@ -1435,7 +1495,10 @@ onclick="toggleSection('tripSection')">
 
 <div class="field">
 <label>L.R. No</label>
-<input type="text" id="lrNo">
+<input
+type="number"
+id="lrNo"
+inputmode="numeric">
 </div>
 
 <div class="field">
@@ -1506,6 +1569,7 @@ onchange="applyRouteFreight()">
 <input
 type="number"
 id="tripQty"
+inputmode="decimal"
 oninput="calculateFreight()">
 </div>
 
@@ -1526,6 +1590,7 @@ onchange="calculateFreight()">
 <input
 type="number"
 id="freightRate"
+inputmode="decimal"
 oninput="calculateFreight()">
 </div>
 
@@ -1534,6 +1599,7 @@ oninput="calculateFreight()">
 <input
 type="number"
 id="totalFreight"
+inputmode="decimal"
 placeholder="Total Freight">
 </div>
 
@@ -2649,15 +2715,17 @@ maximumFractionDigits:2
 
 function toggleSection(id){
 
-let box = document.getElementById(id);
+let section =
+document.getElementById(id);
 
-if(box.style.display === "block"){
+if(section.style.display === "none"
+|| section.style.display === ""){
 
-box.style.display = "none";
+section.style.display = "block";
 
 }else{
 
-box.style.display = "block";
+section.style.display = "none";
 
 }
 
@@ -7014,8 +7082,7 @@ win.focus();
 
 function printLR(id){
 
-let t =
-trips.find(x=>x.id===id);
+let t = trips.find(x=>x.id===id);
 
 if(!t){
 
@@ -7026,317 +7093,41 @@ return;
 
 let company =
 JSON.parse(
-localStorage.getItem(
-"companyInfo"
-) || "{}"
+localStorage.getItem("companyInfo") || "{}"
 );
 
-let win =
-window.open("","_blank");
+let win = window.open("","_blank");
 
-win.document.write(`
+function lrTemplate(copyName){
 
-<html>
-
-<head>
-
-<title>Lorry Receipt</title>
-
-<style>
-
-body{
-font-family:Arial;
-background:#fff;
-padding:8px;
-color:#000;
-}
-
-.lr{
-max-width:1200px;
-margin:auto;
-border:2px solid #000;
-}
-
-.top{
-display:flex;
-justify-content:space-between;
-border-bottom:2px solid #000;
-}
-
-.company-section{
-width:70%;
-padding:12px;
-border-right:2px solid #000;
-}
-
-.lr-section{
-width:30%;
-}
-
-.company{
-font-size:30px;
-font-weight:bold;
-letter-spacing:1px;
-}
-
-.address{
-font-size:12px;
-line-height:1.8;
-margin-top:6px;
-}
-
-.lr-head{
-text-align:center;
-font-size:28px;
-font-weight:bold;
-padding:10px;
-border-bottom:2px solid #000;
-letter-spacing:2px;
-}
-
-.lr-copy{
-text-align:center;
-padding:8px;
-font-size:13px;
-font-weight:bold;
-border-bottom:1px solid #000;
-}
-
-.lr-row{
-display:flex;
-border-bottom:1px solid #000;
-}
-
-.lr-box{
-flex:1;
-padding:10px;
-border-right:1px solid #000;
-min-height:70px;
-}
-
-.label{
-font-size:12px;
-font-weight:bold;
-text-transform:uppercase;
-margin-bottom:6px;
-}
-
-/* NORMAL VALUE */
-.value{
-font-size:14px;
-font-weight:600;
-word-break:break-word;
-}
-
-/* ONLY BIG VALUE */
-.big-value{
-font-size:24px;
-font-weight:bold;
-letter-spacing:1px;
-}
-
-.party-table{
-width:100%;
-border-collapse:collapse;
-}
-
-.party-table td{
-border:1px solid #000;
-padding:10px;
-font-size:13px;
-vertical-align:top;
-height:110px;
-}
-
-.big-name{
-font-size:20px;
-font-weight:bold;
-margin-top:5px;
-line-height:1.5;
-}
-
-.ac-name{
-font-size:14px;
-margin-top:10px;
-font-weight:600;
-}
-
-.route{
-display:flex;
-border-left:1px solid #000;
-border-right:1px solid #000;
-border-bottom:1px solid #000;
-}
-
-.route-box{
-width:50%;
-padding:10px;
-font-size:15px;
-font-weight:bold;
-}
-
-.route-box:first-child{
-border-right:1px solid #000;
-}
-
-.route-city{
-font-size:22px;
-font-weight:bold;
-margin-left:10px;
-}
-
-.goods{
-width:100%;
-border-collapse:collapse;
-}
-
-.goods th,
-.goods td{
-border:1px solid #000;
-padding:8px;
-font-size:13px;
-text-align:center;
-}
-
-.goods th{
-background:#f3f4f6;
-}
-
-.goods td:nth-child(2){
-text-align:left;
-}
-
-.bank{
-padding:12px;
-font-size:12px;
-line-height:1.9;
-border-top:1px solid #000;
-}
-
-.bottom{
-display:flex;
-justify-content:space-between;
-padding:30px 15px 15px;
-}
-
-.sign{
-width:220px;
-text-align:center;
-font-size:13px;
-}
-
-.line{
-border-top:1px solid #000;
-padding-top:5px;
-margin-top:8px;
-}
-
-.note{
-border-top:1px solid #000;
-padding:8px;
-font-size:11px;
-line-height:1.8;
-text-align:center;
-}
-
-@media print{
-
-@page{
-size:A4 portrait;
-margin:5mm;
-}
-
-body{
-padding:0;
-background:#fff;
-}
-
-.lr{
-
-width:100%;
-max-width:780px;
-
-margin:0 auto 10px;
-
-border:2px solid #000;
-
-zoom:0.78;
-
-page-break-inside:avoid;
-
-}
-
-.company{
-font-size:22px;
-}
-
-.route-city{
-font-size:18px;
-}
-
-.big-name{
-font-size:16px;
-}
-
-.big-value{
-font-size:18px;
-}
-
-.goods th,
-.goods td{
-font-size:11px;
-padding:5px;
-}
-
-.address,
-.value,
-.label,
-.bank,
-.note{
-font-size:11px;
-}
-
-}
-</style>
-
-</head>
-
-<body>
+return `
 
 <div class="lr">
+
+<!-- TOP -->
 
 <div class="top">
 
 <div class="company-section">
 
-<div class="company-section">
-
 <div class="company">
-
 ${company.name || ""}
-
 </div>
 
 <div class="address">
 
-${(company.address || "").replace(/\n/g,"<br>")}
+${(company.address || "")
+.replace(/\n/g,"<br>")}
 
 <br>
 
-Mobile:
+Mobile :
 ${company.mobile || ""}
 
-<br>
+&nbsp;&nbsp;&nbsp;
 
-Email:
-${company.email || ""}
-
-<br>
-
-GSTIN:
+GSTIN :
 ${company.gstin || ""}
-
-</div>
 
 </div>
 
@@ -7345,15 +7136,11 @@ ${company.gstin || ""}
 <div class="lr-section">
 
 <div class="lr-head">
-
 L.R.
-
 </div>
 
 <div class="lr-copy">
-
-GOODS CONSIGNMENT NOTE
-
+${copyName}
 </div>
 
 <div class="lr-row">
@@ -7361,9 +7148,7 @@ GOODS CONSIGNMENT NOTE
 <div class="lr-box">
 
 <div class="label">
-
 L.R. No
-
 </div>
 
 <div class="value big-value">
@@ -7375,15 +7160,11 @@ ${t.lrNo || "-"}
 <div class="lr-box">
 
 <div class="label">
-
 Date
-
 </div>
 
 <div class="value">
-
 ${formatDate(t.dispatchDate)}
-
 </div>
 
 </div>
@@ -7395,15 +7176,11 @@ ${formatDate(t.dispatchDate)}
 <div class="lr-box">
 
 <div class="label">
-
 Vehicle No
-
 </div>
 
-<div class="value">
-
+<div class="value big-value">
 ${t.tanker || "-"}
-
 </div>
 
 </div>
@@ -7411,15 +7188,11 @@ ${t.tanker || "-"}
 <div class="lr-box">
 
 <div class="label">
-
 Invoice No
-
 </div>
 
 <div class="value">
-
 ${t.invoiceNo || "-"}
-
 </div>
 
 </div>
@@ -7429,6 +7202,8 @@ ${t.invoiceNo || "-"}
 </div>
 
 </div>
+
+<!-- PARTY -->
 
 <table class="party-table">
 
@@ -7439,9 +7214,7 @@ ${t.invoiceNo || "-"}
 <b>Consignor :</b>
 
 <div class="big-name">
-
 ${t.loadingParty || "-"}
-
 </div>
 
 </td>
@@ -7451,14 +7224,12 @@ ${t.loadingParty || "-"}
 <b>Consignee :</b>
 
 <div class="big-name">
-
 ${t.consigneeName || "-"}
-
 </div>
 
 <div class="ac-name">
 
-A/C:
+A/C :
 ${t.party || "-"}
 
 </div>
@@ -7477,9 +7248,7 @@ ${t.party || "-"}
 
 From :
 <span class="route-city">
-
 ${t.loadingPoint || "-"}
-
 </span>
 
 </div>
@@ -7488,9 +7257,7 @@ ${t.loadingPoint || "-"}
 
 To :
 <span class="route-city">
-
 ${t.unloadingPoint || "-"}
-
 </span>
 
 </div>
@@ -7505,9 +7272,9 @@ ${t.unloadingPoint || "-"}
 
 <th width="8%">Sr.</th>
 <th>Description Of Goods</th>
-<th width="15%">Quantity</th>
+<th width="15%">Qty</th>
 <th width="10%">Unit</th>
-<th width="15%">Vehicle Type</th>
+<th width="15%">Vehicle</th>
 
 </tr>
 
@@ -7516,34 +7283,26 @@ ${t.unloadingPoint || "-"}
 <td>1</td>
 
 <td>
-
 ${t.material || "-"}
-
 </td>
 
 <td>
-
 ${Number(t.qty || 0).toFixed(3)}
-
 </td>
 
 <td>
-
 MT
-
 </td>
 
 <td>
-
 TANKER
-
 </td>
 
 </tr>
 
 </table>
 
-<!-- REMARK -->
+<!-- TERMS -->
 
 <div class="bank">
 
@@ -7567,43 +7326,37 @@ Terms & Conditions
 
 <div class="sign">
 
-<div style="height:70px"></div>
+<div style="height:28px"></div>
 
 <div class="line">
-
 Receiver Signature
-
 </div>
 
 </div>
 
 <div class="sign">
 
-<div style="height:70px"></div>
+<div style="height:28px"></div>
 
 <div class="line">
-
 Driver Signature
-
 </div>
 
 </div>
 
-<div class="sign-box">
+<div class="sign company-sign">
 
-For ${company.name || ""}
+<div class="company-sign-name">
+${company.name || ""}
+</div>
 
-<br><br><br><br>
-
+<div class="line">
 Authorised Signatory
-
-
 </div>
 
 </div>
 
 </div>
-
 <div class="note">
 
 This is a computer generated Lorry Receipt.
@@ -7612,13 +7365,390 @@ This is a computer generated Lorry Receipt.
 
 </div>
 
+`;
+
+}
+
+win.document.write(`
+
+<html>
+
+<head>
+
+<title>Lorry Receipt</title>
+
+<style>
+
+body{
+
+font-family:Arial;
+background:#fff;
+padding:0;
+margin:0;
+color:#000;
+
+}
+
+/* LR */
+
+.lr{
+
+width:100%;
+
+height:48vh;
+
+margin:0 auto;
+
+border:2px solid #000;
+
+box-sizing:border-box;
+
+overflow:hidden;
+
+}
+
+/* TOP */
+
+.top{
+
+display:flex;
+justify-content:space-between;
+border-bottom:2px solid #000;
+
+}
+
+.company-section{
+
+width:70%;
+padding:6px 8px;
+border-right:2px solid #000;
+
+}
+
+.lr-section{
+
+width:30%;
+
+}
+
+/* COMPANY */
+
+.company{
+
+font-size:24px;
+font-weight:bold;
+line-height:1.2;
+letter-spacing:.5px;
+
+}
+
+.address{
+
+font-size:12px;
+line-height:1.5;
+margin-top:3px;
+font-weight:600;
+
+}
+
+/* LR HEAD */
+
+.lr-head{
+
+text-align:center;
+font-size:24px;
+font-weight:bold;
+padding:5px;
+border-bottom:2px solid #000;
+
+}
+
+.lr-copy{
+
+text-align:center;
+padding:4px;
+font-size:12px;
+font-weight:bold;
+border-bottom:1px solid #000;
+
+}
+
+/* BOX */
+
+.lr-row{
+
+display:flex;
+border-bottom:1px solid #000;
+
+}
+
+.lr-box{
+
+flex:1;
+padding:6px;
+border-right:1px solid #000;
+min-height:42px;
+
+}
+
+.label{
+
+font-size:11px;
+font-weight:bold;
+margin-bottom:3px;
+
+}
+
+.value{
+
+font-size:14px;
+font-weight:700;
+
+}
+
+.big-value{
+
+font-size:18px;
+font-weight:bold;
+
+}
+
+/* PARTY */
+
+.party-table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+.party-table td{
+
+border:1px solid #000;
+padding:6px;
+font-size:12px;
+vertical-align:top;
+height:60px;
+
+}
+
+.big-name{
+
+font-size:16px;
+font-weight:bold;
+margin-top:3px;
+line-height:1.4;
+
+}
+
+.ac-name{
+
+font-size:12px;
+margin-top:4px;
+font-weight:700;
+
+}
+
+/* ROUTE */
+
+.route{
+
+display:flex;
+border-left:1px solid #000;
+border-right:1px solid #000;
+border-bottom:1px solid #000;
+
+}
+
+.route-box{
+
+width:50%;
+padding:6px;
+font-size:14px;
+font-weight:bold;
+
+}
+
+.route-box:first-child{
+
+border-right:1px solid #000;
+
+}
+
+.route-city{
+
+font-size:18px;
+font-weight:bold;
+margin-left:6px;
+
+}
+
+/* GOODS */
+
+.goods{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+.goods th,
+.goods td{
+
+border:1px solid #000;
+padding:5px;
+font-size:12px;
+text-align:center;
+
+}
+
+.goods td:nth-child(2){
+
+text-align:left;
+
+}
+
+/* TERMS */
+
+.bank{
+
+padding:6px;
+font-size:10px;
+line-height:1.5;
+border-top:1px solid #000;
+font-weight:600;
+
+}
+
+/* SIGN */
+
+.bottom{
+
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+
+padding:2px 8px 2px;
+
+margin-top:-8px;
+
+}
+
+.sign{
+
+width:180px;
+
+display:flex;
+flex-direction:column;
+justify-content:flex-end;
+
+text-align:center;
+font-size:11px;
+font-weight:700;
+
+}
+
+.line{
+
+border-top:1px solid #000;
+padding-top:3px;
+margin-top:3px;
+margin-bottom:2px;
+
+}
+.company-sign{
+
+display:flex;
+flex-direction:column;
+justify-content:flex-start;
+align-items:center;
+
+}
+
+.company-sign-name{
+
+font-size:12px;
+font-weight:bold;
+
+height:12px;
+
+display:flex;
+align-items:flex-start;
+justify-content:center;
+
+margin-bottom:24px;
+
+}
+/* NOTE */
+
+.note{
+
+border-top:1px solid #000;
+padding:3px;
+font-size:9px;
+line-height:1.2;
+text-align:center;
+
+}
+
+/* CUT LINE */
+
+.cut-line{
+
+border-top:2px dashed #000;
+
+margin:6px 0;
+
+}
+
+/* PRINT */
+
+@media print{
+
+@page{
+
+size:A4 portrait;
+margin:3mm;
+
+}
+
+body{
+
+margin:0;
+padding:0;
+
+}
+
+.lr{
+
+height:48vh;
+
+page-break-inside:avoid;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+${lrTemplate("CONSIGNEE COPY")}
+
+<div class="cut-line"></div>
+
+${lrTemplate("CONSIGNOR COPY")}
+
 <script>
 
 window.onload = function(){
 
 setTimeout(()=>{
+
 window.print();
-showTrips();
+
 },500);
 
 };
@@ -7636,6 +7766,7 @@ win.document.close();
 win.focus();
 
 }
+
 /* EXPORT */
 
 function exportTrips(){
