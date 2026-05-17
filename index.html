@@ -763,6 +763,7 @@ flex-wrap:wrap;
 ">
 
 <button
+id="companySettingsBtn"
 class="action-btn"
 onclick="openCompanySettings()">
 
@@ -785,6 +786,7 @@ color:#2563eb;
 </div>
 
 <button
+id="addCompanyBtn"
 class="action-btn green"
 onclick="addCompanyMode()">
 
@@ -1861,7 +1863,7 @@ const db = firebase.firestore();
 
 </script>
 <script>
-
+const MASTER_ADMIN_UID = "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
 let activeCompany = "";
 
 let financialYear =
@@ -1937,7 +1939,7 @@ Date.now()
 
 await db
 .collection("transportData")
-.doc(currentUser.uid)
+.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
 .collection("companies")
 .doc(activeCompany)
 .set(data,{merge:true})
@@ -2000,10 +2002,13 @@ navigator.onLine &&
 currentUser
 ){
 
+let dataUID =
+"BjwjW1RB8IY5mkf3rVZxlInrOlI3";
+
 let doc = await db
 
 .collection("transportData")
-.doc(currentUser.uid)
+.doc(dataUID)
 .collection("companies")
 .doc(activeCompany)
 
@@ -2093,6 +2098,73 @@ console.log(
 
 }
 
+
+
+function updateAdminUI(){
+
+let settingsBtn =
+document.getElementById(
+"companySettingsBtn"
+);
+
+let addBtn =
+document.getElementById(
+"addCompanyBtn"
+);
+
+let saveBtn =
+document.getElementById(
+"companySaveBtn"
+);
+
+let editBtn =
+document.getElementById(
+"companyEditBtn"
+);
+
+/* ADMIN */
+
+if(isAdmin()){
+
+if(settingsBtn)
+settingsBtn.style.display = "block";
+
+if(addBtn)
+addBtn.style.display = "block";
+
+if(saveBtn)
+saveBtn.style.display = "block";
+
+if(editBtn)
+editBtn.style.display = "block";
+
+}
+
+/* SUB USER */
+
+else{
+
+if(addBtn)
+addBtn.style.display = "none";
+
+/* SETTINGS BUTTON SHOW RAHE */
+
+if(settingsBtn)
+settingsBtn.style.display = "block";
+
+/* SAVE EDIT HIDE */
+
+if(saveBtn)
+saveBtn.style.display = "none";
+
+if(editBtn)
+editBtn.style.display = "none";
+
+}
+
+}
+
+
 function loadNextBillNo(){
 
   let fyKey =
@@ -2110,7 +2182,11 @@ function loadNextBillNo(){
 
 
 function openCompanySettings(){
+if(!isAdmin()){
 
+companyEditMode = false;
+
+}
 companyEditMode = true;
 
 /* OPEN POPUP */
@@ -2134,7 +2210,8 @@ setCompanyFieldsReadonly(true);
 
 document.getElementById(
 "companyEditBtn"
-).style.display = "block";
+).style.display =
+isAdmin() ? "block" : "none";
 
 document.getElementById(
 "companySaveBtn"
@@ -2143,7 +2220,16 @@ document.getElementById(
 }
 
 function addCompanyMode(){
+if(!isAdmin()){
 
+showToast(
+"Only Admin Can Add Company",
+"error"
+);
+
+return;
+
+}
 companyEditMode = false;
 
 /* OPEN POPUP */
@@ -2276,9 +2362,38 @@ document.getElementById(
 /* =========================
 AUTH
 ========================= */
-
 let currentUser = null;
 
+const ADMIN_EMAIL = "sirpmj@gmail.com";
+
+let userCompanyAccess = {
+
+"suresh@gmail.com": [
+"Hariom Logistics",
+"Hariom Roadlines"
+]
+
+};
+
+function getAllowedCompanies(){
+
+let email =
+currentUser.email
+.toLowerCase()
+.trim();
+
+return userCompanyAccess[email] || [];
+
+}
+
+/* ADMIN CHECK */
+
+function isAdmin(){
+
+return currentUser &&
+currentUser.email === ADMIN_EMAIL;
+
+}
 /* REGISTER */
 
 function registerUser(){
@@ -2350,18 +2465,41 @@ document.getElementById(
 "loginScreen"
 ).style.display = "none";
 
-/* SHOW COMPANY SELECT */
+updateAdminUI();
 
-loadCompanyList();
+/* SAVE USER COMPANIES */
 
-document.getElementById(
-"companySelectModal"
-).style.display = "flex";
+let allowedCompanies;
+
+if(isAdmin()){
+
+allowedCompanies = [
+"Hariom Logistics",
+"Hariom Roadlines"
+];
 
 }else{
 
+allowedCompanies =
+userCompanyAccess[
+user.email.toLowerCase().trim()
+] || [];
+
+}
+
+localStorage.setItem(
+"companies",
+JSON.stringify(allowedCompanies)
+);
+
+console.log(allowedCompanies);
+
+/* SHOW COMPANY SELECT */
+
+loadCompanies();
+
 document.getElementById(
-"loginScreen"
+"companySelectModal"
 ).style.display = "flex";
 
 }
@@ -2369,6 +2507,26 @@ document.getElementById(
 });
 
 function logoutUser(){
+
+localStorage.removeItem(
+"activeCompany"
+);
+
+localStorage.removeItem(
+"trips"
+);
+
+localStorage.removeItem(
+"customers"
+);
+
+localStorage.removeItem(
+"tankers"
+);
+
+localStorage.removeItem(
+"routeRates"
+);
 
 auth.signOut();
 
@@ -2521,7 +2679,7 @@ localStorage.getItem("companies")
 
 let select =
 document.getElementById(
-"activeCompany"
+"companySelect"
 );
 
 select.innerHTML = "";
@@ -2530,11 +2688,8 @@ companies.forEach(c=>{
 
 select.innerHTML += `
 
-<option
-value="${c}">
-
+<option value="${c}">
 ${c}
-
 </option>
 
 `;
@@ -2549,7 +2704,7 @@ function changeCompany(){
 
 activeCompany =
 document.getElementById(
-"activeCompany"
+"companySelect"
 ).value;
 
 localStorage.setItem(
@@ -2560,6 +2715,7 @@ activeCompany
 loadCloudData();
 
 }
+
 
 function formatAmount(num){
 
@@ -3259,7 +3415,7 @@ oldCompany || companyName;
 
 await db
 .collection("transportData")
-.doc(currentUser.uid)
+.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
 .collection("companies")
 .doc(companyName)
 .set({
@@ -3345,7 +3501,16 @@ SAVE COMPANY
 ========================= */
 
 async function saveCompanySettings(){
+if(!isAdmin()){
 
+showToast(
+"Only Admin Can Change Settings",
+"error"
+);
+
+return;
+
+}
 /* STOP MULTIPLE CLICK */
 
 if(isSavingCompany) return;
@@ -3534,9 +3699,12 @@ try{
 
 if(!currentUser) return;
 
+let dataUID = "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
+
 let snapshot = await db
+
 .collection("transportData")
-.doc(currentUser.uid)
+.doc(dataUID)
 .collection("companies")
 .get();
 
@@ -3555,19 +3723,65 @@ Select Company
 });
 
 /* LOAD */
+let allowedCompanies = [];
 
+if(!isAdmin()){
+
+allowedCompanies =
+userCompanyAccess[currentUser.email] || [];
+
+}
 snapshot.forEach(doc=>{
 
 let companyName = doc.id;
+
+console.log(
+"Firebase Company:",
+companyName
+);
+
+/* SUB USER FILTER */
+
+if(!isAdmin()){
+
+let allowedCompanies =
+userCompanyAccess[currentUser.email] || [];
+
+console.log(
+"Allowed:",
+allowedCompanies
+);
+
+let matched =
+allowedCompanies.some(c =>
+
+c.toLowerCase().trim()
+
+===
+
+companyName.toLowerCase().trim()
+
+);
+
+console.log(
+"Matched:",
+matched
+);
+
+if(!matched){
+return;
+}
+
+}
+
+/* ADD COMPANY */
 
 selects.forEach(select=>{
 
 select.innerHTML += `
 
 <option value="${companyName}">
-
 ${companyName}
-
 </option>
 
 `;
@@ -3603,10 +3817,12 @@ return;
 
 }
 
+/* SAVE ACTIVE COMPANY */
 
-
-
-
+localStorage.setItem(
+"activeCompany",
+activeCompany
+);
 
 /* TOP COMPANY NAME */
 
@@ -7617,12 +7833,21 @@ loadDropdown(
 
 if("serviceWorker" in navigator){
 
+if(location.protocol === "file:"){
+
+console.log(
+"Service Worker Disabled In File Mode"
+);
+
+}else{
+
 navigator.serviceWorker.register(
 "sw.js"
 );
 
 }
 
+}
 
 
 </script>
