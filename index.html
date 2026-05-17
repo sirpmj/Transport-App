@@ -1661,7 +1661,22 @@ placeholder="Total Freight">
 <div class="table-top-bar">
 
 <div class="top-search-row">
+<select id="yearFilter"
+onchange="showTrips()">
 
+<option value="all">
+All FY
+</option>
+
+<option value="2025-26">
+2025-26
+</option>
+
+<option value="2026-27">
+2026-27
+</option>
+
+</select>
 <input
 type="text"
 id="searchBox"
@@ -1934,20 +1949,39 @@ Date.now()
 };
 
 
+/* CREATE COMPANY DOC */
+
 await db
 .collection("transportData")
 .doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
 .collection("companies")
 .doc(activeCompany)
+.set({
+companyName:activeCompany
+},{merge:true});
+
+/* SAVE FY DATA */
+
+await db
+.collection("transportData")
+.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
+.collection("companies")
+.doc(activeCompany)
+.collection(getFinancialYear())
+.doc("data")
 .set(data,{merge:true})
+
+console.log("COMPANY:",activeCompany);
+
+console.log("FY:",getFinancialYear());
+
+console.log(data);
 
 console.log(
 "Cloud Saved:",
 activeCompany
 );
-
 }
-
 }
 
 async function loadCloudData(){
@@ -2002,7 +2036,24 @@ currentUser
 let dataUID =
 "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
 
+/* NEW FY PATH */
+
 let doc = await db
+
+.collection("transportData")
+.doc(dataUID)
+.collection("companies")
+.doc(activeCompany)
+.collection(getFinancialYear())
+.doc("data")
+
+.get();
+
+/* OLD DATA FALLBACK */
+
+if(!doc.exists){
+
+doc = await db
 
 .collection("transportData")
 .doc(dataUID)
@@ -2010,6 +2061,8 @@ let doc = await db
 .doc(activeCompany)
 
 .get();
+
+}
 
 if(doc.exists){
 
@@ -2094,6 +2147,7 @@ console.log(
 }
 
 }
+
 
 
 
@@ -2482,7 +2536,7 @@ activeCompany = savedCompany;
 document.getElementById(
 "topCompanyName"
 ).innerHTML =
-"🏢 " + activeCompany;
+`🏢 ${activeCompany} | FY ${getFinancialYear()}`
 
 /* HIDE MODAL */
 
@@ -5049,12 +5103,34 @@ reader.readAsText(file);
 
 }
 
+
+function getFinancialYear(){
+
+let d = new Date();
+
+let year = d.getFullYear();
+
+let month = d.getMonth()+1;
+
+if(month >= 4){
+
+return `${year}-${String(year+1).slice(2)}`;
+
+}else{
+
+return `${year-1}-${String(year).slice(2)}`;
+
+}
+
+}
+
+
 /* ADD TRIP */
 
 function addTrip(){
 
 let trip = {
-
+fy:getFinancialYear(),
 id: Date.now(),
 
 dispatchDate:
@@ -5219,6 +5295,32 @@ return true;
 
 /* SEARCH FILTER */
 
+/* FY FILTER */
+
+/* FY FILTER */
+
+let fy =
+document.getElementById(
+"yearFilter"
+)?.value || "all";
+
+if(fy !== "all"){
+
+filteredTrips =
+filteredTrips.filter(t=>{
+
+/* OLD DATA */
+
+if(!t.fy) return true;
+
+/* NEW FY DATA */
+
+return t.fy === fy;
+
+});
+
+}
+
 filteredTrips =
 filteredTrips.filter(t=>{
 
@@ -5267,7 +5369,13 @@ return;
 /* TABLE ROWS */
 
 filteredTrips.forEach((t,index)=>{
+/* OLD DATA FIX */
 
+if(!t.fy){
+
+t.fy = getFinancialYear();
+
+}
 let originalIndex =
 trips.findIndex(x => x.id === t.id);
 
@@ -5565,7 +5673,18 @@ let totalTrips =
 trips.length;
 
 let totalFreight =
-trips.reduce(
+
+trips
+
+.filter(t=>{
+
+if(!t.fy) return true;
+
+return t.fy === getFinancialYear();
+
+})
+
+.reduce(
 (a,b)=>
 a + Number(b.totalFreight || 0),
 0
@@ -6139,16 +6258,18 @@ t.billStatus = "Billed";
 
 /* GET LAST NUMBER */
 
-let parts = billNo.split("-");
+let parts = billNo.split("/");
 
 let lastNum =
-Number(parts[1] || 0);
+Number(parts[2] || 0);
 
 /* NEXT BILL */
 
 let nextBill =
-parts[0] + "-" +
-String(lastNum + 1).padStart(3,"0");
+
+`HL/${getFinancialYear()}/${
+String(lastNum + 1).padStart(3,"0")
+}`;
 
 /* SAVE NEXT */
 
@@ -8065,8 +8186,16 @@ loadNextBillNo();
 
 window.onload = function(){
 
+let fyKey =
+"lastBill_" + getFinancialYear();
+
 document.getElementById("billNo").value =
-localStorage.getItem("lastBill") || "2526-001";
+
+localStorage.getItem(fyKey)
+
+||
+
+`HL/${getFinancialYear()}/001`;
 
   // TODAY DATE AUTO
   let today = new Date().toISOString().split("T")[0];
