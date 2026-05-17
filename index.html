@@ -135,6 +135,7 @@ overflow:auto;
 }
 
 
+
 table{
 width:100%;
 border-collapse:collapse;
@@ -513,6 +514,7 @@ font-size:15px;
 margin-top:4px;
 display:none;
 }
+
 
 @media(max-width:768px){
 
@@ -964,78 +966,25 @@ style="margin-bottom:15px;">
 
 
 
-<div class="mobile-cards">
 
 <!-- CUSTOMER CARD -->
 
 <div class="card">
 
-<div class="section-head"
-onclick="toggleSection('customerSection')">
-
-<h2>👥 Customer</h2>
-
-<span>▼</span>
-
-</div>
-
-<div id="customerSection" class="section-body">
-
-<div class="form-grid">
-
-<div class="field">
-<label>Customer Name</label>
-<input
-type="text"
-id="customerName"
-placeholder="Customer Name">
-</div>
-
-<div class="field">
-<label>Mobile</label>
-<input
-type="text"
-id="customerMobile"
-placeholder="Mobile">
-</div>
-
-<div class="field">
-<label>GST No</label>
-<input
-type="text"
-id="customerGST"
-placeholder="GST No">
-</div>
-
-<div class="field">
-<label>Address</label>
-<textarea id="customerAddress"></textarea>
-</div>
-
-<div class="field">
-
-<label>&nbsp;</label>
+<div class="mobile-action-row customer-actions">
 
 <button onclick="addCustomer()">
-➕ Add Customer
+👥 ➕ Add Customer
 </button>
-
-</div>
-
-<div class="field">
-
-<label>&nbsp;</label>
 
 <button
 class="purple"
 onclick="openCustomerModal()">
 
-👥 View Customers
+📋 View Customers
 
 </button>
 
-</div>
-</div>
 </div>
 </div>
 
@@ -1043,147 +992,38 @@ onclick="openCustomerModal()">
 
 <div class="card">
 
-<div class="section-head"
-onclick="toggleSection('tankerSection')">
-
-<h2>🚛 Tanker</h2>
-
-<span>▼</span>
-
-</div>
-
-<div id="tankerSection" class="section-body">
-
-<div class="form-grid">
-
-<div class="field">
-<label>Vehicle No</label>
-<input
-type="text"
-id="tankerNo"
-placeholder="Vehicle No">
-</div>
-
-<div class="field">
-<label>Driver Name</label>
-<input
-type="text"
-id="driverName"
-placeholder="Driver Name">
-</div>
-
-<div class="field">
-<label>Mobile</label>
-<input
-type="text"
-id="driverMobile"
-placeholder="Mobile">
-</div>
-
-<div class="field">
-<label>Capacity</label>
-<input
-type="text"
-id="tankerCapacity"
-placeholder="Capacity">
-</div>
-
-<div class="field">
-
-<label>&nbsp;</label>
+<div class="mobile-action-row tanker-actions">
 
 <button onclick="addTanker()">
-➕ Add Tanker
+🚛 ➕ Add Tanker
 </button>
-
-</div>
-
-<div class="field">
-
-<label>&nbsp;</label>
 
 <button
 class="purple"
 onclick="openTankerModal()">
 
-🚛 View Tankers
+📋 View Tankers
 
 </button>
-
-</div>
-</div>
 </div>
 </div>
 
 <!-- ROUTE CARD -->
 
 <div class="card">
+<div class="mobile-action-row route-actions-top">
 
-<div class="section-head"
-onclick="toggleSection('routeSection')">
-
-<h2>🛣️ Route Freight</h2>
-
-<span>▼</span>
-
-</div>
-
-<div id="routeSection" class="section-body">
-
-<div class="form-grid">
-
-<div class="field">
-<label>From</label>
-
-<input
-type="text"
-id="routeFrom"
-placeholder="Loading Point">
-</div>
-
-<div class="field">
-<label>To</label>
-
-<input
-type="text"
-id="routeTo"
-placeholder="Unloading Point">
-</div>
-
-<div class="field">
-<label>Freight Rate</label>
-
-<input
-type="number"
-id="routeRate"
-placeholder="Freight Rate">
-</div>
-
-<div class="field">
-
-<label>&nbsp;</label>
-
-<button onclick="addRouteFreight()">
-➕ Add Route
+<button onclick="openAddRoutePopup()">
+🛣️ ➕ Add Route
 </button>
-
-</div>
-
-<div class="field">
-
-<label>&nbsp;</label>
 
 <button
 class="purple"
 onclick="openRouteModal()">
 
-🛣️ View Routes
+📋 View Routes
 
 </button>
-
-</div>
-</div>
-</div>
 </div>
 </div>
 
@@ -1514,6 +1354,68 @@ onclick="closeRouteModal()">
 </div>
 
 
+<!-- ADD ROUTE MODAL -->
+
+<div id="addRouteModal" class="modal">
+
+<div class="modal-box">
+
+<h2>🛣️ Add Route</h2>
+
+<div class="form-grid">
+
+<div class="field">
+<label>From</label>
+
+<input
+type="text"
+id="routeFrom"
+placeholder="Loading Point">
+</div>
+
+<div class="field">
+<label>To</label>
+
+<input
+type="text"
+id="routeTo"
+placeholder="Unloading Point">
+</div>
+
+<div class="field">
+<label>Freight Rate</label>
+
+<input
+type="number"
+id="routeRate"
+placeholder="Freight Rate">
+</div>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+class="green"
+onclick="addRouteFreight()">
+
+💾 Save
+
+</button>
+
+<button
+class="red"
+onclick="closeAddRoutePopup()">
+
+✖ Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
 
 <!-- ADD TRIP -->
 
@@ -1524,7 +1426,6 @@ onclick="toggleSection('tripSection')">
 
 <h2>➕ Add Trip</h2>
 
-<span>▼</span>
 
 </div>
 
@@ -1648,7 +1549,7 @@ placeholder="Total Freight">
 </div>
 </div>
 </div>
-</div>
+
 
 <div id="dashboard" class="dashboard"></div>
 
@@ -3090,7 +2991,7 @@ localStorage.getItem("routeRates") || "[]"
 );
 
 
-function addRouteFreight(){
+async function addRouteFreight(){
 
 let from =
 document.getElementById("routeFrom").value.trim();
@@ -3120,7 +3021,7 @@ localStorage.setItem(
 "routeRates",
 JSON.stringify(routeRates)
 );
-
+await saveData();
 showRouteFreight();
 loadRoutePoints();
 loadRouteDropdown();
@@ -3128,9 +3029,25 @@ loadRouteDropdown();
 document.getElementById("routeFrom").value="";
 document.getElementById("routeTo").value="";
 document.getElementById("routeRate").value="";
+closeAddRoutePopup();
+}
+
+
+function openAddRoutePopup(){
+
+document.getElementById(
+"addRouteModal"
+).style.display = "flex";
 
 }
 
+function closeAddRoutePopup(){
+
+document.getElementById(
+"addRouteModal"
+).style.display = "none";
+
+}
 
 function openRouteModal(){
 
@@ -3197,6 +3114,40 @@ onclick="deleteRoute(${index})">
 
 }
 
+function editRouteFreight(index){
+
+let r = routeRates[index];
+
+/* FILL FORM */
+
+document.getElementById(
+"routeFrom"
+).value = r.from || "";
+
+document.getElementById(
+"routeTo"
+).value = r.to || "";
+
+document.getElementById(
+"routeRate"
+).value = r.rate || "";
+
+/* DELETE OLD */
+
+routeRates.splice(index,1);
+
+/* SAVE */
+
+localStorage.setItem(
+"routeRates",
+JSON.stringify(routeRates)
+);
+saveData();
+/* OPEN POPUP */
+
+openAddRoutePopup();
+
+}
 
 function deleteRoute(index){
 
@@ -3210,6 +3161,7 @@ localStorage.setItem(
 JSON.stringify(routeRates)
 );
 
+saveData();
 showRouteFreight();
 
 loadRouteDropdown();
@@ -5192,7 +5144,7 @@ trips.findIndex(x => x.id === t.id);
 
 body.innerHTML += `
 
-<tr>
+<tr ondblclick="editTrip(${originalIndex})">
 
 <td>
 <input
