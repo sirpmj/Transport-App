@@ -2269,7 +2269,7 @@ placeholder="Total Freight">
 
 
 <button onclick="addTripAndPrint()">
-💾 Save & Print LR
+💾 Save
 </button>
 </div>
 </div>
@@ -5349,7 +5349,7 @@ updateDashboard();
 
 /* PRINT LR */
 
-printLR(trip.id);
+// printLR(trip.id);
 
 
 /* CLEAR FORM */
@@ -8303,9 +8303,17 @@ This is a computer generated freight bill.
 
 `);
 
-win.document.close();
+setTimeout(()=>{
 
-win.focus();
+win.print();
+
+win.onafterprint = ()=>{
+
+win.close();
+
+};
+
+},500);
 
 }
 
@@ -9022,7 +9030,6 @@ alert(
 
 }
 
-
 async function shareBillPDF(index){
 
 let trip = trips[index];
@@ -9034,56 +9041,461 @@ return;
 
 }
 
-if(
-(trip.status || "").trim() !== "Completed"
-){
+/* HTML */
 
-alert(
-"Only Completed Status Trip Allowed"
+let container =
+document.getElementById(
+"billPDFContainer"
 );
 
-return;
+container.innerHTML =
+getBillHTML(trip);
+
+/* WAIT */
+
+await new Promise(resolve =>
+setTimeout(resolve,1000)
+);
+
+try{
+
+/* CANVAS */
+
+const canvas =
+await html2canvas(container,{
+
+scale:2,
+useCORS:true
+
+});
+
+/* IMAGE */
+
+const imgData =
+canvas.toDataURL(
+'image/png'
+);
+
+/* PDF */
+
+const {
+jsPDF
+} = window.jspdf;
+
+const pdf =
+new jsPDF(
+'p',
+'mm',
+'a4'
+);
+
+/* SIZE */
+
+const pdfWidth =
+210;
+
+const pageHeight =
+295;
+
+const imgWidth =
+pdfWidth;
+
+const imgHeight =
+canvas.height *
+imgWidth /
+canvas.width;
+
+let heightLeft =
+imgHeight;
+
+let position = 0;
+
+/* FIRST PAGE */
+
+pdf.addImage(
+
+imgData,
+
+'PNG',
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight
+
+);
+
+heightLeft -= pageHeight;
+
+/* MULTI PAGE */
+
+while(heightLeft > 0){
+
+position =
+heightLeft - imgHeight;
+
+pdf.addPage();
+
+pdf.addImage(
+
+imgData,
+
+'PNG',
+
+0,
+
+position,
+
+imgWidth,
+
+imgHeight
+
+);
+
+heightLeft -= pageHeight;
 
 }
 
-/* MOBILE SHARE */
+/* BLOB */
 
-if(navigator.share){
+const blob =
+pdf.output('blob');
 
-try{
+/* FILE */
+
+const file =
+new File(
+
+[blob],
+
+`Bill-${trip.billNo}.pdf`,
+
+{
+type:'application/pdf'
+}
+
+);
+
+/* SHARE */
+
+if(
+
+navigator.canShare &&
+
+navigator.canShare({
+files:[file]
+})
+
+){
 
 await navigator.share({
 
 title:"Transport Bill",
 
-text:
-`Bill No: ${trip.billNo}
-
-Party: ${trip.party}
-
-Amount: ${trip.freight}`
+files:[file]
 
 });
+
+}else{
+
+pdf.save(
+`Bill-${trip.billNo}.pdf`
+);
+
+}
 
 }catch(err){
 
 console.log(err);
 
-}
-
-}else{
-
-/* DESKTOP */
-
-printSingleBill(trip.id);
-
 alert(
-"PDF Opened. Attach it manually in WhatsApp Web."
+"PDF Generation Failed"
 );
 
 }
 
 }
+
+function getBillHTML(t){
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+let billTrips =
+trips.filter(x => x.billNo === t.billNo);
+
+if(billTrips.length===0){
+
+billTrips = [t];
+
+}
+
+let total = 0;
+let rows = "";
+
+billTrips.forEach((b,index)=>{
+
+total += Number(b.totalFreight || 0);
+
+rows += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${formatDate(b.dispatchDate)}</td>
+
+<td>${b.invoiceNo || ""}</td>
+
+<td>${b.tanker || ""}</td>
+
+<td>${b.lrNo || ""}</td>
+
+<td>${b.loadingPoint || ""}</td>
+
+<td>${b.unloadingPoint || ""}</td>
+
+<td>${b.material || ""}</td>
+
+<td>${Number(b.qty || 0).toFixed(3)}</td>
+
+<td>${Number(b.freightRate || 0)}</td>
+
+<td>${Number(b.totalFreight || 0)}</td>
+
+</tr>
+
+`;
+
+});
+
+return `
+
+<div style="
+font-family:Arial;
+padding:20px;
+background:#fff;
+color:#000;
+">
+
+<h2 style="text-align:center;">
+${company.name || ""}
+</h2>
+
+<h3 style="text-align:center;">
+Transport Invoice
+</h3>
+
+<p>
+<b>Party:</b>
+${t.party || ""}
+</p>
+
+<p>
+<b>Bill No:</b>
+${t.billNo || ""}
+</p>
+
+<table
+border="1"
+width="100%"
+cellpadding="5"
+cellspacing="0">
+
+<tr>
+
+<th>Sr</th>
+<th>Date</th>
+<th>Invoice</th>
+<th>Vehicle</th>
+<th>LR</th>
+<th>From</th>
+<th>To</th>
+<th>Material</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Total</th>
+
+</tr>
+
+${rows}
+
+<tr>
+
+<td colspan="10"
+align="right">
+
+<b>Grand Total</b>
+
+</td>
+
+<td>
+
+<b>
+₹${Math.round(total)}
+</b>
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+function generateBillHTML(trip){
+
+let company =
+JSON.parse(
+localStorage.getItem(
+"companyInfo"
+) || "{}"
+);
+
+let billTrips =
+trips.filter(x => x.billNo === trip.billNo);
+
+if(billTrips.length===0){
+
+billTrips = [trip];
+
+}
+
+let total = 0;
+let rows = "";
+
+billTrips.forEach((b,index)=>{
+
+total += Number(b.totalFreight || 0);
+
+rows += `
+
+<tr>
+
+<td>${index+1}</td>
+
+<td>${formatDate(b.dispatchDate)}</td>
+
+<td>${b.invoiceNo || ""}</td>
+
+<td>${b.tanker || ""}</td>
+
+<td>${b.lrNo || ""}</td>
+
+<td>${b.loadingParty || ""}</td>
+
+<td>${b.consigneeName || ""}</td>
+
+<td>${b.loadingPoint || ""}</td>
+
+<td>${b.unloadingPoint || ""}</td>
+
+<td>${b.material || ""}</td>
+
+<td>${Number(b.qty || 0).toFixed(3)}</td>
+
+<td>${Number(b.freightRate || 0).toLocaleString("en-IN")}</td>
+
+<td>
+${Number(b.totalFreight || 0)
+.toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+</td>
+
+</tr>
+
+`;
+
+});
+
+return `
+
+<div style="padding:20px;font-family:Arial;">
+
+<h2 style="text-align:center;">
+${company.name || ""}
+</h2>
+
+<h3 style="text-align:center;">
+Transport Invoice
+</h3>
+
+<p>
+<b>Customer:</b>
+${trip.party}
+</p>
+
+<p>
+<b>Bill No:</b>
+${trip.billNo || ""}
+</p>
+
+<table
+border="1"
+cellspacing="0"
+cellpadding="5"
+width="100%">
+
+<tr>
+
+<th>Sr</th>
+<th>Date</th>
+<th>Invoice</th>
+<th>Vehicle</th>
+<th>LR</th>
+<th>From</th>
+<th>To</th>
+<th>Material</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Total</th>
+
+</tr>
+
+${rows}
+
+<tr>
+
+<td colspan="10"
+align="right">
+
+<b>Grand Total</b>
+
+</td>
+
+<td>
+
+<b>
+₹${Math.round(total)
+.toLocaleString("en-IN")}
+</b>
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+`;
+
+}
+
 /* EXPORT */
 
 function exportTrips(){
@@ -9318,6 +9730,23 @@ navigator.serviceWorker.register(
 <datalist id="consigneeList"></datalist>
 
 <datalist id="materialList"></datalist>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<div
+id="billPDFContainer"
+style="
+position:fixed;
+left:0;
+top:0;
+width:210mm;
+background:#fff;
+padding:15px;
+z-index:-9999;
+">
+</div>
 
 </body>
 </html>
