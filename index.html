@@ -624,10 +624,18 @@ font-size:14px;
 @media(max-width:768px){
 
 .top-search-row{
-  display:grid;
-  grid-template-columns: 2fr 1fr;
-  gap:6px;
-  align-items:center;
+
+display:grid;
+
+grid-template-columns:
+1fr 260px;
+
+gap:8px;
+
+align-items:center;
+
+overflow:visible;
+
 }
 
 /* ROW 1 */
@@ -668,14 +676,10 @@ min-width:0;
 
 /* BILL */
 
-.bill-box{
-  width:100%;
-}
-
 .bill-box input{
   width:100%;
-  display:block;
   box-sizing:border-box;
+  display:block;
 }
 
 /* BUTTONS */
