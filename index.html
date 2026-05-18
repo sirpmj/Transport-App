@@ -28,13 +28,7 @@ padding:12px;
 color:#111827;
 }
 
-.app-title{
-position:sticky;
-top:0;
-z-index:1000;
-background:#f1f5f9;
-padding-bottom:10px;
-}
+
 
 .card{
 background:#fff;
@@ -563,17 +557,63 @@ border-bottom:1px solid #e5e7eb;
 /* SEARCH ROW */
 
 .top-search-row{
-display:flex;
-gap:8px;
+
+display:grid;
+
+grid-template-columns:
+
+1fr
+160px
+140px
+220px
+320px;
+
+gap:10px;
 align-items:center;
-flex-wrap:nowrap;
-overflow:auto;
-margin-bottom:8px;
+
+margin-bottom:10px;
+
 }
 
-.top-search-row #searchBox{
-flex:1;
-min-width:220px;
+@media(max-width:768px){
+
+.top-search-row{
+
+grid-template-columns:
+1fr 1fr;
+
+gap:6px;
+
+}
+
+.bill-box{
+grid-column:1 / -1;
+}
+
+.btn-row{
+
+grid-column:1 / -1;
+
+display:grid;
+
+grid-template-columns:
+repeat(3,1fr);
+
+gap:5px;
+
+}
+
+.btn-row button{
+
+width:100%;
+min-width:0;
+
+font-size:11px;
+
+padding:8px 4px;
+
+}
+
 }
 
 /* BILL */
@@ -726,6 +766,409 @@ margin:0;
 .customer-row button{
 width:100%;
 }
+
+
+/* =========================
+MODERN TOPBAR
+========================= */
+
+body{
+background:#eef2ff;
+font-family:Inter,sans-serif;
+}
+
+.modern-topbar{
+
+position:sticky;
+top:0;
+z-index:999;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:14px 18px;
+
+background:rgba(255,255,255,.92);
+
+backdrop-filter:blur(14px);
+
+border-radius:18px;
+
+margin-bottom:12px;
+
+box-shadow:
+0 8px 30px rgba(0,0,0,.08);
+
+}
+
+.top-left{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.logo-box{
+
+width:52px;
+height:52px;
+
+border-radius:16px;
+
+background:linear-gradient(
+135deg,
+#2563eb,
+#4f46e5
+);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:26px;
+color:#fff;
+
+box-shadow:
+0 6px 20px rgba(37,99,235,.3);
+
+}
+
+.top-left h1{
+
+font-size:18px;
+margin:0;
+font-weight:700;
+color:#111827;
+
+}
+
+.top-left p{
+
+font-size:12px;
+color:#64748b;
+
+}
+
+.menu-btn{
+
+width:48px;
+height:48px;
+
+border:none;
+border-radius:14px;
+
+background:#2563eb;
+color:#fff;
+
+font-size:22px;
+cursor:pointer;
+
+}
+
+.top-menu{
+
+position:fixed;
+top:80px;
+right:12px;
+
+width:240px;
+
+background:#fff;
+
+border-radius:18px;
+
+padding:10px;
+
+display:none;
+flex-direction:column;
+gap:8px;
+
+box-shadow:
+0 10px 35px rgba(0,0,0,.15);
+
+z-index:99999;
+
+}
+
+.top-menu button,
+.top-menu label{
+
+width:100%;
+
+border:none;
+
+padding:12px 14px;
+
+border-radius:12px;
+
+background:#f8fafc;
+
+cursor:pointer;
+
+font-size:14px;
+font-weight:600;
+
+display:flex;
+align-items:center;
+gap:10px;
+
+color:#111827 !important;
+
+text-align:left;
+
+justify-content:flex-start;
+
+}
+
+.top-menu button:hover,
+.top-menu label:hover{
+
+background:#eff6ff;
+color:#2563eb !important;
+
+}
+
+.logout-btn{
+
+background:#fee2e2 !important;
+color:#dc2626;
+
+}
+
+.menu-upload input{
+display:none;
+}
+
+@media(max-width:768px){
+
+.modern-topbar{
+
+padding:10px 12px;
+
+}
+
+.logo-box{
+
+width:44px;
+height:44px;
+font-size:22px;
+
+}
+
+.top-left h1{
+font-size:15px;
+}
+
+.top-menu{
+width:92%;
+right:4%;
+}
+
+}
+
+
+/* =========================
+QUICK ACTION UI
+========================= */
+
+.quick-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(240px,1fr));
+
+gap:16px;
+
+margin-bottom:14px;
+
+}
+
+.quick-card{
+
+background:rgba(255,255,255,.92);
+
+backdrop-filter:blur(10px);
+
+border-radius:24px;
+
+padding:20px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.08);
+
+transition:.25s;
+
+border:1px solid rgba(255,255,255,.5);
+
+}
+
+.quick-card:hover{
+
+transform:translateY(-4px);
+
+box-shadow:
+0 14px 40px rgba(0,0,0,.12);
+
+}
+
+.quick-icon{
+
+width:58px;
+height:58px;
+
+border-radius:18px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:28px;
+
+background:linear-gradient(
+135deg,
+#2563eb,
+#4f46e5
+);
+
+color:#fff;
+
+margin-bottom:14px;
+
+}
+
+.quick-card h3{
+
+font-size:18px;
+margin-bottom:5px;
+
+color:#111827;
+
+}
+
+.quick-card p{
+
+font-size:13px;
+color:#64748b;
+
+margin-bottom:16px;
+
+}
+
+.quick-actions{
+
+display:flex;
+gap:8px;
+
+}
+
+.quick-actions button{
+
+flex:1;
+
+padding:12px;
+
+border:none;
+
+border-radius:14px;
+
+font-size:14px;
+font-weight:600;
+
+cursor:pointer;
+
+}
+
+.secondary-btn{
+
+background:#eff6ff !important;
+color:#2563eb !important;
+
+}
+
+.trip-card .quick-icon{
+
+background:linear-gradient(
+135deg,
+#16a34a,
+#059669
+);
+
+}
+
+@media(max-width:768px){
+
+.quick-grid{
+
+grid-template-columns:
+1fr 1fr;
+
+gap:10px;
+
+}
+
+.quick-card{
+
+padding:14px;
+border-radius:18px;
+
+}
+
+.quick-card h3{
+font-size:15px;
+}
+
+.quick-card p{
+font-size:11px;
+}
+
+.quick-icon{
+
+width:46px;
+height:46px;
+
+font-size:22px;
+
+}
+
+.quick-actions button{
+
+font-size:11px;
+padding:9px 6px;
+
+}
+
+}
+
+.trip-form-card{
+
+background:rgba(255,255,255,.92);
+
+backdrop-filter:blur(14px);
+
+padding:20px;
+
+border-radius:26px;
+
+box-shadow:
+0 12px 35px rgba(0,0,0,.08);
+
+border:
+1px solid rgba(255,255,255,.6);
+
+margin-bottom:16px;
+
+transition:.25s;
+
+}
+
+.trip-form-card:hover{
+
+box-shadow:
+0 16px 40px rgba(0,0,0,.12);
+
+}
+
 </style>
 
 <!-- FIREBASE -->
@@ -805,75 +1248,60 @@ background:#16a34a;
 TOP BAR
 ========================= -->
 
-<div class="app-title"
-style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
-flex-wrap:wrap;
-">
+<div class="modern-topbar">
+
+<div class="top-left">
+
+<div class="logo-box">
+🚚
+</div>
 
 <div>
-🚚 Transport Management System
+
+<h1 id="topCompanyName">
+No Company
+</h1>
+
+<p>
+Transport Management System
+</p>
+
 </div>
 
-<div style="
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-">
+</div>
+
+<div class="top-right">
 
 <button
-id="companySettingsBtn"
-class="action-btn"
-onclick="openCompanySettings()">
+class="menu-btn"
+onclick="toggleTopMenu()">
 
+☰
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- TOP RIGHT MENU -->
+
+<div id="topMenu" class="top-menu">
+
+<button onclick="openCompanySettings()">
 🏢 Company Settings
-
 </button>
 
-<div id="topCompanyName"
-style="
-font-weight:700;
-font-size:15px;
-padding:8px 14px;
-background:#eff6ff;
-border-radius:10px;
-color:#2563eb;
-">
-
-🏢 No Company
-
-</div>
-
-<button
-id="addCompanyBtn"
-class="action-btn green"
-onclick="addCompanyMode()">
-
-🏢 Add Company
-
+<button onclick="addCompanyMode()">
+➕ Add Company
 </button>
 
-<button
-class="action-btn gray"
-onclick="backupData()">
-
+<button onclick="backupData()">
 📦 Backup
-
 </button>
 
-<label
-class="action-btn purple"
-style="
-cursor:pointer;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:10px 14px;
-color:#fff;
-">
+<label class="menu-upload">
 
 ♻️ Restore
 
@@ -886,13 +1314,12 @@ hidden>
 </label>
 
 <button
-class="action-btn red"
+class="logout-btn"
 onclick="logoutUser()">
 
 🚪 Logout
 
 </button>
-</div>
 
 </div>
 
@@ -1029,45 +1456,72 @@ style="margin-bottom:15px;">
 
 <!-- CUSTOMER CARD -->
 
-<div class="dashboard-actions customer-row">
+<!-- QUICK ACTIONS -->
 
-<div class="card">
-<button onclick="addCustomer()">
-👥 ➕ Add Customer
-</button>
+<div class="quick-grid">
+
+<!-- CUSTOMER -->
+
+<div class="quick-card">
+
+<div class="quick-icon">
+👥
 </div>
 
-<div class="card">
+<h3>
+Customer
+</h3>
+
+<p>
+Manage customer details
+</p>
+
+<div class="quick-actions">
+
+<button onclick="addCustomer()">
+➕ Add
+</button>
+
 <button
-class="purple"
+class="secondary-btn"
 onclick="openCustomerModal()">
 
-📋 View Customers
+📋 View
 
 </button>
-</div>
 
 </div>
 
-<!-- TANKER CARD -->
+</div>
 
-<div class="dashboard-actions customer-row">
 
-<div class="card">
+<!-- TANKER -->
+
+<div class="quick-card">
+
+<div class="quick-icon">
+🚛
+</div>
+
+<h3>
+Tanker
+</h3>
+
+<p>
+Manage vehicle records
+</p>
+
+<div class="quick-actions">
 
 <button onclick="addTanker()">
-🚛 ➕ Add Tanker
+➕ Add
 </button>
 
-</div>
-
-<div class="card">
-
 <button
-class="purple"
+class="secondary-btn"
 onclick="openTankerModal()">
 
-📋 View Tankers
+📋 View
 
 </button>
 
@@ -1075,27 +1529,68 @@ onclick="openTankerModal()">
 
 </div>
 
-<!-- ROUTE CARD -->
 
-<div class="dashboard-actions customer-row">
+<!-- ROUTE -->
 
-<div class="card">
+<div class="quick-card">
+
+<div class="quick-icon">
+🛣️
+</div>
+
+<h3>
+Route
+</h3>
+
+<p>
+Manage freight routes
+</p>
+
+<div class="quick-actions">
 
 <button onclick="openAddRoutePopup()">
-🛣️ ➕ Add Route
+➕ Add
+</button>
+
+<button
+class="secondary-btn"
+onclick="openRouteModal()">
+
+📋 View
+
 </button>
 
 </div>
 
-<div class="card">
+</div>
+
+
+<!-- ADD TRIP -->
+
+<div class="quick-card trip-card">
+
+<div class="quick-icon">
+📦
+</div>
+
+<h3>
+Trip Entry
+</h3>
+
+<p>
+Create dispatch trip
+</p>
+
+<div class="quick-actions">
 
 <button
-class="purple"
-onclick="openRouteModal()">
+onclick="toggleSection('tripSection')">
 
-📋 View Routes
+➕ Open Form
 
 </button>
+
+</div>
 
 </div>
 
@@ -1481,6 +1976,16 @@ id="routeRate"
 placeholder="Freight Rate">
 </div>
 
+<div class="field">
+
+<label>Distance (KM)</label>
+
+<input
+type="number"
+id="routeKM"
+placeholder="KM">
+
+</div>
 </div>
 
 <div class="modal-actions">
@@ -1509,15 +2014,8 @@ onclick="closeAddRoutePopup()">
 
 <!-- ADD TRIP -->
 
-<div class="card">
+<div class="trip-form-card show">
 
-<div
-class="section-head trip-toggle"
-onclick="toggleSection('tripSection')">
-
-<h2>➕ Add Trip Form</h2>
-
-</div>
 
 <div id="tripSection" class="section-body">
 
@@ -1661,32 +2159,73 @@ placeholder="Total Freight">
 <div class="table-top-bar">
 
 <div class="top-search-row">
-<select id="yearFilter"
+
+<!-- SEARCH -->
+
+<input
+type="text"
+id="searchBox"
+placeholder="🔍 Search..."
+oninput="showTrips()">
+
+
+<!-- MONTH FILTER -->
+
+<select
+id="monthFilter"
+onchange="showTrips()">
+
+<option value="current">
+Current Month
+</option>
+
+<option value="all">
+All Months
+</option>
+
+<option value="0">January</option>
+<option value="1">February</option>
+<option value="2">March</option>
+<option value="3">April</option>
+<option value="4">May</option>
+<option value="5">June</option>
+<option value="6">July</option>
+<option value="7">August</option>
+<option value="8">September</option>
+<option value="9">October</option>
+<option value="10">November</option>
+<option value="11">December</option>
+
+</select>
+
+
+<!-- FY FILTER -->
+
+<select
+id="yearFilter"
 onchange="showTrips()">
 
 <option value="all">
 All FY
 </option>
 
-<option value="2025-26">
-2025-26
-</option>
-
 <option value="2026-27">
 2026-27
 </option>
 
+<option value="2027-28">
+2027-28
+</option>
+
 </select>
-<input
-type="text"
-id="searchBox"
-placeholder="Search..."
-oninput="showTrips()">
+
+
+<!-- BILL NO -->
 
 <div class="bill-box">
 
 <label>
-Next Bill No
+Bill No
 </label>
 
 <input
@@ -1696,18 +2235,21 @@ placeholder="Bill No">
 
 </div>
 
+
+<!-- BUTTONS -->
+
 <div class="btn-row">
 
 <button onclick="generateSelectedBills()">
-🧾 Generate Bill
+🧾 Generate
 </button>
 
 <button onclick="openPendingBills()">
-🧾 Pending Bill
+📄 Pending
 </button>
 
 <button onclick="exportTrips()">
-📤 Export Excel
+📤 Export
 </button>
 
 </div>
@@ -2216,19 +2758,73 @@ editBtn.style.display = "none";
 }
 
 
+function getCompanyPrefix(){
+
+let name =
+
+(activeCompany || "")
+.trim();
+
+if(!name)
+return "TR";
+
+/* SPLIT WORDS */
+
+let words =
+name.split(" ")
+.filter(w => w);
+
+/* MULTI WORD */
+
+if(words.length >= 2){
+
+return (
+
+words[0][0] +
+words[1][0]
+
+).toUpperCase();
+
+}
+
+/* SINGLE WORD */
+
+return name
+.substring(0,2)
+.toUpperCase();
+
+}
+
 function loadNextBillNo(){
 
-  let fyKey =
-    "lastBill_" +
-    activeCompany +
-    "_" +
-    financialYear;
+let prefix =
+getCompanyPrefix();
 
-  let nextBill =
-    localStorage.getItem(fyKey) ||
-    financialYear + "-001";
+let fy =
+financialYear;
 
-  document.getElementById("billNo").value = nextBill;
+let fyKey =
+"lastBill_" +
+activeCompany +
+"_" +
+fy;
+
+let lastNo = parseInt(
+localStorage.getItem(fyKey)
+);
+
+if(isNaN(lastNo)){
+lastNo = 1;
+}
+
+let nextBill =
+
+`${prefix}/${fy}/${String(lastNo).padStart(3,"0")}`;
+
+document.getElementById(
+"billNo"
+).value = nextBill;
+
 }
 
 
@@ -2609,6 +3205,40 @@ showToast("Logged Out");
 }
 
 
+
+function toggleTopMenu(){
+
+let menu =
+document.getElementById("topMenu");
+
+menu.style.display =
+
+menu.style.display === "flex"
+? "none"
+: "flex";
+
+}
+
+/* OUTSIDE CLICK */
+
+document.addEventListener("click",(e)=>{
+
+let menu =
+document.getElementById("topMenu");
+
+if(
+!e.target.closest(".top-menu")
+&&
+!e.target.closest(".menu-btn")
+){
+
+menu.style.display = "none";
+
+}
+
+});
+
+
 let deferredPrompt = null;
 
 
@@ -2828,17 +3458,39 @@ maximumFractionDigits:2
 
 function toggleSection(id){
 
-let section =
+let el =
 document.getElementById(id);
 
-if(section.style.display === "none"
-|| section.style.display === ""){
+if(!el) return;
 
-section.style.display = "block";
+/* MAIN CARD */
+
+let wrapper =
+el.closest(".trip-form-card");
+
+/* OPEN */
+
+if(
+el.style.display === "none"
+||
+el.style.display === ""
+){
+
+el.style.display = "block";
+
+if(wrapper){
+wrapper.classList.add("show");
+}
+
+/* CLOSE */
 
 }else{
 
-section.style.display = "none";
+el.style.display = "none";
+
+if(wrapper){
+wrapper.classList.remove("show");
+}
 
 }
 
@@ -3977,8 +4629,8 @@ activeCompany
 
 document.getElementById(
 "topCompanyName"
-).innerHTML =
-"🏢 " + activeCompany;
+).innerText =
+activeCompany;
 
 /* HIDE MODAL */
 
