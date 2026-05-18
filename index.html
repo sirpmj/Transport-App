@@ -1787,18 +1787,62 @@ onclick="closeCustomerListModal()">
 </div>
 
 <div class="field">
+
+<label>Material Group</label>
+
+<select
+id="editMaterialGroup"
+onchange="applyEditRouteFreight()">
+
+<option value="">
+Select Group
+</option>
+
+<option value="CSL">
+CSL
+</option>
+
+<option value="Powder">
+Powder
+</option>
+
+<option value="Hypo">
+Hypo
+</option>
+
+</select>
+
+</div>
+
+<div class="field">
 <label>Material</label>
 <input type="text" id="editMaterial">
 </div>
 
 <div class="field">
 <label>Loading From</label>
-<input type="text" id="editLoadingPoint">
+<select
+id="editLoadingPoint"
+onchange="applyEditRouteFreight()">
+
+<option value="">
+Select Loading Point
+</option>
+
+</select>
 </div>
 
 <div class="field">
 <label>Unload To</label>
-<input type="text" id="editUnloadingPoint">
+<select
+id="editUnloadingPoint"
+onchange="applyEditRouteFreight()">
+
+<option value="">
+Select Unloading Point
+</option>
+
+</select>
 </div>
 
 <div class="field">
@@ -1853,6 +1897,10 @@ onclick="shareLRPDF(trips[currentTripIndex].id)">
 </div>
 
 </div>
+
+
+
+
 
 
 
@@ -2063,6 +2111,9 @@ onclick="closeAddRoutePopup()">
 </div>
 
 </div>
+
+
+
 
 <!-- ADD TRIP -->
 
@@ -4278,6 +4329,140 @@ document.getElementById(
 
 }
 
+
+
+function loadEditRoutePoints(){
+
+let loading =
+document.getElementById(
+"editLoadingPoint"
+);
+
+let unloading =
+document.getElementById(
+"editUnloadingPoint"
+);
+
+if(!loading || !unloading)
+return;
+
+/* UNIQUE POINTS */
+
+let points = [];
+
+routeRates.forEach(r=>{
+
+if(r.from &&
+!points.includes(r.from)){
+
+points.push(r.from);
+
+}
+
+if(r.to &&
+!points.includes(r.to)){
+
+points.push(r.to);
+
+}
+
+});
+
+/* RESET */
+
+loading.innerHTML =
+`<option value="">Select Loading Point</option>`;
+
+unloading.innerHTML =
+`<option value="">Select Unloading Point</option>`;
+
+/* ADD OPTIONS */
+
+points.forEach(p=>{
+
+loading.innerHTML +=
+`<option value="${p}">${p}</option>`;
+
+unloading.innerHTML +=
+`<option value="${p}">${p}</option>`;
+
+});
+
+}
+
+
+function applyEditRouteFreight(){
+
+let from =
+document.getElementById(
+"editLoadingPoint"
+).value.trim();
+
+let to =
+document.getElementById(
+"editUnloadingPoint"
+).value.trim();
+
+let materialGroup =
+document.getElementById(
+"editMaterialGroup"
+).value
+.trim()
+.toLowerCase();
+
+/* FIND ROUTE */
+
+let route = routeRates.find(r => {
+
+let sameRoute =
+
+(r.from || "")
+.trim()
+.toLowerCase() == from.toLowerCase()
+
+&&
+
+(r.to || "")
+.trim()
+.toLowerCase() == to.toLowerCase();
+
+/* OLD DATA */
+
+if(!r.material){
+
+return sameRoute;
+
+}
+
+/* NEW DATA */
+
+return sameRoute &&
+
+(r.material || "")
+.trim()
+.toLowerCase() == materialGroup;
+
+});
+
+/* APPLY */
+
+if(route){
+
+document.getElementById(
+"editRate"
+).value = route.rate;
+
+}else{
+
+document.getElementById(
+"editRate"
+).value = "";
+
+}
+
+}
+
+
 function resetCompanyButton(){
 
 let saveBtn =
@@ -5533,7 +5718,7 @@ ${p}
 function editTrip(index){
 
 currentTripIndex = index;
-
+loadEditRoutePoints();
 let t = trips[index];
 
 document.getElementById("editDispatchDate").value =
@@ -5572,11 +5757,12 @@ t.lrNo || "";
 document.getElementById("editInvoice").value =
 t.invoiceNo || "";
 
+applyEditRouteFreight();
+
 document.getElementById("tripModal").style.display =
 "flex";
 
 }
-
 /* CLOSE */
 
 function closeTripModal(){
