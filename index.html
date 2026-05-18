@@ -628,7 +628,7 @@ font-size:14px;
 display:grid;
 
 grid-template-columns:
-1fr 260px;
+1fr 210px;
 
 gap:8px;
 
@@ -1934,6 +1934,7 @@ onclick="closeEditTankerModal()">
 <th>Sr</th>
 <th>From</th>
 <th>To</th>
+<th>Material</th>
 <th>Freight</th>
 <th>KM</th>
 <th>Action</th>
@@ -1994,6 +1995,30 @@ placeholder="Unloading Point">
 </div>
 
 <div class="field">
+<label>Material Group</label>
+
+<select id="routeMaterial">
+
+<option value="">
+Select Group
+</option>
+
+<option value="CSL">
+CSL
+</option>
+
+<option value="Powder">
+Powder
+</option>
+
+<option value="Hypo">
+Hypo
+</option>
+
+</select>
+</div>
+
+<div class="field">
 <label>Freight Rate</label>
 
 <input
@@ -2012,6 +2037,7 @@ id="routeKM"
 placeholder="KM">
 
 </div>
+
 </div>
 
 <div class="modal-actions">
@@ -2081,12 +2107,40 @@ id="consigneeName"
 list="consigneeList">
 </div>
 
+
+<div class="field">
+<label>Material Group</label>
+
+<select
+id="materialGroup"
+onchange="applyRouteFreight()">
+
+<option value="">
+Select Group
+</option>
+
+<option value="CSL">
+CSL
+</option>
+
+<option value="Powder">
+Powder
+</option>
+
+<option value="Hypo">
+Hypo
+</option>
+
+</select>
+</div>
+
 <div class="field">
 <label>Material</label>
 <input
 type="text"
 id="material"
-list="materialList">
+list="materialList"
+onchange="applyRouteFreight()">
 </div>
 
 <div class="field">
@@ -3925,13 +3979,16 @@ document.getElementById("routeFrom").value.trim();
 let to =
 document.getElementById("routeTo").value.trim();
 
+let material =
+document.getElementById("routeMaterial").value.trim();
+
 let rate =
 document.getElementById("routeRate").value;
 
 let km =
 document.getElementById("routeKM").value;
 
-if(!from || !to || !rate){
+if(!from || !to || !material || !rate){
 
 alert("Fill all fields");
 return;
@@ -3942,6 +3999,7 @@ routeRates.push({
 
 from,
 to,
+material,
 rate,
 km
 
@@ -3951,16 +4009,23 @@ localStorage.setItem(
 "routeRates",
 JSON.stringify(routeRates)
 );
+
 await saveData();
+
 showRouteFreight();
+
 loadRoutePoints();
+
 loadRouteDropdown();
 
 document.getElementById("routeFrom").value="";
 document.getElementById("routeTo").value="";
+document.getElementById("routeMaterial").value="";
 document.getElementById("routeRate").value="";
 document.getElementById("routeKM").value="";
+
 closeAddRoutePopup();
+
 }
 
 
@@ -4019,7 +4084,7 @@ body.innerHTML += `
 <td>${r.from}</td>
 
 <td>${r.to}</td>
-
+<td>${r.material || "-"}</td>
 <td>₹${r.rate}</td>
 <td>${r.km || "-"}</td>
 <td class="route-actions">
@@ -4060,6 +4125,10 @@ document.getElementById(
 ).value = r.to || "";
 
 document.getElementById(
+"routeMaterial"
+).value = r.material || "";
+
+document.getElementById(
 "routeRate"
 ).value = r.rate || "";
 
@@ -4077,7 +4146,9 @@ localStorage.setItem(
 "routeRates",
 JSON.stringify(routeRates)
 );
+
 saveData();
+
 /* OPEN POPUP */
 
 openAddRoutePopup();
@@ -4139,21 +4210,53 @@ function applyRouteFreight(){
 let from =
 document.getElementById(
 "loadingPoint"
-).value;
+).value.trim();
 
 let to =
 document.getElementById(
 "unloadingPoint"
-).value;
+).value.trim();
+
+let materialGroup =
+document.getElementById(
+"materialGroup"
+).value
+.trim()
+.toLowerCase();
 
 /* FIND ROUTE */
 
-let route = routeRates.find(r =>
+let route = routeRates.find(r => {
 
-r.from == from &&
-r.to == to
+let sameRoute =
 
-);
+(r.from || "")
+.trim()
+.toLowerCase() == from.toLowerCase()
+
+&&
+
+(r.to || "")
+.trim()
+.toLowerCase() == to.toLowerCase();
+
+/* OLD DATA */
+
+if(!r.material){
+
+return sameRoute;
+
+}
+
+/* NEW DATA */
+
+return sameRoute &&
+
+(r.material || "")
+.trim()
+.toLowerCase() == materialGroup;
+
+});
 
 /* APPLY */
 
@@ -4174,8 +4277,6 @@ document.getElementById(
 }
 
 }
-
-
 
 function resetCompanyButton(){
 
