@@ -1910,6 +1910,7 @@ onclick="closeEditTankerModal()">
 <th>From</th>
 <th>To</th>
 <th>Freight</th>
+<th>KM</th>
 <th>Action</th>
 
 </tr>
@@ -3835,6 +3836,9 @@ document.getElementById("routeTo").value.trim();
 let rate =
 document.getElementById("routeRate").value;
 
+let km =
+document.getElementById("routeKM").value;
+
 if(!from || !to || !rate){
 
 alert("Fill all fields");
@@ -3846,7 +3850,8 @@ routeRates.push({
 
 from,
 to,
-rate
+rate,
+km
 
 });
 
@@ -3862,6 +3867,7 @@ loadRouteDropdown();
 document.getElementById("routeFrom").value="";
 document.getElementById("routeTo").value="";
 document.getElementById("routeRate").value="";
+document.getElementById("routeKM").value="";
 closeAddRoutePopup();
 }
 
@@ -3923,7 +3929,7 @@ body.innerHTML += `
 <td>${r.to}</td>
 
 <td>₹${r.rate}</td>
-
+<td>${r.km || "-"}</td>
 <td class="route-actions">
 
 <button
@@ -3964,6 +3970,10 @@ document.getElementById(
 document.getElementById(
 "routeRate"
 ).value = r.rate || "";
+
+document.getElementById(
+"routeKM"
+).value = r.km || "";
 
 /* DELETE OLD */
 
