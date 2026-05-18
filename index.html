@@ -575,46 +575,6 @@ margin-bottom:10px;
 
 }
 
-@media(max-width:768px){
-
-.top-search-row{
-
-grid-template-columns:
-1fr 1fr;
-
-gap:6px;
-
-}
-
-.bill-box{
-grid-column:1 / -1;
-}
-
-.btn-row{
-
-grid-column:1 / -1;
-
-display:grid;
-
-grid-template-columns:
-repeat(3,1fr);
-
-gap:5px;
-
-}
-
-.btn-row button{
-
-width:100%;
-min-width:0;
-
-font-size:11px;
-
-padding:8px 4px;
-
-}
-
-}
 
 /* BILL */
 
@@ -664,44 +624,108 @@ font-size:12px;
 @media(max-width:768px){
 
 .top-search-row{
+
 display:grid;
-grid-template-columns:1fr 1fr;
-gap:6px;
+
+grid-template-columns:
+1fr 140px;
+
+gap:8px;
+
+align-items:center;
+
 overflow:visible;
+
 }
+
+/* ROW 1 */
+
+.search-input{
+grid-column:1;
+grid-row:1;
+}
+
+.bill-box{
+
+grid-column:2;
+grid-row:1;
+
+width:100%;
+min-width:0;
+
+}
+
+/* ROW 2 */
+
+.month-filter{
+grid-column:1;
+grid-row:2;
+}
+
+.year-filter{
+grid-column:2;
+grid-row:2;
+}
+
+/* SEARCH */
 
 .top-search-row #searchBox{
 width:100%;
 min-width:0;
 }
 
-.bill-box{
-width:100%;
-min-width:0;
-}
+/* BILL */
 
 .bill-box input{
 width:100%;
 min-width:0;
 }
 
+/* BUTTONS */
+
 .btn-row{
+
 grid-column:1 / -1;
+grid-row:3;
+
 display:grid;
-grid-template-columns:repeat(3,1fr);
+
+grid-template-columns:
+repeat(3,1fr);
+
 gap:5px;
+
 }
 
 .btn-row button{
+
 width:100%;
 min-width:0;
+
 font-size:11px;
+
 padding:8px 0;
+
 }
 
+/* TABS */
+
 .bill-tabs button{
+
 font-size:11px;
 padding:8px;
+
+}
+
+/* INPUT SIZE */
+
+.top-search-row input,
+.top-search-row select{
+
+height:42px;
+
+font-size:13px;
+
 }
 
 }
@@ -2166,6 +2190,7 @@ placeholder="Total Freight">
 <input
 type="text"
 id="searchBox"
+class="search-input"
 placeholder="🔍 Search..."
 oninput="showTrips()">
 
@@ -2174,6 +2199,7 @@ oninput="showTrips()">
 
 <select
 id="monthFilter"
+class="month-filter"
 onchange="showTrips()">
 
 <option value="current">
@@ -2204,6 +2230,7 @@ All Months
 
 <select
 id="yearFilter"
+class="year-filter"
 onchange="showTrips()">
 
 <option value="all">
@@ -2232,6 +2259,7 @@ Bill No
 <input
 type="text"
 id="billNo"
+class="bill-input"
 placeholder="Bill No">
 
 </div>
