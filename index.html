@@ -2449,12 +2449,13 @@ const db = firebase.firestore();
 const MASTER_ADMIN_UID = "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
 let activeCompany = "";
 
-let financialYear =
-getFinancialYear();
+let financialYear =getFinancialYear();
 let originalCompanyName = "";
 let companyEditMode = false;
 let isSavingCompany = false;
 let currentBillView = "Pending";
+let userCompanyAccess = {};
+
 
 let trips =
 
@@ -3042,15 +3043,6 @@ let currentUser = null;
 
 const ADMIN_EMAIL = "sirpmj@gmail.com";
 
-let userCompanyAccess = {
-
-"suresh@gmail.com": [
-"Hariom Logistics",
-"Hariom Roadlines"
-]
-
-};
-
 function getAllowedCompanies(){
 
 let email =
@@ -3072,39 +3064,76 @@ currentUser.email === ADMIN_EMAIL;
 }
 /* REGISTER */
 
-function registerUser(){
+async function registerUser(){
 
 let email =
-document.getElementById("loginEmail").value;
+document.getElementById(
+"loginEmail"
+).value.trim();
 
 let password =
-document.getElementById("loginPassword").value;
+document.getElementById(
+"loginPassword"
+).value;
 
 if(!email || !password){
 
-alert("Enter email & password");
+alert(
+"Enter email & password"
+);
+
 return;
 
 }
 
-auth.createUserWithEmailAndPassword(
+try{
+
+/* CREATE AUTH USER */
+
+let userCredential =
+
+await auth
+.createUserWithEmailAndPassword(
 email,
 password
-)
+);
 
-.then(()=>{
+/* SAVE USER */
 
-alert("Registration Successful");
+await db
+.collection("users")
+.doc(userCredential.user.uid)
+.set({
 
-})
+email:
+email.toLowerCase(),
 
-.catch(err=>{
+approved:false,
 
-alert(err.message);
+role:"user",
+
+companies:{},
+
+createdAt:Date.now()
 
 });
 
+/* LOGOUT */
+
+await auth.signOut();
+
+alert(
+"Registration Submitted.\nWaiting for Admin Approval."
+);
+
+}catch(err){
+
+alert(err.message);
+
 }
+
+}
+
 
 /* LOGIN */
 
@@ -3134,6 +3163,40 @@ alert(err.message);
 auth.onAuthStateChanged(async user=>{
 
 if(user){
+
+/* CHECK APPROVAL */
+
+let doc = await db
+.collection("users")
+.doc(user.uid)
+.get();
+
+if(!doc.exists){
+
+await auth.signOut();
+
+alert(
+"User data not found"
+);
+
+return;
+
+}
+
+let userData =
+doc.data();
+
+if(!userData.approved){
+
+await auth.signOut();
+
+alert(
+"Pending Admin Approval"
+);
+
+return;
+
+}
 
 currentUser = user;
 
