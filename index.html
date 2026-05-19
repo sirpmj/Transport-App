@@ -628,7 +628,7 @@ font-size:14px;
 display:grid;
 
 grid-template-columns:
-1fr 210px;
+1fr 230px;
 
 gap:8px;
 
@@ -1529,7 +1529,7 @@ onclick="openCustomerModal()">
 </div>
 
 <h3>
-Tanker
+Vehicle
 </h3>
 
 <p>
@@ -1627,7 +1627,7 @@ onclick="toggleSection('tripSection')">
 
 <div class="modal-box">
 
-<h2>✏️ Edit Customer</h2>
+<h2>✏️ Add Customer</h2>
 
 <div class="modal-grid">
 
@@ -1663,7 +1663,7 @@ onclick="toggleSection('tripSection')">
 
 <div class="modal-box" style="max-width:1000px;">
 
-<h2>🚛 Tanker List</h2>
+<h2>🚛 Vehicle List</h2>
 
 <div style="overflow:auto;">
 
@@ -1910,7 +1910,7 @@ onclick="shareLRPDF(trips[currentTripIndex].id)">
 
 <div class="modal-box" style="max-width:700px;">
 
-<h2>✏️ Edit Tanker</h2>
+<h2>✏️ Add Vehicle</h2>
 
 <div class="form-grid">
 
@@ -1969,7 +1969,7 @@ onclick="closeEditTankerModal()">
 
 <div class="modal-box" style="max-width:900px;">
 
-<h2>🛣️ Trip Route Freight</h2>
+<h2>🛣️ Route List</h2>
 
 <div style="overflow:auto;">
 
@@ -2432,7 +2432,7 @@ onclick="toggleAllRows(this)">
 <th>A/C Customer</th>
 <th>Consignor</th>
 <th>Consignee</th>
-<th>Tanker</th>
+<th>Vehicle</th>
 <th>From</th>
 <th>To</th>
 <th>Material</th>
@@ -6533,32 +6533,20 @@ Paid
 
 <td>
 
-<button
-class="action-btn green"
-onclick="editTrip(${index})">
-✏️
-</button>
 
 <button
 class="action-btn orange"
 onclick="printLR(${t.id})">
-LR📄
+LR📤
 </button>
 
 <button
-class="action-btn purple"
-onclick="shareBillPDF(${originalIndex})">
-
-📤
-
+class="action-btn"
+onclick="viewBill(${t.id})">
+INV📤
 </button>
-<button
-class="action-btn purple"
-onclick="printSingleBill(${t.id})">
 
-🖨️
 
-</button>
 <button
 class="action-btn red"
 onclick="deleteTrip(${index})">
@@ -6792,9 +6780,45 @@ class="bill-check">
 </td>
 
 <td>${i+1}</td>
-<td>${t.party}</td>
-<td>${t.tanker}</td>
-<td>${t.totalFreight}</td>
+
+<td>${formatDate(t.dispatchDate)}</td>
+
+<td>${t.billNo || "-"}</td>
+
+<td>${t.invoiceNo || ""}</td>
+
+<td>${t.lrNo || ""}</td>
+
+<td>${t.party || ""}</td>
+
+<td>${t.loadingParty || ""}</td>
+
+<td>${t.consigneeName || ""}</td>
+
+<td>${t.tanker || ""}</td>
+
+<td>${t.loadingPoint || ""}</td>
+
+<td>${t.unloadingPoint || ""}</td>
+
+<td>${t.material || ""}</td>
+
+<td>${Number(t.qty || 0).toFixed(3)}</td>
+
+<td>
+₹${Number(t.freightRate || 0)
+.toLocaleString("en-IN")}
+</td>
+
+<td>
+₹${Number(t.totalFreight || 0)
+.toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+</td>
+
+<td>${t.billStatus || ""}</td>
 
 </tr>
 
@@ -6811,11 +6835,41 @@ win.document.write(`
 <table border="1" cellpadding="10">
 
 <tr>
+
 <th>Select</th>
+
 <th>Sr</th>
+
+<th>Date</th>
+
+<th>Bill No</th>
+
+<th>Invoice No</th>
+
+<th>L.R. No</th>
+
 <th>Party</th>
-<th>Tanker</th>
-<th>Amount</th>
+
+<th>Consignor</th>
+
+<th>Consignee</th>
+
+<th>Vehicle No</th>
+
+<th>From</th>
+
+<th>To</th>
+
+<th>Material</th>
+
+<th>Qty</th>
+
+<th>Rate</th>
+
+<th>Total Freight</th>
+
+<th>Status</th>
+
 </tr>
 
 ${html}
@@ -6824,9 +6878,6 @@ ${html}
 
 <br>
 
-<button onclick="generateBill()">
-Generate Bill
-</button>
 
 <script>
 
@@ -7665,7 +7716,6 @@ localStorage.getItem(
 ) || "{}"
 );
 
-
 /* SAME BILL NO TRIPS */
 
 let billTrips =
@@ -7736,13 +7786,81 @@ win.document.write(`
 
 <title>View Bill</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+
 ${getBillStyle()}
+
+<style>
+
+.top-buttons{
+
+position:fixed;
+top:10px;
+right:10px;
+display:flex;
+gap:10px;
+z-index:99999;
+
+}
+
+.top-buttons button{
+
+padding:10px 16px;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+color:#fff;
+
+}
+
+.share-btn{
+
+background:#0a7cff;
+
+}
+
+.print-btn{
+
+background:#222;
+
+}
+
+@media print{
+
+.top-buttons{
+
+display:none;
+
+}
+
+}
+
+</style>
 
 </head>
 
 <body>
 
-<div class="bill">
+<div class="top-buttons">
+
+<button
+class="share-btn"
+onclick="shareCurrentBill()">
+📤 Share PDF
+</button>
+
+<button
+class="print-btn"
+onclick="window.print()">
+🖨️ Print
+</button>
+
+</div>
+
+<div class="bill print-bill">
 
 <div class="top">
 
@@ -7779,13 +7897,6 @@ ${company.gstin || ""}
 
 <div class="info">
 
-<b>Invoice No   :</b>
-${t.billNo ? t.billNo : "Not Generated"}
-<br><br>
-
-<b>Invoice Date :</b>
-${formatDate(new Date())}
-
 </div>
 
 </div>
@@ -7796,25 +7907,52 @@ Transport Invoice
 
 </div>
 
-<div class="party">
+<div class="party" style="
+border:1px solid #000;
+padding:10px 12px;
+margin-bottom:15px;
+position:relative;
+min-height:85px;
+">
 
-<div style="line-height:1.2;">
+<div style="
+padding-right:220px;
+line-height:1.4;
+">
 
-<b>Party :</b>
-${t.party || ""}
+<b>Customer :</b>
+${t.party}
 
 <div style="
 font-size:13px;
 color:#555;
 white-space:pre-line;
-margin-top:2px;
-padding:0;
-line-height:1.2;
+margin-top:4px;
+line-height:1.4;
 ">
 ${getCustomerAddress(t.party)}
 </div>
 
+</div>
 
+<div style="
+position:absolute;
+top:10px;
+right:12px;
+text-align:right;
+font-size:13px;
+line-height:1.8;
+">
+
+<div>
+<b>Invoice No :</b>
+${t.billNo || "-"}
+</div>
+
+<div>
+<b>Invoice Date :</b>
+${formatDate(new Date())}
+</div>
 
 </div>
 
@@ -7863,7 +8001,7 @@ padding:6px;
 text-align:right;
 white-space:nowrap;
 ">
-${(Math.round(total) - total).toFixed(2)}
+₹${(Math.round(total) - total).toFixed(2)}
 </td>
 
 </tr>
@@ -7915,7 +8053,6 @@ ${numberToWords(Math.round(total))} Rupees Only
 
 </table>
 
-
 <div class="bottom-section">
 
 <div class="bank">
@@ -7938,6 +8075,7 @@ For ${company.name || ""}
 <br><br><br><br>
 
 Authorised Signatory
+
 </div>
 
 </div>
@@ -7954,6 +8092,107 @@ This is a computer generated freight bill.
 
 </div>
 
+<script>
+
+async function shareCurrentBill(){
+
+try{
+
+const bill =
+document.querySelector(".print-bill");
+
+const canvas =
+await html2canvas(
+bill,
+{
+scale:1,
+backgroundColor:"#ffffff",
+useCORS:true
+}
+);
+
+const imgData =
+canvas.toDataURL(
+'image/jpeg',
+0.7
+);
+
+const { jsPDF } =
+window.jspdf;
+
+const pdf =
+new jsPDF(
+'p',
+'mm',
+'a4'
+);
+
+const pdfWidth = 210;
+
+const pdfHeight =
+Math.min(
+295,
+(canvas.height * pdfWidth)
+/ canvas.width
+);
+
+pdf.addImage(
+imgData,
+'PNG',
+0,
+0,
+pdfWidth,
+pdfHeight
+);
+
+const blob =
+pdf.output('blob');
+
+const file =
+new File(
+[blob],
+'Transport-Bill.pdf',
+{
+type:'application/pdf'
+}
+);
+
+if(
+navigator.share &&
+navigator.canShare &&
+navigator.canShare({
+files:[file]
+})
+){
+
+await navigator.share({
+
+title:'Transport Bill',
+
+files:[file]
+
+});
+
+}else{
+
+pdf.save(
+'Transport-Bill.pdf'
+);
+
+}
+
+}catch(err){
+
+console.log(err);
+
+alert("Share Failed");
+
+}
+
+}
+
+<\/script>
+
 </body>
 
 </html>
@@ -7963,7 +8202,6 @@ This is a computer generated freight bill.
 win.document.close();
 
 }
-
 /* PRINT BILL */
 
 function printSingleBill(id){
@@ -8513,7 +8751,7 @@ ${t.unloadingPoint || "-"}
 <th>Description Of Goods</th>
 <th width="15%">Qty</th>
 <th width="10%">Unit</th>
-<th width="15%">Vehicle</th>
+<th width="15%">Remark</th>
 
 </tr>
 
@@ -8534,7 +8772,7 @@ MT
 </td>
 
 <td>
-TANKER
+
 </td>
 
 </tr>
@@ -8590,7 +8828,6 @@ For ${company.name || ""}
 <br><br><br>
 
 Authorised Signatory
-</div>
 
 </div>
 
@@ -8616,15 +8853,55 @@ win.document.write(`
 
 <title>Lorry Receipt</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+
 <style>
 
 body{
 
 font-family:Arial;
-background:#fff;
-padding:0;
+background:#f5f5f5;
+padding:10px;
 margin:0;
 color:#000;
+
+}
+
+/* BUTTONS */
+
+.top-buttons{
+
+position:fixed;
+top:10px;
+right:10px;
+display:flex;
+gap:10px;
+z-index:99999;
+
+}
+
+.top-buttons button{
+
+padding:10px 16px;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+color:#fff;
+
+}
+
+.share-btn{
+
+background:#0a7cff;
+
+}
+
+.print-btn{
+
+background:#222;
 
 }
 
@@ -8632,17 +8909,14 @@ color:#000;
 
 .lr{
 
-width:100%;
-
-height:48vh;
-
+width:190mm;
+min-height:135mm;
 margin:0 auto;
-
 border:2px solid #000;
-
 box-sizing:border-box;
-
 overflow:hidden;
+background:#fff;
+page-break-inside:avoid;
 
 }
 
@@ -8903,14 +9177,10 @@ text-align:center;
 .cut-line{
 
 border-top:2px dashed #000;
-
-margin:6px 0;
+margin:6px auto;
+width:190mm;
 
 }
-
-/* PRINT */
-
-@media print{
 
 @page{
 
@@ -8919,18 +9189,25 @@ margin:6mm;
 
 }
 
+@media print{
+
 body{
 
-margin:0;
+background:#fff;
 padding:0;
+
+}
+
+.top-buttons{
+
+display:none;
 
 }
 
 .lr{
 
-height:47.50vh;
-
-page-break-inside:avoid;
+width:190mm;
+min-height:135mm;
 
 }
 
@@ -8942,6 +9219,22 @@ page-break-inside:avoid;
 
 <body>
 
+<div class="top-buttons">
+
+<button
+class="share-btn"
+onclick="shareCurrentLR()">
+📤 Share PDF
+</button>
+
+<button
+class="print-btn"
+onclick="window.print()">
+🖨️ Print
+</button>
+
+</div>
+
 ${lrTemplate("CONSIGNEE COPY")}
 
 <div class="cut-line"></div>
@@ -8950,15 +9243,125 @@ ${lrTemplate("CONSIGNOR COPY")}
 
 <script>
 
-window.onload = function(){
+async function shareCurrentLR(){
 
-setTimeout(()=>{
+try{
 
-window.print();
+const buttons =
+document.querySelector(".top-buttons");
 
-},500);
+buttons.style.display = "none";
 
-};
+const { jsPDF } =
+window.jspdf;
+
+const pdf =
+new jsPDF(
+'p',
+'mm',
+'a4'
+);
+
+const lrs =
+document.querySelectorAll(".lr");
+
+for(let i=0;i<lrs.length;i++){
+
+const canvas =
+await html2canvas(
+lrs[i],
+{
+scale:2,
+backgroundColor:"#ffffff",
+useCORS:true
+}
+);
+
+const imgData =
+canvas.toDataURL(
+'image/jpeg',
+0.9
+);
+
+/* A4 */
+
+const pageWidth = 210;
+
+const pageHeight = 297;
+
+const margin = 6;
+
+const imgWidth =
+pageWidth - (margin * 2);
+
+const imgHeight =
+(canvas.height * imgWidth)
+/ canvas.width;
+
+if(i > 0){
+
+pdf.addPage();
+
+}
+
+pdf.addImage(
+imgData,
+'JPEG',
+margin,
+8,
+imgWidth,
+imgHeight
+);
+
+}
+
+buttons.style.display = "flex";
+
+const blob =
+pdf.output('blob');
+
+const file =
+new File(
+[blob],
+'LR-Copy.pdf',
+{
+type:'application/pdf'
+}
+);
+
+if(navigator.share){
+
+try{
+
+await navigator.share({
+
+title:'LR Copy',
+
+files:[file]
+
+});
+
+}catch(err){
+
+pdf.save('LR-Copy.pdf');
+
+}
+
+}else{
+
+pdf.save('LR-Copy.pdf');
+
+}
+
+}catch(err){
+
+console.log(err);
+
+alert("Share Failed");
+
+}
+
+}
 
 <\/script>
 
@@ -9030,196 +9433,12 @@ alert(
 
 }
 
-async function shareBillPDF(index){
 
-let trip = trips[index];
+/* =========================
+COMMON BILL HTML
+========================= */
 
-if(!trip){
-
-alert("Trip Not Found");
-return;
-
-}
-
-/* HTML */
-
-let container =
-document.getElementById(
-"billPDFContainer"
-);
-
-container.innerHTML =
-getBillHTML(trip);
-
-/* WAIT */
-
-await new Promise(resolve =>
-setTimeout(resolve,1000)
-);
-
-try{
-
-/* CANVAS */
-
-const canvas =
-await html2canvas(container,{
-
-scale:2,
-useCORS:true
-
-});
-
-/* IMAGE */
-
-const imgData =
-canvas.toDataURL(
-'image/png'
-);
-
-/* PDF */
-
-const {
-jsPDF
-} = window.jspdf;
-
-const pdf =
-new jsPDF(
-'p',
-'mm',
-'a4'
-);
-
-/* SIZE */
-
-const pdfWidth =
-210;
-
-const pageHeight =
-295;
-
-const imgWidth =
-pdfWidth;
-
-const imgHeight =
-canvas.height *
-imgWidth /
-canvas.width;
-
-let heightLeft =
-imgHeight;
-
-let position = 0;
-
-/* FIRST PAGE */
-
-pdf.addImage(
-
-imgData,
-
-'PNG',
-
-0,
-
-position,
-
-imgWidth,
-
-imgHeight
-
-);
-
-heightLeft -= pageHeight;
-
-/* MULTI PAGE */
-
-while(heightLeft > 0){
-
-position =
-heightLeft - imgHeight;
-
-pdf.addPage();
-
-pdf.addImage(
-
-imgData,
-
-'PNG',
-
-0,
-
-position,
-
-imgWidth,
-
-imgHeight
-
-);
-
-heightLeft -= pageHeight;
-
-}
-
-/* BLOB */
-
-const blob =
-pdf.output('blob');
-
-/* FILE */
-
-const file =
-new File(
-
-[blob],
-
-`Bill-${trip.billNo}.pdf`,
-
-{
-type:'application/pdf'
-}
-
-);
-
-/* SHARE */
-
-if(
-
-navigator.canShare &&
-
-navigator.canShare({
-files:[file]
-})
-
-){
-
-await navigator.share({
-
-title:"Transport Bill",
-
-files:[file]
-
-});
-
-}else{
-
-pdf.save(
-`Bill-${trip.billNo}.pdf`
-);
-
-}
-
-}catch(err){
-
-console.log(err);
-
-alert(
-"PDF Generation Failed"
-);
-
-}
-
-}
-
-function getBillHTML(t){
+function buildPrintBillHTML(t){
 
 let company =
 JSON.parse(
@@ -9228,8 +9447,12 @@ localStorage.getItem(
 ) || "{}"
 );
 
+/* SAME BILL NO TRIPS */
+
 let billTrips =
-trips.filter(x => x.billNo === t.billNo);
+trips.filter(
+x => x.billNo === t.billNo
+);
 
 if(billTrips.length===0){
 
@@ -9238,147 +9461,14 @@ billTrips = [t];
 }
 
 let total = 0;
+
 let rows = "";
 
 billTrips.forEach((b,index)=>{
 
-total += Number(b.totalFreight || 0);
-
-rows += `
-
-<tr>
-
-<td>${index+1}</td>
-
-<td>${formatDate(b.dispatchDate)}</td>
-
-<td>${b.invoiceNo || ""}</td>
-
-<td>${b.tanker || ""}</td>
-
-<td>${b.lrNo || ""}</td>
-
-<td>${b.loadingPoint || ""}</td>
-
-<td>${b.unloadingPoint || ""}</td>
-
-<td>${b.material || ""}</td>
-
-<td>${Number(b.qty || 0).toFixed(3)}</td>
-
-<td>${Number(b.freightRate || 0)}</td>
-
-<td>${Number(b.totalFreight || 0)}</td>
-
-</tr>
-
-`;
-
-});
-
-return `
-
-<div style="
-font-family:Arial;
-padding:20px;
-background:#fff;
-color:#000;
-">
-
-<h2 style="text-align:center;">
-${company.name || ""}
-</h2>
-
-<h3 style="text-align:center;">
-Transport Invoice
-</h3>
-
-<p>
-<b>Party:</b>
-${t.party || ""}
-</p>
-
-<p>
-<b>Bill No:</b>
-${t.billNo || ""}
-</p>
-
-<table
-border="1"
-width="100%"
-cellpadding="5"
-cellspacing="0">
-
-<tr>
-
-<th>Sr</th>
-<th>Date</th>
-<th>Invoice</th>
-<th>Vehicle</th>
-<th>LR</th>
-<th>From</th>
-<th>To</th>
-<th>Material</th>
-<th>Qty</th>
-<th>Rate</th>
-<th>Total</th>
-
-</tr>
-
-${rows}
-
-<tr>
-
-<td colspan="10"
-align="right">
-
-<b>Grand Total</b>
-
-</td>
-
-<td>
-
-<b>
-₹${Math.round(total)}
-</b>
-
-</td>
-
-</tr>
-
-</table>
-
-</div>
-
-`;
-
-}
-
-
-function generateBillHTML(trip){
-
-let company =
-JSON.parse(
-localStorage.getItem(
-"companyInfo"
-) || "{}"
+total += Number(
+b.totalFreight || 0
 );
-
-let billTrips =
-trips.filter(x => x.billNo === trip.billNo);
-
-if(billTrips.length===0){
-
-billTrips = [trip];
-
-}
-
-let total = 0;
-let rows = "";
-
-billTrips.forEach((b,index)=>{
-
-total += Number(b.totalFreight || 0);
 
 rows += `
 
@@ -9406,14 +9496,21 @@ rows += `
 
 <td>${Number(b.qty || 0).toFixed(3)}</td>
 
-<td>${Number(b.freightRate || 0).toLocaleString("en-IN")}</td>
+<td>
+${Number(
+b.freightRate || 0
+).toLocaleString("en-IN")}
+</td>
 
 <td>
-${Number(b.totalFreight || 0)
-.toLocaleString("en-IN",{
+
+${Number(
+b.totalFreight || 0
+).toLocaleString("en-IN",{
 minimumFractionDigits:2,
 maximumFractionDigits:2
 })}
+
 </td>
 
 </tr>
@@ -9424,43 +9521,127 @@ maximumFractionDigits:2
 
 return `
 
-<div style="padding:20px;font-family:Arial;">
+${getBillStyle()}
 
-<h2 style="text-align:center;">
+<div class="bill">
+
+<div class="top">
+
+<div>
+
+<div class="company">
+
 ${company.name || ""}
-</h2>
 
-<h3 style="text-align:center;">
+</div>
+
+<div class="info">
+
+${(company.address || "")
+.replace(/\n/g,"<br>")}
+
+<br>
+
+Mobile:
+${company.mobile || ""}
+
+<br>
+
+Email:
+${company.email || ""}
+
+<br>
+
+GSTIN:
+${company.gstin || ""}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="title">
+
 Transport Invoice
-</h3>
 
-<p>
-<b>Customer:</b>
-${trip.party}
-</p>
+</div>
 
-<p>
-<b>Bill No:</b>
-${trip.billNo || ""}
-</p>
+<div class="party" style="
+border:1px solid #000;
+padding:10px 12px;
+margin-bottom:15px;
+position:relative;
+min-height:85px;
+">
 
-<table
-border="1"
-cellspacing="0"
-cellpadding="5"
-width="100%">
+<div style="
+padding-right:220px;
+line-height:1.4;
+">
+
+<b>Customer :</b>
+
+${t.party || ""}
+
+<div style="
+font-size:13px;
+color:#555;
+white-space:pre-line;
+margin-top:4px;
+line-height:1.4;
+">
+
+${getCustomerAddress(t.party)}
+
+</div>
+
+</div>
+
+<div style="
+position:absolute;
+top:10px;
+right:12px;
+text-align:right;
+font-size:13px;
+line-height:1.8;
+">
+
+<div>
+
+<b>Invoice No :</b>
+
+${t.billNo || "-"}
+
+</div>
+
+<div>
+
+<b>Invoice Date :</b>
+
+${formatDate(new Date())}
+
+</div>
+
+</div>
+
+</div>
+
+<table>
 
 <tr>
 
 <th>Sr</th>
 <th>Date</th>
-<th>Invoice</th>
-<th>Vehicle</th>
-<th>LR</th>
+<th>Invoice No</th>
+<th>Vehicle No</th>
+<th>L.R. No</th>
+<th>Consignor</th>
+<th>Consignee</th>
 <th>From</th>
 <th>To</th>
-<th>Material</th>
-<th>Qty</th>
+<th>Particulars</th>
+<th>Weight</th>
 <th>Rate</th>
 <th>Total</th>
 
@@ -9470,19 +9651,80 @@ ${rows}
 
 <tr>
 
-<td colspan="10"
-align="right">
+<td colspan="12"
+style="
+text-align:right;
+font-size:13px;
+font-weight:bold;
+padding:6px;
+">
 
-<b>Grand Total</b>
+Round Off
 
 </td>
 
-<td>
+<td style="
+font-size:13px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+">
 
-<b>
+₹${(
+Math.round(total) - total
+).toFixed(2)}
+
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="12"
+style="
+text-align:right;
+font-size:14px;
+font-weight:bold;
+padding:6px;
+white-space:nowrap;
+">
+
+Grand Total
+
+</td>
+
+<td style="
+font-size:15px;
+font-weight:bold;
+padding:6px;
+text-align:right;
+white-space:nowrap;
+min-width:120px;
+">
+
 ₹${Math.round(total)
 .toLocaleString("en-IN")}
-</b>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="13"
+style="
+text-align:left;
+font-size:14px;
+font-weight:bold;
+padding:10px;
+">
+
+Amount in Words :
+
+${numberToWords(
+Math.round(total)
+)} Rupees Only
 
 </td>
 
@@ -9490,11 +9732,95 @@ align="right">
 
 </table>
 
+<div class="bottom-section">
+
+<div class="bank">
+
+<h3>
+Terms & Conditions
+</h3>
+
+${(company.terms || "")
+.replace(/\n/g,"<br>")}
+
+</div>
+
+<div class="sign">
+
+<div class="sign-box">
+
+For ${company.name || ""}
+
+<br><br><br><br>
+
+Authorised Signatory
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+This is a computer generated freight bill.
+
+</div>
+
 </div>
 
 `;
 
 }
+
+
+
+/* =========================
+PRINT BILL
+========================= */
+
+function printSingleBill(id){
+
+let t =
+trips.find(x=>x.id===id);
+
+if(!t){
+
+alert("Bill not found");
+return;
+
+}
+
+let win =
+window.open("","_blank");
+
+win.document.write(
+buildPrintBillHTML(t)
+);
+
+win.document.close();
+
+setTimeout(()=>{
+
+win.print();
+
+win.onafterprint = ()=>{
+
+win.close();
+
+};
+
+},500);
+
+}
+
+
+
+/* =========================
+SHARE PDF
+========================= */
+
+
 
 /* EXPORT */
 
@@ -9735,16 +10061,15 @@ navigator.serviceWorker.register(
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<div
-id="billPDFContainer"
+<div id="billPDFContainer"
 style="
-position:fixed;
-left:0;
+position:absolute;
+left:-99999px;
 top:0;
-width:210mm;
+width:1200px;
 background:#fff;
 padding:15px;
-z-index:-9999;
+z-index:-1;
 ">
 </div>
 
