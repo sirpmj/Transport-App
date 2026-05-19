@@ -592,18 +592,72 @@ font-weight:700;
 margin:0;
 }
 
-/* BUTTONS */
+/* BUTTON ROW */
 
 .btn-row{
-display:flex;
-gap:5px;
+
+display:grid;
+
+grid-template-columns:
+repeat(3,1fr);
+
+gap:8px;
+
+margin-top:8px;
+
 }
 
 .btn-row button{
-padding:8px 0;
+
+width:100%;
+
 font-size:14px;
-white-space:nowrap;
-min-width:105px;
+
+padding:14px 0;
+
+border-radius:10px;
+
+font-weight:600;
+
+}
+
+/* MOBILE TABLE FIX */
+
+@media(max-width:768px){
+
+.table-wrap,
+.table-container,
+.table-responsive{
+
+width:100%;
+
+margin:0;
+
+overflow:auto;
+
+box-sizing:border-box;
+
+}
+
+/* TABLE */
+
+table{
+
+width:100%;
+
+min-width:900px;
+
+}
+
+/* CARD */
+
+.card{
+
+width:100%;
+box-sizing:border-box;
+
+}
+
 }
 
 /* TABS */
@@ -630,7 +684,7 @@ font-size:14px;
 display:flex;
 align-items:center;
 gap:6px;
-flex-wrap:wrap;
+flex-wrap:nowrap;
 
 }
 
@@ -638,7 +692,7 @@ flex-wrap:wrap;
 
 .search-input{
 
-flex:1 1 auto;
+flex:1;
 min-width:0;
 
 }
@@ -647,8 +701,8 @@ min-width:0;
 
 .bill-box{
 
-width:120px;
-flex:0 0 120px;
+width:110px;
+flex-shrink:0;
 
 }
 
@@ -661,20 +715,23 @@ box-sizing:border-box;
 
 }
 
-/* FORM / LAST */
+/* SEARCH + BILL SAME LINE */
 
-.top-search-row > *:last-child{
+.search-input,
+.bill-box{
 
-flex:0 0 auto;
+margin:0;
 
 }
 
-/* SECOND ROW */
+/* REST ITEMS NEXT LINE */
 
 .month-filter,
-.year-filter{
+.year-filter,
+.btn-row{
 
-flex:1;
+width:100%;
+margin-top:5px;
 
 }
 
@@ -682,15 +739,12 @@ flex:1;
 
 .btn-row{
 
-width:100%;
 display:grid;
 
 grid-template-columns:
 repeat(3,1fr);
 
 gap:5px;
-
-margin-top:4px;
 
 }
 
