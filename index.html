@@ -1988,12 +1988,12 @@ Select Unloading Point
 </div>
 
 <div class="field">
-<label>Quantity</label>
+<label>Quantity(Mt)</label>
 <input type="number" id="editQty">
 </div>
 
 <div class="field">
-<label>Freight Rate</label>
+<label>Freight Rate(Mt)</label>
 <input type="number" id="editRate">
 </div>
 
@@ -2022,7 +2022,7 @@ onclick="printLR(trips[currentTripIndex].id)">
 class="gray"
 onclick="shareLRPDF(trips[currentTripIndex].id)">
 
-📤 Share LR
+📤 LR Share
 
 </button>
 
@@ -2361,7 +2361,7 @@ onchange="applyRouteFreight()">
 
 
 <div class="field">
-<label>Quantity</label>
+<label>Quantity(Mt)</label>
 <input
 type="number"
 id="tripQty"
@@ -2382,7 +2382,7 @@ onchange="calculateFreight()">
 </div>
 
 <div class="field">
-<label>Freight Rate</label>
+<label>Freight Rate(Mt)</label>
 <input
 type="number"
 id="freightRate"
@@ -2573,8 +2573,8 @@ onclick="toggleAllRows(this)">
 <th>From</th>
 <th>To</th>
 <th>Material</th>
-<th>Qty</th>
-<th>Rate</th>
+<th>Qty(Mt)</th>
+<th>Rate(Mt)</th>
 <th>Freight</th>
 <th>L.R.</th>
 <th>Invoice</th>
@@ -3887,9 +3887,9 @@ let html = `
 <th>Tanker</th>
 <th>From</th>
 <th>To</th>
-<th>Qty</th>
+<th>Qty(Mt)</th>
 <th>Bill No</th>
-<th>Freight</th>
+<th>Freight(Mt)</th>
 
 </tr>
 
@@ -6999,9 +6999,9 @@ win.document.write(`
 
 <th>Material</th>
 
-<th>Qty</th>
+<th>Qty(Mt)</th>
 
-<th>Rate</th>
+<th>Rate(Mt)</th>
 
 <th>Total Freight</th>
 
@@ -7697,8 +7697,8 @@ ${formatDate(new Date())}
 <th>From</th>
 <th>To</th>
 <th>Material</th>
-<th>Weight</th>
-<th>Rate</th>
+<th>Qty(Mt)</th>
+<th>Rate(Mt)</th>
 <th>Total</th>
 
 </tr>
@@ -8109,8 +8109,8 @@ ${formatDate(new Date())}
 <th>From</th>
 <th>To</th>
 <th>Particulars</th>
-<th>Weight</th>
-<th>Rate</th>
+<th>Qty(Mt)</th>
+<th>Rate(Mt)</th>
 <th>Total</th>
 
 </tr>
@@ -8550,8 +8550,8 @@ ${formatDate(new Date())}
 <th>From</th>
 <th>To</th>
 <th>Particulars</th>
-<th>Weight</th>
-<th>Rate</th>
+<th>Qty(Mt)</th>
+<th>Rate(Mt)</th>
 <th>Total</th>
 
 </tr>
@@ -9778,8 +9778,8 @@ ${formatDate(new Date())}
 <th>From</th>
 <th>To</th>
 <th>Particulars</th>
-<th>Weight</th>
-<th>Rate</th>
+<th>Qty(Mt)</th>
+<th>Rate(Mt)</th>
 <th>Total</th>
 
 </tr>
