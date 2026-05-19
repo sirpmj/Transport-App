@@ -232,7 +232,7 @@ background:#fff;
 border-radius:14px;
 overflow:hidden;
 box-shadow:0 2px 10px rgba(0,0,0,.08);
-margin-bottom:15px;
+margin-bottom:6px;
 }
 
 thead{
@@ -240,29 +240,62 @@ background:#2563eb;
 color:#fff;
 }
 
+thead th{
+padding-top:5px;
+padding-bottom:5px;
+font-weight:600;
+}
+
 th,td{
-padding:6px 8px;
+padding:2px 5px;
+line-height:1.05;
 border-bottom:1px solid #e5e7eb;
-font-size:12px;
+font-size:12.50px;
 text-align:left;
 white-space:nowrap;
 }
 
 .status{
-padding:5px 10px;
-border-radius:20px;
+padding:2px 7px;
+border-radius:12px;
 font-size:12px;
 background:#dbeafe;
 color:#1d4ed8;
 display:inline-block;
 }
 
+.status-select{
+width:90px !important;
+min-width:90px;
+padding:3px 5px;
+font-size:12px;
+height:2px;
+}
+
+td:nth-child(17) select{
+width:90px;
+min-width:70px;
+height:22px;
+padding:1px 4px;
+font-size:13px;
+}
+
+td:nth-child(18) select{
+width:80px;
+min-width:70px;
+height:22px;
+padding:1px 4px;
+font-size:13px;
+}
+
 .action-btn{
 width:auto;
-padding:7px 10px;
-font-size:13px;
-border-radius:8px;
-margin:1px;
+padding:3px 6px;
+font-size:12px;
+border-radius:5px;
+margin:0;
+min-height:24px;
+line-height:1;
 }
 
 .green{
@@ -2500,7 +2533,7 @@ placeholder="Bill No">
 <div class="bill-tabs">
 
 <button onclick="currentBillView='Pending';showTrips();">
-📄 Pending
+📄 Pending LR
 </button>
 
 <button onclick="currentBillView='Billed';showTrips();">
@@ -2508,7 +2541,7 @@ placeholder="Bill No">
 </button>
 
 <button onclick="currentBillView='Paid';showTrips();">
-💰 Paid
+💰 Paid Bill
 </button>
 
 </div>
