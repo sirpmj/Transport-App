@@ -592,72 +592,18 @@ font-weight:700;
 margin:0;
 }
 
-/* BUTTON ROW */
+/* BUTTONS */
 
 .btn-row{
-
-display:grid;
-
-grid-template-columns:
-repeat(3,1fr);
-
-gap:8px;
-
-margin-top:8px;
-
+display:flex;
+gap:5px;
 }
 
 .btn-row button{
-
-width:100%;
-
+padding:8px 0;
 font-size:14px;
-
-padding:14px 0;
-
-border-radius:10px;
-
-font-weight:600;
-
-}
-
-/* MOBILE TABLE FIX */
-
-@media(max-width:768px){
-
-.table-wrap,
-.table-container,
-.table-responsive{
-
-width:100%;
-
-margin:0;
-
-overflow:auto;
-
-box-sizing:border-box;
-
-}
-
-/* TABLE */
-
-table{
-
-width:100%;
-
-min-width:900px;
-
-}
-
-/* CARD */
-
-.card{
-
-width:100%;
-box-sizing:border-box;
-
-}
-
+white-space:nowrap;
+min-width:105px;
 }
 
 /* TABS */
@@ -675,69 +621,78 @@ font-size:14px;
 
 /* MOBILE */
 
-/* MOBILE */
-
 @media(max-width:768px){
 
 .top-search-row{
 
-display:flex;
+display:grid;
+
+grid-template-columns:
+1fr 180px;
+
+gap:8px;
+
 align-items:center;
-gap:6px;
-flex-wrap:nowrap;
+
+overflow:visible;
 
 }
 
-/* SEARCH */
+/* ROW 1 */
 
 .search-input{
+grid-column:1;
+grid-row:1;
+min-width:0;
+}
 
-flex:1;
+.bill-box{
+
+grid-column:2;
+grid-row:1;
+
+width:100%;
 min-width:0;
 
 }
 
-/* BILL BOX */
+/* ROW 2 */
 
-.bill-box{
+.month-filter{
+grid-column:1;
+grid-row:2;
+}
 
-width:110px;
-flex-shrink:0;
+.year-filter{
+grid-column:2;
+grid-row:2;
+}
+
+/* SEARCH */
+
+.top-search-row #searchBox{
+
+width:100%;
+min-width:0;
 
 }
 
-/* BILL INPUT */
+/* BILL */
 
 .bill-box input{
 
 width:100%;
 box-sizing:border-box;
+display:block;
 
 }
 
-/* SEARCH + BILL SAME LINE */
+/* BUTTONS */
 
-.search-input,
-.bill-box{
-
-margin:0;
-
-}
-
-/* REST ITEMS NEXT LINE */
-
-.month-filter,
-.year-filter,
 .btn-row{
 
-width:100%;
-margin-top:5px;
-
-}
-
-/* BUTTON ROW */
-
-.btn-row{
+grid-column:1 / -1;
+grid-row:3;
 
 display:grid;
 
@@ -751,17 +706,30 @@ gap:5px;
 .btn-row button{
 
 width:100%;
-font-size:11px;
-padding:8px 0;
+min-width:0;
+
+font-size:13px;
+
+padding:12px 0;
 
 }
 
-/* INPUT */
+/* TABS */
+
+.bill-tabs button{
+
+font-size:11px;
+padding:8px;
+
+}
+
+/* INPUT SIZE */
 
 .top-search-row input,
 .top-search-row select{
 
 height:42px;
+
 font-size:13px;
 
 }
