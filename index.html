@@ -621,74 +621,68 @@ font-size:14px;
 
 /* MOBILE */
 
+/* MOBILE */
+
 @media(max-width:768px){
 
 .top-search-row{
 
-display:grid;
-
-grid-template-columns:
-1fr 250px;
-
-gap:8px;
-
+display:flex;
 align-items:center;
+gap:6px;
+flex-wrap:wrap;
 
-overflow:visible;
-
-}
-
-/* ROW 1 */
-
-.search-input{
-grid-column:1;
-grid-row:1;
-}
-
-.bill-box{
-
-grid-column:2;
-grid-row:1;
-
-width:100%;
-min-width:0;
-
-}
-
-/* ROW 2 */
-
-.month-filter{
-grid-column:1;
-grid-row:2;
-}
-
-.year-filter{
-grid-column:2;
-grid-row:2;
 }
 
 /* SEARCH */
 
-.top-search-row #searchBox{
-width:100%;
+.search-input{
+
+flex:1 1 auto;
 min-width:0;
+
 }
 
-/* BILL */
+/* BILL BOX */
+
+.bill-box{
+
+width:120px;
+flex:0 0 120px;
+
+}
+
+/* BILL INPUT */
 
 .bill-box input{
-  width:100%;
-  box-sizing:border-box;
-  display:block;
+
+width:100%;
+box-sizing:border-box;
+
 }
 
-/* BUTTONS */
+/* FORM / LAST */
+
+.top-search-row > *:last-child{
+
+flex:0 0 auto;
+
+}
+
+/* SECOND ROW */
+
+.month-filter,
+.year-filter{
+
+flex:1;
+
+}
+
+/* BUTTON ROW */
 
 .btn-row{
 
-grid-column:1 / -1;
-grid-row:3;
-
+width:100%;
 display:grid;
 
 grid-template-columns:
@@ -696,35 +690,24 @@ repeat(3,1fr);
 
 gap:5px;
 
+margin-top:4px;
+
 }
 
 .btn-row button{
 
 width:100%;
-min-width:0;
-
 font-size:11px;
-
 padding:8px 0;
 
 }
 
-/* TABS */
-
-.bill-tabs button{
-
-font-size:11px;
-padding:8px;
-
-}
-
-/* INPUT SIZE */
+/* INPUT */
 
 .top-search-row input,
 .top-search-row select{
 
 height:42px;
-
 font-size:13px;
 
 }
