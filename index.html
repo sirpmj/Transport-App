@@ -3194,47 +3194,95 @@ return name
 
 function loadNextBillNo(){
 
+let fy =
+getFinancialYear();
+
 let prefix =
 getCompanyPrefix();
 
-let fy =
-financialYear;
-
 let fyKey =
+
 "lastBill_" +
 activeCompany +
 "_" +
 fy;
 
+/* ALL USED BILL NOS */
+
+let usedNumbers =
+
+trips
+
+.filter(t => 
+t.billNo &&
+t.billNo.startsWith(
+prefix + "/" + fy
+)
+)
+
+.map(t => {
+
+let match =
+t.billNo.match(/(\d+)$/);
+
+return match
+? Number(match[1])
+: 0;
+
+});
+
+/* SAVED NEXT */
+
 let savedBill =
 localStorage.getItem(fyKey);
 
-/* DEFAULT */
+let savedNo = 0;
 
-if(
-!savedBill
-||
-!savedBill.startsWith(prefix + "/")
-){
+if(savedBill){
 
-savedBill =
-`${prefix}/${fy}/001`;
+let match =
+savedBill.match(/(\d+)$/);
+
+savedNo =
+match
+? Number(match[1])
+: 0;
+
+}
+
+/* FIND MAX */
+
+let maxNo = Math.max(
+savedNo,
+...usedNumbers,
+0
+);
+
+/* NEXT UNIQUE */
+
+let nextNo =
+maxNo + 1;
+
+let nextBill =
+
+`${prefix}/${fy}/${
+String(nextNo).padStart(3,"0")
+}`;
+
+/* SAVE */
 
 localStorage.setItem(
 fyKey,
-savedBill
+nextBill
 );
-
-}
 
 /* SHOW */
 
 document.getElementById(
 "billNo"
-).value = savedBill;
+).value = nextBill;
 
 }
-
 
 function openCompanySettings(){
 if(!isAdmin()){
@@ -7561,9 +7609,17 @@ function finalBill(ids){
 let selectedTrips =
 trips.filter(t => ids.includes(t.id));
 
-if(selectedTrips.length===0){
+if(selectedTrips.length === 0){
 
-let incomplete = selectedTrips.filter(
+alert("No trips selected");
+return;
+
+}
+
+/* CHECK COMPLETED */
+
+let incomplete =
+selectedTrips.filter(
 t => t.status !== "Completed"
 );
 
@@ -7577,11 +7633,7 @@ return;
 
 }
 
-alert("No trips selected");
-return;
-
-}
-
+/* COMPANY */
 
 let company =
 JSON.parse(
@@ -7590,46 +7642,88 @@ localStorage.getItem(
 ) || "{}"
 );
 
+/* FY + PREFIX */
 
-/* Invoice No*/
+let fy =
+getFinancialYear();
+
+let prefix =
+getCompanyPrefix();
 
 let fyKey =
+
 "lastBill_" +
 activeCompany +
 "_" +
-financialYear;
+fy;
 
-let lastBill =
+/* LAST BILL */
+
+let savedBill =
 localStorage.getItem(fyKey)
 ||
-`HL/${financialYear}/001`;
+`${prefix}/${fy}/001`;
 
-document.getElementById(
-"billNo"
-).value = lastBill;
+/* ONLY AUTO IF EMPTY */
 
-/* USER INPUT */
+let billInput =
+document.getElementById("billNo");
 
-let enteredBill =
-document.getElementById("billNo").value.trim();
+if(!billInput.value.trim()){
 
-if(!enteredBill){
+billInput.value =
+savedBill;
+
+}
+
+/* USER BILL */
+
+let billNo =
+billInput.value.trim();
+
+if(!billNo){
 
 alert("Enter Bill No");
 return;
 
 }
 
-let billNo = enteredBill;
 
-/* SAVE CURRENT */
+/* DUPLICATE CHECK */
+
+let alreadyExists =
+
+trips.some(t =>
+
+!ids.includes(t.id) &&
+
+t.billNo &&
+
+t.billNo.trim() ===
+billNo.trim()
+
+);
+
+if(alreadyExists){
+
+alert(
+"Bill No already exists"
+);
+
+return;
+
+}
+/* SAVE BILL */
 
 selectedTrips.forEach(t=>{
-t.billNo = billNo;
-t.billStatus = "Billed";
+
+t.billNo =
+billNo;
+
+t.billStatus =
+"Billed";
 
 });
-
 
 /* GET LAST NUMBER */
 
@@ -7645,8 +7739,9 @@ match
 
 let nextBill =
 
-`HL/${getFinancialYear()}/${
-String(lastNum + 1).padStart(3,"0")
+`${prefix}/${fy}/${
+String(lastNum + 1)
+.padStart(3,"0")
 }`;
 
 /* SAVE NEXT */
@@ -7658,8 +7753,10 @@ nextBill
 
 /* SHOW NEXT */
 
-document.getElementById("billNo").value =
+billInput.value =
 nextBill;
+
+/* SAVE */
 
 saveData();
 
@@ -7668,11 +7765,13 @@ showTrips();
 /* ROWS */
 
 let total = 0;
+
 let rows = "";
 
 selectedTrips.forEach((t,index)=>{
 
-total += Number(t.totalFreight || 0);
+total +=
+Number(t.totalFreight || 0);
 
 rows += `
 
@@ -7680,33 +7779,60 @@ rows += `
 
 <td>${index+1}</td>
 
-<td>${formatDate(t.dispatchDate)}</td>
-
-<td>${t.invoiceNo || ""}</td>
-
-<td>${t.tanker}</td>
-
-<td>${t.lrNo}</td>
-
-<td>${t.loadingParty || ""}</td>
-
-<td>${t.consigneeName || ""}</td>
-
-<td>${t.loadingPoint}</td>
-
-<td>${t.unloadingPoint}</td>
-
-<td>${t.material}</td>
-
-<td>${Number(t.qty).toFixed(3)}</td>
-
-<td>${t.freightRate}</td>
+<td>
+${formatDate(t.dispatchDate)}
+</td>
 
 <td>
-${Number(t.totalFreight || 0).toLocaleString("en-IN",{
+${t.invoiceNo || ""}
+</td>
+
+<td>
+${t.tanker}
+</td>
+
+<td>
+${t.lrNo}
+</td>
+
+<td>
+${t.loadingParty || ""}
+</td>
+
+<td>
+${t.consigneeName || ""}
+</td>
+
+<td>
+${t.loadingPoint}
+</td>
+
+<td>
+${t.unloadingPoint}
+</td>
+
+<td>
+${t.material}
+</td>
+
+<td>
+${Number(t.qty).toFixed(3)}
+</td>
+
+<td>
+${t.freightRate}
+</td>
+
+<td>
+${Number(
+t.totalFreight || 0
+).toLocaleString(
+"en-IN",
+{
 minimumFractionDigits:2,
 maximumFractionDigits:2
-})}
+}
+)}
 </td>
 
 </tr>
@@ -7715,10 +7841,14 @@ maximumFractionDigits:2
 
 });
 
-/* WINDOW */
+/* PRINT */
 
 let win =
-window.open("","_blank","width=1200,height=800");
+window.open(
+"",
+"_blank",
+"width=1200,height=800"
+);
 
 win.document.write(`
 
@@ -7726,7 +7856,9 @@ win.document.write(`
 
 <head>
 
-<title>Transport Invoice</title>
+<title>
+Transport Invoice
+</title>
 
 ${getBillStyle()}
 
@@ -7748,7 +7880,8 @@ ${company.name || ""}
 
 <div class="info">
 
-${(company.address || "").replace(/\n/g,"<br>")}
+${(company.address || "")
+.replace(/\n/g,"<br>")}
 
 <br>
 
@@ -7766,11 +7899,6 @@ GSTIN:
 ${company.gstin || ""}
 
 </div>
-
-</div>
-
-<div class="info">
-
 
 </div>
 
@@ -7796,6 +7924,7 @@ line-height:1.4;
 ">
 
 <b>Customer :</b>
+
 ${selectedTrips[0].party}
 
 <div style="
@@ -7805,7 +7934,11 @@ white-space:pre-line;
 margin-top:4px;
 line-height:1.4;
 ">
-${getCustomerAddress(selectedTrips[0].party)}
+
+${getCustomerAddress(
+selectedTrips[0].party
+)}
+
 </div>
 
 </div>
@@ -7820,27 +7953,34 @@ line-height:1.8;
 ">
 
 <div>
-<b>Invoice No   :</b>
-${billNo || "-"}
+
+<b>Invoice No :</b>
+
+${billNo}
+
 </div>
 
 <div>
-<b>Invoice Date   :</b>
+
+<b>Invoice Date :</b>
+
 ${formatDate(new Date())}
-</div>
 
 </div>
 
 </div>
+
+</div>
+
 <table>
 
 <tr>
 
 <th>Sr</th>
 <th>Date</th>
-<th>L.R. No</th>
 <th>Invoice No</th>
 <th>Vehicle No</th>
+<th>L.R. No</th>
 <th>Loading Party</th>
 <th>Consignee</th>
 <th>From</th>
@@ -7875,7 +8015,13 @@ padding:6px;
 text-align:right;
 white-space:nowrap;
 ">
-${(Number((Math.round(total) - total)).toFixed(2))}
+
+${(
+Number(
+Math.round(total) - total
+)
+).toFixed(2)}
+
 </td>
 
 </tr>
@@ -7903,7 +8049,10 @@ text-align:right;
 white-space:nowrap;
 min-width:120px;
 ">
-₹${Math.round(total).toLocaleString("en-IN")}
+
+₹${Math.round(total)
+.toLocaleString("en-IN")}
+
 </td>
 
 </tr>
@@ -7919,14 +8068,16 @@ padding:10px;
 ">
 
 Amount in Words :
-${numberToWords(Math.round(total))} Rupees Only
+
+${numberToWords(
+Math.round(total)
+)} Rupees Only
 
 </td>
 
 </tr>
 
 </table>
-
 
 <div class="bottom-section">
 
@@ -7950,6 +8101,7 @@ For ${company.name || ""}
 <br><br><br><br>
 
 Authorised Signatory
+
 </div>
 
 </div>
@@ -7964,10 +8116,6 @@ This is a computer generated freight bill.
 
 </div>
 
-</div>
-
-
-
 </body>
 
 </html>
@@ -7979,7 +8127,6 @@ win.document.close();
 win.focus();
 
 }
-
 
 /* VIEW BILL */
 
@@ -10266,7 +10413,7 @@ if(
 ){
 
 savedBill =
-`HL/${getFinancialYear()}/001`;
+`${prefix}/${getFinancialYear()}/001`;
 
 localStorage.setItem(
 fyKey,
