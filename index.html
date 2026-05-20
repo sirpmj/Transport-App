@@ -1090,10 +1090,19 @@ color:#2563eb !important;
 
 }
 
-.logout-btn{
+/* LOGOUT BUTTON FIX */
+
+.top-menu .logout-btn{
 
 background:#fee2e2 !important;
-color:#dc2626;
+color:#dc2626 !important;
+
+}
+
+.top-menu .logout-btn:hover{
+
+background:#fecaca !important;
+color:#b91c1c !important;
 
 }
 
@@ -1331,6 +1340,65 @@ box-shadow:
 
 }
 
+.quick-head{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+}
+
+.quick-head h3{
+margin:0 !important;
+font-size:18px;
+color:#111827;
+}
+
+.quick-icon{
+margin-bottom:0 !important;
+flex-shrink:0;
+}
+
+.quick-card{
+position:relative;
+overflow:hidden;
+}
+
+.quick-card::before{
+content:"";
+position:absolute;
+inset:0;
+padding:1px;
+border-radius:24px;
+
+background:linear-gradient(
+135deg,
+rgba(37,99,235,.5),
+rgba(79,70,229,.2)
+);
+
+-webkit-mask:
+linear-gradient(#fff 0 0) content-box,
+linear-gradient(#fff 0 0);
+
+-webkit-mask-composite:xor;
+mask-composite:exclude;
+
+pointer-events:none;
+}
+.quick-card:hover{
+transform:translateY(-5px) scale(1.01);
+
+box-shadow:
+0 18px 45px rgba(37,99,235,.18);
+}
+
+.quick-icon{
+transition:.3s;
+}
+
+.quick-card:hover .quick-icon{
+transform:scale(1.08) rotate(-3deg);
+}
 </style>
 
 <!-- FIREBASE -->
@@ -1451,20 +1519,21 @@ onclick="toggleTopMenu()">
 
 <div id="topMenu" class="top-menu">
 
-<button onclick="openCompanySettings()">
+<button onclick="openCompanySettings();closeTopMenu()">
 🏢 Company Settings
 </button>
 
-<button onclick="addCompanyMode()">
+<button onclick="addCompanyMode();closeTopMenu()">
 ➕ Add Company
 </button>
 
-<button onclick="backupData()">
+<button onclick="backupData();closeTopMenu()">
 📦 Backup
 </button>
 
-<label class="menu-upload">
-
+<label
+class="menu-upload"
+onclick="closeTopMenu()">
 ♻️ Restore
 
 <input
@@ -1477,7 +1546,7 @@ hidden>
 
 <button
 class="logout-btn"
-onclick="logoutUser()">
+onclick="logoutUser();closeTopMenu()">
 
 🚪 Logout
 
@@ -1626,13 +1695,27 @@ style="margin-bottom:15px;">
 
 <div class="quick-card">
 
+<div class="quick-head">
+
+<div class="quick-head">
+
 <div class="quick-icon">
 👥
 </div>
 
-<h3>
-Customer
-</h3>
+<div>
+
+<h3>Customer</h3>
+
+<span class="quick-sub">
+Manage
+</span>
+
+</div>
+
+</div>
+
+</div>
 
 <p>
 Manage customer details
@@ -1661,13 +1744,27 @@ onclick="openCustomerModal()">
 
 <div class="quick-card">
 
+<div class="quick-head">
+
+<div class="quick-head">
+
 <div class="quick-icon">
 🚛
 </div>
 
-<h3>
-Vehicle
-</h3>
+<div>
+
+<h3>Vehicle</h3>
+
+<span class="quick-sub">
+Records
+</span>
+
+</div>
+
+</div>
+
+</div>
 
 <p>
 Manage vehicle records
@@ -1696,13 +1793,27 @@ onclick="openTankerModal()">
 
 <div class="quick-card">
 
+<div class="quick-head">
+
+<div class="quick-head">
+
 <div class="quick-icon">
 🛣️
 </div>
 
-<h3>
-Route
-</h3>
+<div>
+
+<h3>Route</h3>
+
+<span class="quick-sub">
+Freight
+</span>
+
+</div>
+
+</div>
+
+</div>
 
 <p>
 Manage freight routes
@@ -1731,13 +1842,27 @@ onclick="openRouteModal()">
 
 <div class="quick-card trip-card">
 
+<div class="quick-head">
+
+<div class="quick-head">
+
 <div class="quick-icon">
 📦
 </div>
 
-<h3>
-Trip Entry
-</h3>
+<div>
+
+<h3>Trip Entry</h3>
+
+<span class="quick-sub">
+Dispatch
+</span>
+
+</div>
+
+</div>
+
+</div>
 
 <p>
 Create dispatch trip
@@ -1757,7 +1882,6 @@ onclick="toggleSection('tripSection')">
 </div>
 
 </div>
-
 <!-- EDIT CUSTOMER MODAL -->
 
 <div id="customerModal" class="modal">
@@ -2513,15 +2637,15 @@ placeholder="Bill No">
 <div class="btn-row">
 
 <button onclick="generateSelectedBills()">
-🧾 Generate
+Inv Generate
 </button>
 
 <button onclick="openPendingBills()">
-📄 Pending
+Pending Report 
 </button>
 
 <button onclick="exportTrips()">
-📤 Export
+📤Export
 </button>
 
 </div>
@@ -3082,21 +3206,32 @@ activeCompany +
 "_" +
 fy;
 
-let lastNo = parseInt(
-localStorage.getItem(fyKey)
+let savedBill =
+localStorage.getItem(fyKey);
+
+/* DEFAULT */
+
+if(
+!savedBill
+||
+!savedBill.startsWith(prefix + "/")
+){
+
+savedBill =
+`${prefix}/${fy}/001`;
+
+localStorage.setItem(
+fyKey,
+savedBill
 );
 
-if(isNaN(lastNo)){
-lastNo = 1;
 }
 
-let nextBill =
-
-`${prefix}/${fy}/${String(lastNo).padStart(3,"0")}`;
+/* SHOW */
 
 document.getElementById(
 "billNo"
-).value = nextBill;
+).value = savedBill;
 
 }
 
@@ -3551,6 +3686,14 @@ menu.style.display =
 menu.style.display === "flex"
 ? "none"
 : "flex";
+
+}
+
+function closeTopMenu(){
+
+document.getElementById(
+"topMenu"
+).style.display = "none";
 
 }
 
@@ -7211,7 +7354,7 @@ th:nth-child(8), td:nth-child(8){width:55px;}
 th:nth-child(9), td:nth-child(9){width:55px;}
 th:nth-child(10), td:nth-child(10){width:55px;}
 th:nth-child(11), td:nth-child(11){width:35px;}
-th:nth-child(12), td:nth-child(12){width:30px;}
+th:nth-child(12), td:nth-child(12){width:35px;}
 
 /* LAST COLUMN */
 th:nth-child(13), td:nth-child(13){
@@ -7286,7 +7429,7 @@ th:nth-child(13), td:nth-child(13){
   text-align:center;
   font-size:12px;
   font-weight:600;
-  margin-top:60px;
+  margin-top:100px;
 }
 
 .sign-line{
@@ -7459,9 +7602,11 @@ financialYear;
 let lastBill =
 localStorage.getItem(fyKey)
 ||
-financialYear + "-001";
+`HL/${financialYear}/001`;
 
-
+document.getElementById(
+"billNo"
+).value = lastBill;
 
 /* USER INPUT */
 
@@ -7485,12 +7630,16 @@ t.billStatus = "Billed";
 
 });
 
+
 /* GET LAST NUMBER */
 
-let parts = billNo.split("/");
+let match =
+billNo.match(/(\d+)$/);
 
 let lastNum =
-Number(parts[2] || 0);
+match
+? Number(match[1])
+: 0;
 
 /* NEXT BILL */
 
