@@ -3271,10 +3271,6 @@ String(nextNo).padStart(3,"0")
 
 /* SAVE */
 
-localStorage.setItem(
-fyKey,
-nextBill
-);
 
 /* SHOW */
 
@@ -10316,7 +10312,27 @@ return;
 
 }
 
+/* BILL SAVE */
+
+let fy = getFinancialYear();
+
+let prefix = getCompanyPrefix();
+
+let fyKey =
+
+"lastBill_" +
+activeCompany +
+"_" +
+fy;
+
+localStorage.setItem(
+fyKey,
+document.getElementById("billNo").value
+);
+
 finalBill(ids);
+
+loadNextBillNo();
 
 }
 
