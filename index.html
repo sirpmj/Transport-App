@@ -2151,6 +2151,14 @@ oninput="calculateEditFreight()">
 </div>
 
 <div class="field">
+<label>Detention Reason</label>
+
+<input
+type="text"
+id="editDetentionReason">
+</div>
+
+<div class="field">
 <label>Detention Charges</label>
 
 <input
@@ -2158,6 +2166,15 @@ type="number"
 id="editDetentionCharges"
 oninput="calculateEditFreight()">
 
+</div>
+
+
+<div class="field">
+<label>Other Remark</label>
+
+<input
+type="text"
+id="editOtherRemark">
 </div>
 
 <div class="field">
@@ -2581,6 +2598,15 @@ oninput="calculateFreight()">
 </div>
 
 <div class="field">
+<label>Detention Reason</label>
+
+<input
+type="text"
+id="detentionReason"
+placeholder="Detention Reason">
+</div>
+
+<div class="field">
 <label>Detention Charges</label>
 
 <input
@@ -2589,6 +2615,15 @@ id="detentionCharges"
 value="0"
 oninput="calculateFreight()">
 
+</div>
+
+<div class="field">
+<label>Other Remark</label>
+
+<input
+type="text"
+id="otherRemark"
+placeholder="Other Remark">
 </div>
 
 <div class="field">
@@ -2601,6 +2636,7 @@ value="0"
 oninput="calculateFreight()">
 
 </div>
+
 
 <div class="field">
 <label>Total Freight</label>
@@ -5748,8 +5784,12 @@ Number(document.getElementById("freightRate").value || 0),
 totalFreight:
 Number(document.getElementById("totalFreight").value || 0),
 
+detentionReason:document.getElementById("detentionReason").value || "",
+
 detentionCharges:
 Number(document.getElementById("detentionCharges").value || 0),
+
+otherRemark:document.getElementById("otherRemark").value || "",
 
 otherCharges:
 Number(document.getElementById("otherCharges").value || 0),
@@ -6274,9 +6314,21 @@ document.getElementById(
 t.invoiceNo || "";
 
 document.getElementById(
+"editDetentionReason"
+).value =
+
+t.detentionReason || "";
+
+document.getElementById(
 "editDetentionCharges"
 ).value =
 t.detentionCharges || 0;
+
+document.getElementById(
+"editOtherRemark"
+).value =
+
+t.otherRemark || "";
 
 document.getElementById(
 "editOtherCharges"
@@ -6410,6 +6462,16 @@ detention,
 otherCharges:
 other,
 
+detentionReason:
+document.getElementById(
+"editDetentionReason"
+).value || "",
+
+otherRemark:
+document.getElementById(
+"editOtherRemark"
+).value || "",
+
 };
 
 saveData();
@@ -6421,7 +6483,6 @@ updateDashboard();
 closeTripModal();
 
 }
-
 
 function calculateEditFreight(){
 
@@ -8358,6 +8419,18 @@ text-align:right;
 
 Detention Charges
 
+${
+b.detentionReason
+
+?
+
+` - ${b.detentionReason}`
+
+:
+
+""
+}
+
 </td>
 
 <td style="
@@ -8402,6 +8475,18 @@ text-align:right;
 ">
 
 Other Charges
+
+${
+b.otherRemark
+
+?
+
+` - ${b.otherRemark}`
+
+:
+
+""
+}
 
 </td>
 
@@ -8894,6 +8979,18 @@ text-align:right;
 
 Detention Charges
 
+${
+b.detentionReason
+
+?
+
+` - ${b.detentionReason}`
+
+:
+
+""
+}
+
 </td>
 
 <td style="
@@ -8902,10 +8999,13 @@ padding:4px 10px;
 text-align:right;
 ">
 
-₹${detention.toLocaleString("en-IN",{
+₹${detention.toLocaleString(
+"en-IN",
+{
 minimumFractionDigits:2,
 maximumFractionDigits:2
-})}
+}
+)}
 
 </td>
 
@@ -8936,6 +9036,18 @@ text-align:right;
 
 Other Charges
 
+${
+b.otherRemark
+
+?
+
+` - ${b.otherRemark}`
+
+:
+
+""
+}
+
 </td>
 
 <td style="
@@ -8944,10 +9056,13 @@ padding:4px 10px;
 text-align:right;
 ">
 
-₹${other.toLocaleString("en-IN",{
+₹${other.toLocaleString(
+"en-IN",
+{
 minimumFractionDigits:2,
 maximumFractionDigits:2
-})}
+}
+)}
 
 </td>
 
@@ -8959,7 +9074,6 @@ maximumFractionDigits:2
 
 ""
 }
-
 `;
 
 });
