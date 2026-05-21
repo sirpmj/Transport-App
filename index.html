@@ -1399,6 +1399,13 @@ transition:.3s;
 .quick-card:hover .quick-icon{
 transform:scale(1.08) rotate(-3deg);
 }
+
+#topCompanyName{
+
+cursor:pointer;
+
+}
+
 </style>
 
 <!-- FIREBASE -->
@@ -1488,7 +1495,10 @@ TOP BAR
 
 <div>
 
-<h1 id="topCompanyName">
+<h1
+id="topCompanyName"
+onclick="openCompanyModal()"
+>
 No Company
 </h1>
 
@@ -3895,7 +3905,26 @@ showToast("Logged Out");
 
 }
 
+let savedCompany =
+localStorage.getItem(
+"activeCompany"
+);
 
+if(savedCompany){
+
+activeCompany = savedCompany;
+
+document.getElementById(
+"companySelect"
+).value =
+savedCompany;
+
+document.getElementById(
+"topCompanyName"
+).innerText =
+savedCompany;
+
+}
 
 function toggleTopMenu(){
 
@@ -11414,6 +11443,13 @@ navigator.serviceWorker.register(
 
 }
 
+function openCompanyModal(){
+
+document.getElementById(
+"companySelectModal"
+).style.display = "flex";
+
+}
 
 </script>
 <datalist id="partyList"></datalist>
