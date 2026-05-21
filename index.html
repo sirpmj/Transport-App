@@ -2775,24 +2775,77 @@ onclick="toggleAllRows(this)">
 </th>
 
 <th>Sr</th>
-<th>Date</th>
-<th>A/C Customer</th>
-<th>Consignor</th>
-<th>Consignee</th>
-<th>Vehicle</th>
-<th>From</th>
-<th>To</th>
-<th>Material</th>
-<th>Qty(Mt)</th>
-<th>Rate(Mt)</th>
-<th>Detention</th>
-<th>Other</th>
-<th>Freight</th>
-<th>LR No.</th>
-<th>Invoice</th>
-<th>Bill No</th>
-<th>Status</th>
+
+<th onclick="sortTrips('dispatchDate')">
+Date
+</th>
+
+<th onclick="sortTrips('party')">
+A/C Customer
+</th>
+
+<th onclick="sortTrips('consignor')">
+Consignor
+</th>
+
+<th onclick="sortTrips('consignee')">
+Consignee
+</th>
+
+<th onclick="sortTrips('tanker')">
+Vehicle
+</th>
+
+<th onclick="sortTrips('from')">
+From
+</th>
+
+<th onclick="sortTrips('to')">
+To
+</th>
+
+<th onclick="sortTrips('material')">
+Material
+</th>
+
+<th onclick="sortTrips('qty')">
+Qty(Mt)
+</th>
+
+<th onclick="sortTrips('freightRate')">
+Rate(Mt)
+</th>
+
+<th onclick="sortTrips('detention')">
+Detention
+</th>
+
+<th onclick="sortTrips('otherCharges')">
+Other
+</th>
+
+<th onclick="sortTrips('totalFreight')">
+Freight
+</th>
+
+<th onclick="sortTrips('lrNo')">
+LR No.
+</th>
+
+<th onclick="sortTrips('invoiceNo')">
+Invoice
+</th>
+
+<th onclick="sortTrips('billNo')">
+Bill No
+</th>
+
+<th onclick="sortTrips('status')">
+Status
+</th>
+
 <th>Bill</th>
+
 <th>Action</th>
 
 </tr>
@@ -6917,6 +6970,36 @@ alert("✅ Trip Added Successfully");
 
 }
 
+
+/* TABLE SORT */
+
+let currentSortColumn = "dispatchDate";
+let currentSortDirection = "desc";
+
+function sortTrips(column){
+
+if(currentSortColumn === column){
+
+currentSortDirection =
+currentSortDirection === "asc"
+? "desc"
+: "asc";
+
+}else{
+
+currentSortColumn = column;
+currentSortDirection = "asc";
+
+}
+
+/* REFRESH */
+
+showTrips();
+
+}
+
+
+
 /* SHOW TRIPS */
 
 function showTrips(){
@@ -7017,6 +7100,69 @@ return (
 party.includes(search) ||
 tanker.includes(search)
 );
+
+});
+
+
+/* DEFAULT DATE SORT + HEADER SORT */
+
+filteredTrips.sort((a,b)=>{
+
+let valA = a[currentSortColumn] || "";
+let valB = b[currentSortColumn] || "";
+
+/* DATE */
+
+if(currentSortColumn === "dispatchDate"){
+
+valA = new Date(valA);
+valB = new Date(valB);
+
+}
+
+/* NUMBER */
+
+else if(
+
+currentSortColumn === "qty" ||
+
+currentSortColumn === "freightRate" ||
+
+currentSortColumn === "totalFreight"
+
+){
+
+valA = Number(valA || 0);
+valB = Number(valB || 0);
+
+}
+
+/* TEXT */
+
+else{
+
+valA = String(valA).toLowerCase();
+valB = String(valB).toLowerCase();
+
+}
+
+if(valA < valB){
+
+return currentSortDirection === "asc"
+? -1
+: 1;
+
+}
+
+if(valA > valB){
+
+return currentSortDirection === "asc"
+? 1
+: -1;
+
+}
+
+return 0;
 
 });
 
