@@ -2038,6 +2038,11 @@ onclick="closeCustomerListModal()">
 </div>
 
 <div class="field">
+<label>Invoice No</label>
+<input type="text" id="editInvoice">
+</div>
+
+<div class="field">
 <label>Consignor Name</label>
 <input type="text" id="editLoadingParty">
 </div>
@@ -2077,11 +2082,17 @@ Hypo
 
 <div class="field">
 <label>Material</label>
-<input type="text" id="editMaterial">
+
+<input
+type="text"
+id="editMaterial">
+
 </div>
 
 <div class="field">
+
 <label>Loading From</label>
+
 <select
 id="editLoadingPoint"
 onchange="applyEditRouteFreight()">
@@ -2091,10 +2102,13 @@ Select Loading Point
 </option>
 
 </select>
+
 </div>
 
 <div class="field">
+
 <label>Unload To</label>
+
 <select
 id="editUnloadingPoint"
 onchange="applyEditRouteFreight()">
@@ -2104,34 +2118,79 @@ Select Unloading Point
 </option>
 
 </select>
+
 </div>
 
 <div class="field">
 <label>Vehicle No</label>
-<input type="text" id="editTanker">
+
+<input
+type="text"
+id="editTanker">
+
 </div>
 
 <div class="field">
 <label>Quantity(Mt)</label>
-<input type="number" id="editQty">
+
+<input
+type="number"
+id="editQty"
+oninput="calculateEditFreight()">
+
 </div>
 
 <div class="field">
 <label>Freight Rate(Mt)</label>
-<input type="number" id="editRate">
+
+<input
+type="number"
+id="editRate"
+oninput="calculateEditFreight()">
+
 </div>
 
 <div class="field">
-<label>Invoice No</label>
-<input type="text" id="editInvoice">
+<label>Detention Charges</label>
+
+<input
+type="number"
+id="editDetentionCharges"
+oninput="calculateEditFreight()">
+
+</div>
+
+<div class="field">
+<label>Other Charges</label>
+
+<input
+type="number"
+id="editOtherCharges"
+oninput="calculateEditFreight()">
+
+</div>
+
+<div class="field">
+
+<label>Total Freight</label>
+
+<input
+type="number"
+id="editTotalFreight"
+readonly>
+
 </div>
 
 </div>
 
 <div class="modal-actions">
 
-<button class="green" onclick="saveTripEdit()">
+<button
+class="green"
+onclick="saveTripEdit()">
+
 💾 Save Changes
+
 </button>
 
 <button
@@ -2150,15 +2209,17 @@ onclick="shareLRPDF(trips[currentTripIndex].id)">
 
 </button>
 
-<button class="red" onclick="closeTripModal()">
+<button
+class="red"
+onclick="closeTripModal()">
+
 ✖ Close
+
 </button>
 
 </div>
 </div>
-
 </div>
-
 
 
 
@@ -2404,6 +2465,11 @@ inputmode="numeric">
 </div>
 
 <div class="field">
+<label>Invoice No</label>
+<input type="text" id="invoiceNo">
+</div>
+
+<div class="field">
 <label>Consignor Name</label>
 <input
 type="text"
@@ -2515,18 +2581,38 @@ oninput="calculateFreight()">
 </div>
 
 <div class="field">
+<label>Detention Charges</label>
+
+<input
+type="number"
+id="detentionCharges"
+value="0"
+oninput="calculateFreight()">
+
+</div>
+
+<div class="field">
+<label>Other Charges</label>
+
+<input
+type="number"
+id="otherCharges"
+value="0"
+oninput="calculateFreight()">
+
+</div>
+
+<div class="field">
 <label>Total Freight</label>
 <input
 type="number"
 id="totalFreight"
 inputmode="decimal"
-placeholder="Total Freight">
+placeholder="Total Freight"
+readonly>
 </div>
 
-<div class="field">
-<label>Invoice No</label>
-<input type="text" id="invoiceNo">
-</div>
+
 
 
 <button onclick="addTripAndPrint()">
@@ -2699,8 +2785,10 @@ onclick="toggleAllRows(this)">
 <th>Material</th>
 <th>Qty(Mt)</th>
 <th>Rate(Mt)</th>
+<th>Detention</th>
+<th>Other</th>
 <th>Freight</th>
-<th>L.R.</th>
+<th>LR No.</th>
 <th>Invoice</th>
 <th>Bill No</th>
 <th>Status</th>
@@ -4607,13 +4695,21 @@ let sameRoute =
 
 (r.from || "")
 .trim()
-.toLowerCase() == from.toLowerCase()
+.toLowerCase()
+
+===
+
+from.toLowerCase()
 
 &&
 
 (r.to || "")
 .trim()
-.toLowerCase() == to.toLowerCase();
+.toLowerCase()
+
+===
+
+to.toLowerCase();
 
 /* OLD DATA */
 
@@ -4629,7 +4725,11 @@ return sameRoute &&
 
 (r.material || "")
 .trim()
-.toLowerCase() == materialGroup;
+.toLowerCase()
+
+===
+
+materialGroup;
 
 });
 
@@ -4641,6 +4741,8 @@ document.getElementById(
 "freightRate"
 ).value = route.rate;
 
+/* AUTO TOTAL */
+
 calculateFreight();
 
 }else{
@@ -4649,10 +4751,13 @@ document.getElementById(
 "freightRate"
 ).value = "";
 
-}
+document.getElementById(
+"totalFreight"
+).value = "";
 
 }
 
+}
 
 
 function loadEditRoutePoints(){
@@ -5551,11 +5656,17 @@ let trip = {
 
 id: Date.now(),
 
+lrNo:
+document.getElementById("lrNo").value,
+
 dispatchDate:
 document.getElementById("dispatchDate").value,
 
 party:
 document.getElementById("partyName").value,
+
+invoiceNo:
+document.getElementById("invoiceNo").value,
 
 loadingParty:
 document.getElementById("loadingParty").value,
@@ -5584,11 +5695,13 @@ Number(document.getElementById("freightRate").value || 0),
 totalFreight:
 Number(document.getElementById("totalFreight").value || 0),
 
-lrNo:
-document.getElementById("lrNo").value,
+detentionCharges:
+Number(document.getElementById("detentionCharges").value || 0),
 
-invoiceNo:
-document.getElementById("invoiceNo").value,
+otherCharges:
+Number(document.getElementById("otherCharges").value || 0),
+
+
 
 status:"Pending",
 
@@ -6042,51 +6155,94 @@ ${p}
 function editTrip(index){
 
 currentTripIndex = index;
+
 loadEditRoutePoints();
+
 let t = trips[index];
 
-document.getElementById("editDispatchDate").value =
+document.getElementById(
+"editDispatchDate"
+).value =
 t.dispatchDate || "";
 
-document.getElementById("editParty").value =
+document.getElementById(
+"editParty"
+).value =
 t.party || "";
 
-document.getElementById("editLoadingParty").value =
+document.getElementById(
+"editLoadingParty"
+).value =
 t.loadingParty || "";
 
-document.getElementById("editConsignee").value =
+document.getElementById(
+"editConsignee"
+).value =
 t.consigneeName || "";
 
-document.getElementById("editMaterial").value =
+document.getElementById(
+"editMaterial"
+).value =
 t.material || "";
 
-document.getElementById("editLoadingPoint").value =
+document.getElementById(
+"editLoadingPoint"
+).value =
 t.loadingPoint || "";
 
-document.getElementById("editUnloadingPoint").value =
+document.getElementById(
+"editUnloadingPoint"
+).value =
 t.unloadingPoint || "";
 
-document.getElementById("editTanker").value =
+document.getElementById(
+"editTanker"
+).value =
 t.tanker || "";
 
-document.getElementById("editQty").value =
+document.getElementById(
+"editQty"
+).value =
 t.qty || "";
 
-document.getElementById("editRate").value =
+document.getElementById(
+"editRate"
+).value =
 t.freightRate || "";
 
-document.getElementById("editLR").value =
+document.getElementById(
+"editLR"
+).value =
 t.lrNo || "";
 
-document.getElementById("editInvoice").value =
+document.getElementById(
+"editInvoice"
+).value =
 t.invoiceNo || "";
 
-applyEditRouteFreight();
+document.getElementById(
+"editDetentionCharges"
+).value =
+t.detentionCharges || 0;
 
-document.getElementById("tripModal").style.display =
-"flex";
+document.getElementById(
+"editOtherCharges"
+).value =
+t.otherCharges || 0;
+
+document.getElementById(
+"editTotalFreight"
+).value =
+t.totalFreight || 0;
+
+calculateEditFreight();
+
+document.getElementById(
+"tripModal"
+).style.display = "flex";
 
 }
+
 /* CLOSE */
 
 function closeTripModal(){
@@ -6103,54 +6259,105 @@ function saveTripEdit(){
 if(currentTripIndex === null) return;
 
 let qty =
-Number(document.getElementById("editQty").value || 0);
+Number(
+document.getElementById(
+"editQty"
+).value || 0
+);
 
 let rate =
-Number(document.getElementById("editRate").value || 0);
+Number(
+document.getElementById(
+"editRate"
+).value || 0
+);
+
+let detention =
+Number(
+document.getElementById(
+"editDetentionCharges"
+).value || 0
+);
+
+let other =
+Number(
+document.getElementById(
+"editOtherCharges"
+).value || 0
+);
 
 trips[currentTripIndex] = {
 
 ...trips[currentTripIndex],
 
 dispatchDate:
-document.getElementById("editDispatchDate").value,
+document.getElementById(
+"editDispatchDate"
+).value,
 
 party:
-document.getElementById("editParty").value,
+document.getElementById(
+"editParty"
+).value,
 
 loadingParty:
-document.getElementById("editLoadingParty").value,
+document.getElementById(
+"editLoadingParty"
+).value,
 
 consigneeName:
-document.getElementById("editConsignee").value,
+document.getElementById(
+"editConsignee"
+).value,
 
 material:
-document.getElementById("editMaterial").value,
+document.getElementById(
+"editMaterial"
+).value,
 
 loadingPoint:
-document.getElementById("editLoadingPoint").value,
+document.getElementById(
+"editLoadingPoint"
+).value,
 
 unloadingPoint:
-document.getElementById("editUnloadingPoint").value,
+document.getElementById(
+"editUnloadingPoint"
+).value,
 
 tanker:
-document.getElementById("editTanker").value,
+document.getElementById(
+"editTanker"
+).value,
 
 qty: qty,
 
 freightRate: rate,
 
-totalFreight: qty * rate,
+totalFreight:
+Number(
+document.getElementById(
+"editTotalFreight"
+).value || 0
+),
 
 lrNo:
-document.getElementById("editLR").value,
+document.getElementById(
+"editLR"
+).value,
 
 invoiceNo:
-document.getElementById("editInvoice").value
+document.getElementById(
+"editInvoice"
+).value,
+
+detentionCharges:
+detention,
+
+otherCharges:
+other,
 
 };
-
-
 
 saveData();
 
@@ -6162,6 +6369,54 @@ closeTripModal();
 
 }
 
+
+function calculateEditFreight(){
+
+let qty =
+Number(
+document.getElementById(
+"editQty"
+).value || 0
+);
+
+let rate =
+Number(
+document.getElementById(
+"editRate"
+).value || 0
+);
+
+let detention =
+Number(
+document.getElementById(
+"editDetentionCharges"
+).value || 0
+);
+
+let other =
+Number(
+document.getElementById(
+"editOtherCharges"
+).value || 0
+);
+
+let total =
+
+(qty * rate)
+
++
+
+detention
+
++
+
+other;
+
+document.getElementById(
+"editTotalFreight"
+).value = total.toFixed(2);
+
+}
 
 
 /* =========================================
@@ -6329,16 +6584,77 @@ ${t.vehicleNo}
 function calculateFreight(){
 
 let qty =
-Number(document.getElementById("tripQty").value || 0);
+Number(
+document.getElementById(
+"tripQty"
+).value || 0
+);
 
 let rate =
-Number(document.getElementById("freightRate").value || 0);
+Number(
+document.getElementById(
+"freightRate"
+).value || 0
+);
 
-let total = qty * rate;
+let freightType =
+document.getElementById(
+"freightType"
+).value;
+
+let detention =
+
+Number(
+document.getElementById(
+"detentionCharges"
+)?.value || 0
+);
+
+let other =
+
+Number(
+document.getElementById(
+"otherCharges"
+)?.value || 0
+);
+
+let freight = 0;
+
+/* PER MT */
+
+if(freightType === "MT"){
+
+freight = qty * rate;
+
+}
+
+/* PER TRIP */
+
+else{
+
+freight = rate;
+
+}
+
+/* FINAL TOTAL */
+
+let total =
+
+freight
+
++
+
+detention
+
++
+
+other;
+
+/* SHOW */
 
 document.getElementById(
 "totalFreight"
-).value = total;
+).value = total.toFixed(2);
 
 }
 
@@ -6784,8 +7100,17 @@ ${Number(t.freightRate || 0).toFixed(2)}
 </td>
 
 <td>
+₹${formatAmount(t.detentionCharges || 0)}
+</td>
+
+<td>
+₹${formatAmount(t.otherCharges || 0)}
+</td>
+
+<td>
 ₹${formatAmount(t.totalFreight || 0)}
 </td>
+
 
 <td>${t.lrNo || ""}</td>
 
@@ -7684,7 +8009,6 @@ return;
 
 }
 
-
 /* DUPLICATE CHECK */
 
 let alreadyExists =
@@ -7709,6 +8033,7 @@ alert(
 return;
 
 }
+
 /* SAVE BILL */
 
 selectedTrips.forEach(t=>{
@@ -7758,16 +8083,52 @@ saveData();
 
 showTrips();
 
-/* ROWS */
+/* TOTALS */
 
-let total = 0;
+let freightTotal = 0;
+
+let grandTotal = 0;
 
 let rows = "";
 
+/* ROWS */
+
 selectedTrips.forEach((t,index)=>{
 
-total +=
-Number(t.totalFreight || 0);
+let detention =
+Number(
+t.detentionCharges || 0
+);
+
+let other =
+Number(
+t.otherCharges || 0
+);
+
+let tripTotal =
+Number(
+t.totalFreight || 0
+);
+
+let freight =
+
+tripTotal
+
+-
+
+detention
+
+-
+
+other;
+
+/* TOTALS */
+
+freightTotal += tripTotal;
+
+grandTotal += tripTotal;
+
+/* ROWS */
 
 rows += `
 
@@ -7820,18 +8181,108 @@ ${t.freightRate}
 </td>
 
 <td>
-${Number(
-t.totalFreight || 0
-).toLocaleString(
+
+₹${freight.toLocaleString(
 "en-IN",
 {
 minimumFractionDigits:2,
 maximumFractionDigits:2
 }
 )}
+
 </td>
 
 </tr>
+
+${
+detention > 0
+
+?
+
+`
+
+<tr>
+
+<td colspan="12"
+style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+Detention Charges
+
+</td>
+
+<td style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+₹${detention.toLocaleString(
+"en-IN",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+)}
+
+</td>
+
+</tr>
+
+`
+
+:
+
+""
+}
+
+${
+other > 0
+
+?
+
+`
+
+<tr>
+
+<td colspan="12"
+style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+Other Charges
+
+</td>
+
+<td style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+₹${other.toLocaleString(
+"en-IN",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+)}
+
+</td>
+
+</tr>
+
+`
+
+:
+
+""
+}
 
 `;
 
@@ -7990,6 +8441,7 @@ ${formatDate(new Date())}
 
 ${rows}
 
+
 <tr>
 
 <td colspan="12"
@@ -8012,9 +8464,11 @@ text-align:right;
 white-space:nowrap;
 ">
 
-${(
+₹${(
 Number(
-Math.round(total) - total
+Math.round(grandTotal)
+-
+grandTotal
 )
 ).toFixed(2)}
 
@@ -8046,7 +8500,7 @@ white-space:nowrap;
 min-width:120px;
 ">
 
-₹${Math.round(total)
+₹${Math.round(grandTotal)
 .toLocaleString("en-IN")}
 
 </td>
@@ -8066,7 +8520,7 @@ padding:10px;
 Amount in Words :
 
 ${numberToWords(
-Math.round(total)
+Math.round(grandTotal)
 )} Rupees Only
 
 </td>
@@ -8148,7 +8602,9 @@ localStorage.getItem(
 /* SAME BILL NO TRIPS */
 
 let billTrips =
-trips.filter(x => x.billNo === t.billNo);
+trips.filter(
+x => x.billNo === t.billNo
+);
 
 if(billTrips.length===0){
 
@@ -8156,12 +8612,54 @@ billTrips = [t];
 
 }
 
-let total = 0;
+/* TOTALS */
+
+let freightTotal = 0;
+
+let grandTotal = 0;
+
 let rows = "";
+
+/* ROWS */
 
 billTrips.forEach((b,index)=>{
 
-total += Number(b.totalFreight || 0);
+let detention =
+Number(
+b.detentionCharges || 0
+);
+
+let other =
+Number(
+b.otherCharges || 0
+);
+
+let tripTotal =
+Number(
+b.totalFreight || 0
+);
+
+/* FREIGHT */
+
+let freight =
+
+tripTotal
+
+-
+
+detention
+
+-
+
+other;
+
+/* TOTALS */
+
+freightTotal += tripTotal;
+
+grandTotal += tripTotal;
+
+/* MAIN ROW */
 
 rows += `
 
@@ -8169,40 +8667,158 @@ rows += `
 
 <td>${index+1}</td>
 
-<td>${formatDate(b.dispatchDate)}</td>
-
-<td>${b.invoiceNo || ""}</td>
-
-<td>${b.tanker || ""}</td>
-
-<td>${b.lrNo || ""}</td>
-
-<td>${b.loadingParty || ""}</td>
-
-<td>${b.consigneeName || ""}</td>
-
-<td>${b.loadingPoint || ""}</td>
-
-<td>${b.unloadingPoint || ""}</td>
-
-<td>${b.material || ""}</td>
-
-<td>${Number(b.qty || 0).toFixed(3)}</td>
-
-<td>${Number(b.freightRate || 0).toLocaleString("en-IN")}</td>
+<td>
+${formatDate(
+b.dispatchDate
+)}
+</td>
 
 <td>
-${Number(b.totalFreight || 0).toLocaleString("en-IN",{
+${b.invoiceNo || ""}
+</td>
+
+<td>
+${b.tanker || ""}
+</td>
+
+<td>
+${b.lrNo || ""}
+</td>
+
+<td>
+${b.loadingParty || ""}
+</td>
+
+<td>
+${b.consigneeName || ""}
+</td>
+
+<td>
+${b.loadingPoint || ""}
+</td>
+
+<td>
+${b.unloadingPoint || ""}
+</td>
+
+<td>
+${b.material || ""}
+</td>
+
+<td>
+${Number(
+b.qty || 0
+).toFixed(3)}
+</td>
+
+<td>
+
+${Number(
+b.freightRate || 0
+).toLocaleString("en-IN")}
+
+</td>
+
+<td>
+
+₹${freight.toLocaleString("en-IN",{
 minimumFractionDigits:2,
 maximumFractionDigits:2
 })}
+
 </td>
 
 </tr>
 
+${
+detention > 0
+
+?
+
+`
+
+<tr>
+
+<td colspan="12"
+style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+Detention Charges
+
+</td>
+
+<td style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+₹${detention.toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+
+</td>
+
+</tr>
+
+`
+
+:
+
+""
+}
+
+${
+other > 0
+
+?
+
+`
+
+<tr>
+
+<td colspan="12"
+style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+Other Charges
+
+</td>
+
+<td style="
+font-size:12px;
+padding:4px 10px;
+text-align:right;
+">
+
+₹${other.toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+})}
+
+</td>
+
+</tr>
+
+`
+
+:
+
+""
+}
+
 `;
 
 });
+
+/* WINDOW */
 
 let win =
 window.open("","_blank");
@@ -8213,7 +8829,9 @@ win.document.write(`
 
 <head>
 
-<title>View Bill</title>
+<title>
+View Bill
+</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
 
@@ -8228,8 +8846,10 @@ ${getBillStyle()}
 position:fixed;
 top:10px;
 right:10px;
+
 display:flex;
 gap:10px;
+
 z-index:99999;
 
 }
@@ -8237,10 +8857,14 @@ z-index:99999;
 .top-buttons button{
 
 padding:10px 16px;
+
 border:none;
 border-radius:8px;
+
 font-weight:bold;
+
 cursor:pointer;
+
 color:#fff;
 
 }
@@ -8278,13 +8902,17 @@ display:none;
 <button
 class="share-btn"
 onclick="shareCurrentBill()">
+
 📤 Share PDF
+
 </button>
 
 <button
 class="print-btn"
 onclick="window.print()">
+
 🖨️ Print
+
 </button>
 
 </div>
@@ -8303,21 +8931,22 @@ ${company.name || ""}
 
 <div class="info">
 
-${(company.address || "").replace(/\n/g,"<br>")}
+${(company.address || "")
+.replace(/\n/g,"<br>")}
 
 <br>
 
-Mobile:
+Mobile :
 ${company.mobile || ""}
 
 <br>
 
-Email:
+Email :
 ${company.email || ""}
 
 <br>
 
-GSTIN:
+GSTIN :
 ${company.gstin || ""}
 
 </div>
@@ -8336,7 +8965,8 @@ Transport Invoice
 
 </div>
 
-<div class="party" style="
+<div class="party"
+style="
 border:1px solid #000;
 padding:10px 12px;
 margin-bottom:15px;
@@ -8350,6 +8980,7 @@ line-height:1.4;
 ">
 
 <b>Customer :</b>
+
 ${t.party}
 
 <div style="
@@ -8359,7 +8990,11 @@ white-space:pre-line;
 margin-top:4px;
 line-height:1.4;
 ">
-${getCustomerAddress(t.party)}
+
+${getCustomerAddress(
+t.party
+)}
+
 </div>
 
 </div>
@@ -8374,13 +9009,19 @@ line-height:1.8;
 ">
 
 <div>
+
 <b>Invoice No :</b>
+
 ${t.billNo || "-"}
+
 </div>
 
 <div>
+
 <b>Invoice Date :</b>
+
 ${formatDate(new Date())}
+
 </div>
 
 </div>
@@ -8409,6 +9050,8 @@ ${formatDate(new Date())}
 
 ${rows}
 
+
+
 <tr>
 
 <td colspan="12"
@@ -8430,7 +9073,13 @@ padding:6px;
 text-align:right;
 white-space:nowrap;
 ">
-₹${(Math.round(total) - total).toFixed(2)}
+
+₹${(
+Math.round(grandTotal)
+-
+grandTotal
+).toFixed(2)}
+
 </td>
 
 </tr>
@@ -8458,7 +9107,10 @@ text-align:right;
 white-space:nowrap;
 min-width:120px;
 ">
-₹${Math.round(total).toLocaleString("en-IN")}
+
+₹${Math.round(grandTotal)
+.toLocaleString("en-IN")}
+
 </td>
 
 </tr>
@@ -8474,7 +9126,10 @@ padding:10px;
 ">
 
 Amount in Words :
-${numberToWords(Math.round(total))} Rupees Only
+
+${numberToWords(
+Math.round(grandTotal)
+)} Rupees Only
 
 </td>
 
@@ -8528,7 +9183,9 @@ async function shareCurrentBill(){
 try{
 
 const bill =
-document.querySelector(".print-bill");
+document.querySelector(
+".print-bill"
+);
 
 const canvas =
 await html2canvas(
@@ -8631,6 +9288,7 @@ alert("Share Failed");
 win.document.close();
 
 }
+
 /* PRINT BILL */
 
 function printSingleBill(id){
