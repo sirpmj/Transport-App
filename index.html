@@ -6405,6 +6405,11 @@ document.getElementById(
 t.consigneeName || "";
 
 document.getElementById(
+"editMaterialGroup"
+).value =
+t.materialGroup || "";
+
+document.getElementById(
 "editMaterial"
 ).value =
 t.material || "";
@@ -6544,6 +6549,11 @@ document.getElementById(
 consigneeName:
 document.getElementById(
 "editConsignee"
+).value,
+
+materialGroup:
+document.getElementById(
+"editMaterialGroup"
 ).value,
 
 material:
@@ -7120,6 +7130,8 @@ document.getElementById("loadingParty").value,
 
 consigneeName:
 document.getElementById("consigneeName").value,
+
+materialGroup:document.getElementById("materialGroup").value,
 
 material:
 document.getElementById("material").value,
