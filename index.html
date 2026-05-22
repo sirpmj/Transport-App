@@ -2167,7 +2167,7 @@ onclick="closeCustomerListModal()">
 </div>
 
 <div class="field">
-<label>Material Group</label>
+<label>Material</label>
 <select
 id="editMaterialGroup"
 onchange="applyEditRouteFreight()">
@@ -2193,7 +2193,7 @@ Hypo
 </div>
 
 <div class="field">
-<label>Material</label>
+<label>Item Name</label>
 
 <input
 type="text"
@@ -2494,7 +2494,7 @@ placeholder="Unloading Point">
 </div>
 
 <div class="field">
-<label>Material Group</label>
+<label>Material</label>
 
 <select id="routeMaterial">
 
@@ -2616,7 +2616,7 @@ list="consigneeList">
 
 
 <div class="field">
-<label>Material Group</label>
+<label>Material</label>
 
 <select
 id="materialGroup"
@@ -2642,7 +2642,7 @@ Hypo
 </div>
 
 <div class="field">
-<label>Material</label>
+<label>Item Name</label>
 <input
 type="text"
 id="material"
@@ -8485,6 +8485,8 @@ nextBill;
 
 saveData();
 
+currentBillView = "Billed";
+
 showTrips();
 
 /* TOTALS */
@@ -8517,13 +8519,9 @@ t.totalFreight || 0
 let freight =
 
 tripTotal
-
 -
-
 detention
-
 -
-
 other;
 
 /* TOTALS */
@@ -8549,11 +8547,11 @@ ${t.invoiceNo || ""}
 </td>
 
 <td>
-${t.tanker}
+${t.tanker || ""}
 </td>
 
 <td>
-${t.lrNo}
+${t.lrNo || ""}
 </td>
 
 <td>
@@ -8565,23 +8563,24 @@ ${t.consigneeName || ""}
 </td>
 
 <td>
-${t.loadingPoint}
+${t.loadingPoint || ""}
 </td>
 
 <td>
-${t.unloadingPoint}
+${t.unloadingPoint || ""}
 </td>
 
 <td>
-${t.material}
+${t.material || ""}
 </td>
 
 <td>
-${Number(t.qty).toFixed(3)}
+${Number(t.qty || 0).toFixed(3)}
 </td>
 
 <td>
-${t.freightRate}
+${Number(t.freightRate || 0)
+.toLocaleString("en-IN")}
 </td>
 
 <td>
@@ -8617,11 +8616,11 @@ text-align:right;
 Detention Charges
 
 ${
-b.detentionReason
+t.detentionReason
 
 ?
 
-` - ${b.detentionReason}`
+` - ${t.detentionReason}`
 
 :
 
@@ -8674,11 +8673,11 @@ text-align:right;
 Other Charges
 
 ${
-b.otherRemark
+t.otherRemark
 
 ?
 
-` - ${b.otherRemark}`
+` - ${t.otherRemark}`
 
 :
 
@@ -8716,14 +8715,22 @@ maximumFractionDigits:2
 
 });
 
-/* PRINT */
+/* WINDOW */
 
-let win =
-window.open(
+let win = window.open(
 "",
 "_blank",
-"width=1200,height=800"
+"width=1200,height=900"
 );
+
+if(!win){
+
+alert("Popup blocked");
+return;
+
+}
+
+/* HTML */
 
 win.document.write(`
 
@@ -8737,11 +8744,91 @@ Transport Invoice
 
 ${getBillStyle()}
 
+<style>
+
+.top-buttons{
+
+position:fixed;
+top:10px;
+right:10px;
+
+display:flex;
+gap:10px;
+
+z-index:99999;
+
+}
+
+.top-buttons button{
+
+padding:10px 16px;
+
+border:none;
+border-radius:8px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+color:#fff;
+
+}
+
+.share-btn{
+
+background:#0a7cff;
+
+}
+
+.print-btn{
+
+background:#222;
+
+}
+
+@media print{
+
+.top-buttons{
+
+display:none;
+
+}
+
+body{
+
+margin:0;
+
+}
+
+}
+
+</style>
+
 </head>
 
 <body>
 
-<div class="bill">
+<div class="top-buttons">
+
+<button
+class="share-btn"
+onclick="window.print()">
+
+📤 Share / Save PDF
+
+</button>
+
+<button
+class="print-btn"
+onclick="window.print()">
+
+🖨️ Print
+
+</button>
+
+</div>
+
+<div class="bill print-bill">
 
 <div class="top">
 
@@ -8760,17 +8847,17 @@ ${(company.address || "")
 
 <br>
 
-Mobile:
+Mobile :
 ${company.mobile || ""}
 
 <br>
 
-Email:
+Email :
 ${company.email || ""}
 
 <br>
 
-GSTIN:
+GSTIN :
 ${company.gstin || ""}
 
 </div>
@@ -8780,8 +8867,8 @@ ${company.gstin || ""}
 </div>
 
 <div class="title">
-
 Transport Invoice
+</div>
 
 <div class="party"
 style="
@@ -8794,29 +8881,28 @@ min-height:85px;
 
 <div style="
 padding-right:220px;
-line-height:1;
+line-height:1.4;
 ">
 
 <div style="
 font-size:14px;
 font-weight:bold;
-margin-bottom:2px;
+margin-bottom:4px;
 ">
 
 Customer :
-${t.party}
+${selectedTrips[0]?.party || ""}
 
 </div>
 
 <div style="
 font-size:13px;
 color:#555;
-margin:0;
-padding:0;
-line-height:1;
 ">
 
-${getCustomerAddress(t.party)
+${getCustomerAddress(
+selectedTrips[0]?.party || ""
+)
 .replace(/\n/g,"<br>")
 .replace(/<br><br>/g,"<br>")}
 
@@ -8830,14 +8916,14 @@ top:10px;
 right:12px;
 text-align:right;
 font-size:13px;
-line-height:1.5;
+line-height:1.6;
 ">
 
 <div>
 
 <b>Invoice No :</b>
 
-${t.billNo || "-"}
+${billNo || "-"}
 
 </div>
 
@@ -8875,7 +8961,6 @@ ${formatDate(new Date())}
 
 ${rows}
 
-
 <tr>
 
 <td colspan="12"
@@ -8899,11 +8984,9 @@ white-space:nowrap;
 ">
 
 ₹${(
-Number(
 Math.round(grandTotal)
 -
 grandTotal
-)
 ).toFixed(2)}
 
 </td>
@@ -9008,10 +9091,13 @@ This is a computer generated freight bill.
 
 win.document.close();
 
+setTimeout(()=>{
+
 win.focus();
 
-}
+},500);
 
+}
 /* VIEW BILL */
 
 function viewBill(id){
