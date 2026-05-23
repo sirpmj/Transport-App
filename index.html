@@ -3967,11 +3967,52 @@ console.log(userCompanyAccess);
 
 await loadCompanies();
 
-/* ALWAYS SHOW COMPANY MODAL */
+/* CHECK SAVED COMPANY */
+
+let savedCompany =
+localStorage.getItem("activeCompany");
+
+/* AUTO LOAD */
+
+if(savedCompany){
+
+activeCompany = savedCompany;
+
+/* SET DROPDOWN */
+
+document.getElementById(
+"companySelect"
+).value = savedCompany;
+
+/* TOP TITLE */
+
+document.getElementById(
+"topCompanyName"
+).innerHTML =
+
+`🏢 ${savedCompany} | FY ${getFinancialYear()}`;
+
+/* HIDE POPUP */
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+/* LOAD DATA */
+
+await loadCloudData();
+
+loadNextBillNo();
+
+}else{
+
+/* FIRST TIME */
 
 document.getElementById(
 "companySelectModal"
 ).style.display = "flex";
+
+}
 
 }else{
 
@@ -5358,8 +5399,7 @@ document.getElementById(
 if(topName){
 
 topName.textContent =
-"🏢 " + activeCompany;
-
+`🏢 ${savedCompany} | FY ${getFinancialYear()}`;
 }
 
 /* RELOAD LIST */
