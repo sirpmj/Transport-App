@@ -3492,77 +3492,69 @@ getFinancialYear();
 let prefix =
 getCompanyPrefix();
 
-let fyKey =
+/* SAFE ARRAY */
 
-"lastBill_" +
-activeCompany +
-"_" +
-fy;
+if(!Array.isArray(trips)){
+trips = [];
+}
 
-/* ALL USED BILL NOS */
+/* USED NOS */
 
 let usedNumbers =
 
 trips
 
-.filter(t => 
-t.billNo &&
-t.billNo.startsWith(
-prefix + "/" + fy
+.filter(t =>
+
+t.billNo
+
+&&
+
+String(t.billNo)
+.startsWith(
+`${prefix}/${fy}/`
 )
+
 )
 
 .map(t => {
 
 let match =
-t.billNo.match(/(\d+)$/);
+
+String(t.billNo)
+.match(/(\d+)$/);
 
 return match
 ? Number(match[1])
 : 0;
 
-});
+})
 
-/* SAVED NEXT */
+.filter(n => !isNaN(n))
 
-let savedBill =
-localStorage.getItem(fyKey);
+.sort((a,b)=>a-b);
 
-let savedNo = 0;
+/* FIND NEXT AVAILABLE */
 
-if(savedBill){
+let nextNo = 1;
 
-let match =
-savedBill.match(/(\d+)$/);
+for(let n of usedNumbers){
 
-savedNo =
-match
-? Number(match[1])
-: 0;
+if(n === nextNo){
+
+nextNo++;
 
 }
 
-/* FIND MAX */
+}
 
-let maxNo = Math.max(
-savedNo,
-...usedNumbers,
-0
-);
-
-/* NEXT UNIQUE */
-
-let nextNo =
-maxNo + 1;
+/* FINAL */
 
 let nextBill =
 
 `${prefix}/${fy}/${
 String(nextNo).padStart(3,"0")
 }`;
-
-/* SAVE */
-
 
 /* SHOW */
 
@@ -4475,7 +4467,7 @@ html += `
 <td>${t.billNo || "-"}</td>
 
 <td>
-₹${formatAmount(t.totalFreight)}
+${formatAmount(t.totalFreight)}
 </td>
 
 </tr>
@@ -7688,15 +7680,15 @@ ${Number(t.freightRate || 0).toFixed(2)}
 </td>
 
 <td>
-₹${formatAmount(t.detentionCharges || 0)}
+${formatAmount(t.detentionCharges || 0)}
 </td>
 
 <td>
-₹${formatAmount(t.otherCharges || 0)}
+${formatAmount(t.otherCharges || 0)}
 </td>
 
 <td>
-₹${formatAmount(t.totalFreight || 0)}
+${formatAmount(t.totalFreight || 0)}
 </td>
 
 
@@ -8048,7 +8040,7 @@ class="bill-check">
 </td>
 
 <td>
-₹${Number(t.totalFreight || 0)
+${Number(t.totalFreight || 0)
 .toLocaleString("en-IN",{
 minimumFractionDigits:2,
 maximumFractionDigits:2
@@ -8653,12 +8645,7 @@ String(lastNum + 1)
 .padStart(3,"0")
 }`;
 
-/* SAVE NEXT */
 
-localStorage.setItem(
-fyKey,
-nextBill
-);
 
 /* SHOW NEXT */
 
@@ -8769,7 +8756,7 @@ ${Number(t.freightRate || 0)
 
 <td>
 
-₹${freight.toLocaleString(
+${freight.toLocaleString(
 "en-IN",
 {
 minimumFractionDigits:2,
@@ -8819,7 +8806,7 @@ padding:4px 10px;
 text-align:right;
 ">
 
-₹${detention.toLocaleString(
+${detention.toLocaleString(
 "en-IN",
 {
 minimumFractionDigits:2,
@@ -8876,7 +8863,7 @@ padding:4px 10px;
 text-align:right;
 ">
 
-₹${other.toLocaleString(
+${other.toLocaleString(
 "en-IN",
 {
 minimumFractionDigits:2,
@@ -9167,7 +9154,7 @@ text-align:right;
 white-space:nowrap;
 ">
 
-₹${(
+${(
 Math.round(grandTotal)
 -
 grandTotal
@@ -9425,7 +9412,7 @@ b.freightRate || 0
 
 <td>
 
-₹${freight.toLocaleString("en-IN",{
+${freight.toLocaleString("en-IN",{
 minimumFractionDigits:2,
 maximumFractionDigits:2
 })}
@@ -9472,7 +9459,7 @@ padding:4px 10px;
 text-align:right;
 ">
 
-₹${detention.toLocaleString(
+${detention.toLocaleString(
 "en-IN",
 {
 minimumFractionDigits:2,
@@ -9529,7 +9516,7 @@ padding:4px 10px;
 text-align:right;
 ">
 
-₹${other.toLocaleString(
+${other.toLocaleString(
 "en-IN",
 {
 minimumFractionDigits:2,
@@ -9814,7 +9801,7 @@ text-align:right;
 white-space:nowrap;
 ">
 
-₹${(
+${(
 Math.round(grandTotal)
 -
 grandTotal
@@ -10287,7 +10274,7 @@ padding:6px;
 text-align:right;
 white-space:nowrap;
 ">
-₹${(Math.round(total) - total).toFixed(2)}
+${(Math.round(total) - total).toFixed(2)}
 </td>
 
 </tr>
@@ -11524,7 +11511,7 @@ text-align:right;
 white-space:nowrap;
 ">
 
-₹${(
+${(
 Math.round(total) - total
 ).toFixed(2)}
 
@@ -11749,10 +11736,6 @@ activeCompany +
 "_" +
 fy;
 
-localStorage.setItem(
-fyKey,
-document.getElementById("billNo").value
-);
 
 finalBill(ids);
 
@@ -11852,13 +11835,7 @@ if(
 !savedBill.startsWith("HL/")
 ){
 
-savedBill =
-`${prefix}/${getFinancialYear()}/001`;
 
-localStorage.setItem(
-fyKey,
-savedBill
-);
 
 }
 
