@@ -3112,6 +3112,13 @@ let isSavingCompany = false;
 let currentBillView = "Pending";
 let userCompanyAccess = {};
 
+function userHasCompanyAccess(company){
+
+if(isAdmin()) return true;
+
+return !!userCompanyAccess[company];
+
+}
 
 let trips =
 
@@ -3773,6 +3780,40 @@ return currentUser &&
 currentUser.email === ADMIN_EMAIL;
 
 }
+
+async function loadUserCompanyAccess(){
+
+if(!currentUser) return;
+
+let doc = await db
+.collection("users")
+.doc(currentUser.uid)
+.get();
+
+if(!doc.exists) return;
+
+let data = doc.data();
+
+userCompanyAccess = {};
+
+Object.keys(
+data.companies || {}
+).forEach(company=>{
+
+userCompanyAccess[
+company.trim()
+] = true;
+
+});
+
+console.log(
+"ACCESS:",
+userCompanyAccess
+);
+
+}
+
+
 /* REGISTER */
 
 async function registerUser(){
@@ -3916,6 +3957,10 @@ document.getElementById(
 ).style.display = "none";
 
 updateAdminUI();
+
+await loadUserCompanyAccess();
+
+console.log(userCompanyAccess);
 
 await loadCompanies();
 
@@ -4228,13 +4273,31 @@ let snapshot = await db
 
 snapshot.forEach(doc=>{
 
+let companyName = doc.id;
+
+/* ADMIN */
+
+if(isAdmin()){
+
 select.innerHTML += `
-
-<option value="${doc.id}">
-${doc.id}
+<option value="${companyName}">
+${companyName}
 </option>
-
 `;
+
+}
+
+/* USER ACCESS CHECK */
+
+else if(userCompanyAccess[companyName]){
+
+select.innerHTML += `
+<option value="${companyName}">
+${companyName}
+</option>
+`;
+
+}
 
 });
 
@@ -5641,35 +5704,49 @@ showToast(
 
 }
 
-async function continueCompany(){
+function continueCompany(){
 
 activeCompany =
 document.getElementById(
 "companySelect"
-).value;
+).value.trim();
 
-if(!activeCompany){
+/* ACCESS CHECK */
 
-alert("Select Company");
+if(
+
+!isAdmin()
+
+&&
+
+!userCompanyAccess[
+activeCompany
+]
+
+){
+
+alert("Access Denied");
+
 return;
 
 }
 
-/* SAVE ACTIVE COMPANY */
+/* SAVE */
 
 localStorage.setItem(
 "activeCompany",
 activeCompany
 );
 
-/* TOP COMPANY NAME */
+/* TOP TITLE */
 
 document.getElementById(
 "topCompanyName"
-).innerText =
-activeCompany;
+).innerHTML =
 
-/* HIDE MODAL */
+`🏢 ${activeCompany} | FY ${getFinancialYear()}`;
+
+/* CLOSE MODAL */
 
 document.getElementById(
 "companySelectModal"
@@ -5677,7 +5754,7 @@ document.getElementById(
 
 /* LOAD DATA */
 
-await loadCloudData();
+loadCloudData();
 
 loadNextBillNo();
 
