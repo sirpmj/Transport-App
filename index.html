@@ -4024,42 +4024,38 @@ localStorage.removeItem("tankers");
 
 localStorage.removeItem("routeRates");
 
+activeCompany = "";
+
 await auth.signOut();
 
 currentUser = null;
 
+/* HIDE APP */
+
 document.getElementById(
-"loginScreen"
-).style.display = "flex";
+"mainApp"
+).style.display = "none";
+
+/* HIDE MODALS */
 
 document.getElementById(
 "companySelectModal"
 ).style.display = "none";
 
+document.getElementById(
+"installPopup"
+).style.display = "none";
+
+/* SHOW LOGIN */
+
+document.getElementById(
+"loginScreen"
+).style.display = "flex";
+
 showToast("Logged Out");
 
 }
 
-let savedCompany =
-localStorage.getItem(
-"activeCompany"
-);
-
-if(savedCompany){
-
-activeCompany = savedCompany;
-
-document.getElementById(
-"companySelect"
-).value =
-savedCompany;
-
-document.getElementById(
-"topCompanyName"
-).innerText =
-savedCompany;
-
-}
 
 function toggleTopMenu(){
 
@@ -4170,15 +4166,6 @@ function isAppInstalled() {
 }
 
 
-auth.onAuthStateChanged(async (user) => {
-
-if(user){
-
-showFirstTimePopup();
-
-}
-
-});
 
 
 function getFinancialYear(){
@@ -5745,7 +5732,13 @@ document.getElementById(
 loadCloudData();
 
 loadNextBillNo();
+/* INSTALL POPUP */
 
+setTimeout(()=>{
+
+showFirstTimePopup();
+
+},800);
 }
 
 /* ESC CLOSE */
@@ -11834,8 +11827,6 @@ if(
 ||
 !savedBill.startsWith("HL/")
 ){
-
-
 
 }
 
