@@ -3108,6 +3108,7 @@ let isSavingCompany = false;
 let currentBillView = "Pending";
 let userCompanyAccess = {};
 
+
 function userHasCompanyAccess(company){
 
 if(isAdmin()) return true;
@@ -3938,59 +3939,39 @@ return;
 
 }
 
+/* CURRENT USER */
+
 currentUser = user;
+
+/* AUTO LOGOUT */
+
+resetAutoLogout();
+
+/* HIDE LOGIN */
 
 document.getElementById(
 "loginScreen"
 ).style.display = "none";
 
+/* ADMIN UI */
+
 updateAdminUI();
+
+/* LOAD USER ACCESS */
 
 await loadUserCompanyAccess();
 
 console.log(userCompanyAccess);
 
+/* LOAD COMPANIES */
+
 await loadCompanies();
 
-/* AUTO COMPANY LOAD */
-
-let savedCompany =
-localStorage.getItem(
-"activeCompany"
-);
-
-if(savedCompany){
-
-activeCompany = savedCompany;
-
-/* TOP NAME */
-
-document.getElementById(
-"topCompanyName"
-).innerHTML =
-`🏢 ${activeCompany} | FY ${getFinancialYear()}`
-
-/* HIDE MODAL */
-
-document.getElementById(
-"companySelectModal"
-).style.display = "none";
-
-/* LOAD DATA */
-
-await loadCloudData();
-
-loadNextBillNo();
-
-}else{
-
-/* FIRST TIME ONLY */
+/* ALWAYS SHOW COMPANY MODAL */
 
 document.getElementById(
 "companySelectModal"
 ).style.display = "flex";
-
-}
 
 }else{
 
@@ -4310,6 +4291,58 @@ loadCloudData();
 
 }
 
+
+/* =========================
+AUTO LOGOUT
+========================= */
+
+let logoutTimer;
+
+function resetAutoLogout(){
+
+clearTimeout(logoutTimer);
+
+logoutTimer = setTimeout(
+async ()=>{
+
+try{
+
+await auth.signOut();
+
+alert(
+"Logged out due to inactivity"
+);
+
+location.reload();
+
+}catch(err){
+
+console.error(err);
+
+}
+
+},
+1 * 60 * 1000
+); // 30 Minutes
+
+}
+
+/* USER ACTIVITY EVENTS */
+
+[
+"click",
+"mousemove",
+"keydown",
+"scroll",
+"touchstart"
+].forEach(event=>{
+
+document.addEventListener(
+event,
+resetAutoLogout
+);
+
+});
 
 function formatAmount(num){
 
@@ -5679,7 +5712,7 @@ showToast(
 
 }
 
-function continueCompany(){
+async function continueCompany(){
 
 activeCompany =
 document.getElementById(
@@ -5729,9 +5762,10 @@ document.getElementById(
 
 /* LOAD DATA */
 
-loadCloudData();
+await loadCloudData();
 
 loadNextBillNo();
+
 /* INSTALL POPUP */
 
 setTimeout(()=>{
@@ -5739,6 +5773,7 @@ setTimeout(()=>{
 showFirstTimePopup();
 
 },800);
+
 }
 
 /* ESC CLOSE */
@@ -11827,6 +11862,7 @@ if(
 ||
 !savedBill.startsWith("HL/")
 ){
+
 
 }
 
