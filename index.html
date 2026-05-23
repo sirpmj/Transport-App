@@ -2803,10 +2803,6 @@ id="monthFilter"
 class="month-filter"
 onchange="showTrips()">
 
-<option value="current">
-Current Month
-</option>
-
 <option value="all">
 All Months
 </option>
@@ -3188,7 +3184,7 @@ Date.now()
 
 await db
 .collection("transportData")
-.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
+.doc(MASTER_ADMIN_UID)
 .collection("companies")
 .doc(activeCompany)
 .set({
@@ -3199,7 +3195,7 @@ companyName:activeCompany
 
 await db
 .collection("transportData")
-.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
+.doc(MASTER_ADMIN_UID)
 .collection("companies")
 .doc(activeCompany)
 .collection(getFinancialYear())
@@ -5316,7 +5312,7 @@ oldCompany || companyName;
 
 await db
 .collection("transportData")
-.doc("BjwjW1RB8IY5mkf3rVZxlInrOlI3")
+.doc(MASTER_ADMIN_UID)
 .collection("companies")
 .doc(companyName)
 .set({
@@ -7363,15 +7359,67 @@ trips = [];
 
 /* FILTER */
 
+let monthFilter =
+document.getElementById(
+"monthFilter"
+)?.value || "all";
+
+let fyFilter =
+document.getElementById(
+"yearFilter"
+)?.value || "all";
+
+/* FILTER */
+
 let filteredTrips =
 trips.filter(t=>{
 
 if(!t) return false;
 
-/* FIX OLD DATA */
+/* OLD DATA FIX */
 
 if(!t.billStatus){
 t.billStatus = "Pending";
+}
+
+/* MONTH FILTER */
+
+if(t.dispatchDate){
+
+let d =
+new Date(t.dispatchDate);
+
+let tripMonth =
+d.getMonth();
+
+if(
+monthFilter !== "all"
+&&
+tripMonth != Number(monthFilter)
+){
+return false;
+}
+
+}
+
+/* FY FILTER */
+
+if(
+
+fyFilter !== "all"
+
+&&
+
+t.fy
+
+&&
+
+t.fy !== fyFilter
+
+){
+
+return false;
+
 }
 
 /* BILL FILTER */
@@ -7394,50 +7442,109 @@ return true;
 
 /* SEARCH FILTER */
 
-/* FY FILTER */
-
-/* FY FILTER */
-
-let fy =
-document.getElementById(
-"yearFilter"
-)?.value || "all";
-
-if(fy !== "all"){
-
-filteredTrips =
-filteredTrips.filter(t=>{
-
-/* OLD DATA */
-
-if(!t.fy) return true;
-
-/* NEW FY DATA */
-
-return t.fy === fy;
-
-});
-
-}
 
 filteredTrips =
 filteredTrips.filter(t=>{
 
 let party =
-(t.party || "")
+String(t.party || "")
 .toLowerCase();
 
 let tanker =
-(t.tanker || "")
+String(t.tanker || "")
+.toLowerCase();
+
+let lr =
+String(t.lrNo || "")
+.toLowerCase();
+
+let invoice =
+String(t.invoiceNo || "")
+.toLowerCase();
+
+let bill =
+String(t.billNo || "")
+.toLowerCase();
+
+let loading =
+String(t.loadingPoint || "")
+.toLowerCase();
+
+let unloading =
+String(t.unloadingPoint || "")
+.toLowerCase();
+
+let material =
+String(t.material || "")
+.toLowerCase();
+
+let consignee =
+String(t.consigneeName || "")
+.toLowerCase();
+
+let qty =
+String(t.qty || "")
+.toLowerCase();
+
+let rate =
+String(t.freightRate || "")
+.toLowerCase();
+
+let total =
+String(t.totalFreight || "")
 .toLowerCase();
 
 return (
-party.includes(search) ||
+
+party.includes(search)
+
+||
+
 tanker.includes(search)
+
+||
+
+lr.includes(search)
+
+||
+
+invoice.includes(search)
+
+||
+
+bill.includes(search)
+
+||
+
+loading.includes(search)
+
+||
+
+unloading.includes(search)
+
+||
+
+material.includes(search)
+
+||
+
+consignee.includes(search)
+
+||
+
+qty.includes(search)
+
+||
+
+rate.includes(search)
+
+||
+
+total.includes(search)
+
 );
 
 });
-
 
 /* DEFAULT DATE SORT + HEADER SORT */
 
