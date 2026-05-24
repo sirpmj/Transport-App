@@ -1526,6 +1526,104 @@ overflow:auto;
 background:#f1f5f9;
 }
 
+/* LOADER */
+
+/* =========================
+MODERN APP LOADER
+========================= */
+
+.modern-loader{
+
+width:110px;
+height:110px;
+
+border-radius:30px;
+
+background:rgba(255,255,255,.45);
+
+backdrop-filter:blur(12px);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+position:relative;
+
+box-shadow:
+0 10px 40px rgba(37,99,235,.20);
+
+animation:pulseLoader 1.8s infinite;
+
+}
+
+/* ROTATING RING */
+
+.modern-loader::before{
+
+content:"";
+
+position:absolute;
+
+inset:-6px;
+
+border-radius:35px;
+
+border:5px solid transparent;
+
+border-top:5px solid #2563eb;
+border-right:5px solid #4f46e5;
+
+animation:rotateLoader .9s linear infinite;
+
+}
+
+/* ICON */
+
+.truck-icon{
+
+font-size:46px;
+
+animation:truckBounce 1s infinite;
+
+}
+
+/* ANIMATIONS */
+
+@keyframes rotateLoader{
+
+100%{
+transform:rotate(360deg);
+}
+
+}
+
+@keyframes pulseLoader{
+
+0%{
+transform:scale(1);
+}
+
+50%{
+transform:scale(1.04);
+}
+
+100%{
+transform:scale(1);
+}
+
+}
+
+@keyframes truckBounce{
+
+0%,100%{
+transform:translateY(0);
+}
+
+50%{
+transform:translateY(-6px);
+}
+
+}
 </style>
 
 <!-- FIREBASE -->
@@ -1539,6 +1637,62 @@ background:#f1f5f9;
 </head>
 
 <body style="background:#f1f5f9;">
+
+<!-- APP LOADER -->
+
+<div id="appLoader" style="
+position:fixed;
+inset:0;
+background:linear-gradient(135deg,#eef2ff,#dbeafe);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999999;
+">
+
+<div style="
+display:flex;
+flex-direction:column;
+align-items:center;
+">
+
+<!-- LOGO -->
+
+<div class="modern-loader">
+
+<div class="truck-icon">
+🚚
+</div>
+
+</div>
+
+<!-- TEXT -->
+
+<h1
+id="loaderCompanyName"
+style="
+margin-top:22px;
+font-size:28px;
+font-weight:800;
+color:#1e3a8a;
+letter-spacing:.5px;
+text-align:center;
+">
+</h1>
+
+<p style="
+margin-top:8px;
+font-size:14px;
+color:#475569;
+">
+
+Loading your dashboard...
+
+</p>
+
+</div>
+
+</div>
 
 <!-- LOGIN SCREEN -->
 
@@ -3117,6 +3271,29 @@ const db = firebase.firestore();
 
 </script>
 <script>
+
+window.addEventListener("load",()=>{
+
+let company =
+localStorage.getItem(
+"activeCompany"
+);
+
+let el =
+document.getElementById(
+"loaderCompanyName"
+);
+
+if(el){
+
+el.innerText =
+company ||
+"Transport System";
+
+}
+
+});
+
 const MASTER_ADMIN_UID = "BjwjW1RB8IY5mkf3rVZxlInrOlI3";
 let activeCompany = "";
 
@@ -3793,24 +3970,54 @@ document.getElementById(
 
 }
 
+function updateLoaderCompanyName(){
+
+let el =
+document.getElementById(
+"loaderCompanyName"
+);
+
+if(!el) return;
+
+el.innerText =
+activeCompany || "Transport System";
+
+}
+
 function showMainApp(){
 
 document.getElementById(
 "loginScreen"
-).style.display = "none";
+).style.display =
+"none";
 
 document.getElementById(
 "companySelectModal"
-).style.display = "none";
+).style.display =
+"none";
 
 let app =
 document.getElementById(
 "mainApp"
 );
 
-app.style.display = "block";
-app.style.visibility = "visible";
-app.style.opacity = "1";
+if(app){
+
+app.style.display =
+"block";
+
+app.style.visibility =
+"visible";
+
+app.style.opacity =
+"1";
+
+}
+
+document.getElementById(
+"appLoader"
+).style.display =
+"none";
 
 }
 
@@ -3973,6 +4180,11 @@ alert(err.message);
 /* AUTO LOGIN */
 
 auth.onAuthStateChanged(async user=>{
+/* SHOW LOADER */
+
+document.getElementById(
+"appLoader"
+).style.display = "flex";
 
 try{
 
@@ -4002,13 +4214,17 @@ if(!user){
 
 currentUser = null;
 
+document.getElementById(
+"appLoader"
+).style.display =
+"none";
+
 setTimeout(()=>{
 
 document.getElementById(
 "loginScreen"
 ).style.display =
 "flex";
-
 
 },100);
 
@@ -4092,7 +4308,14 @@ let savedCompany =
 localStorage.getItem(
 "activeCompany"
 );
+if(savedCompany){
 
+activeCompany =
+savedCompany;
+
+updateLoaderCompanyName();
+
+}
 /* VALID */
 
 if(
@@ -4105,6 +4328,14 @@ userCompanyAccess[savedCompany]
 
 activeCompany = savedCompany;
 
+/* UPDATE TEXT FIRST */
+
+setTimeout(()=>{
+
+updateLoaderCompanyName();
+
+},50);
+
 /* SHOW APP FAST */
 
 document.getElementById(
@@ -4112,6 +4343,10 @@ document.getElementById(
 ).style.display =
 "block";
 
+document.getElementById(
+"appLoader"
+).style.display =
+"none";
 /* LOAD CLOUD BACKGROUND */
 
 setTimeout(async ()=>{
@@ -4163,6 +4398,7 @@ document.getElementById(
 
 app.style.display =
 "block";
+
 
 
 
@@ -4241,6 +4477,8 @@ console.error(err);
 
 /* NO COMPANY */
 
+/* NO COMPANY */
+
 else{
 
 document.getElementById(
@@ -4248,6 +4486,10 @@ document.getElementById(
 ).style.display =
 "flex";
 
+document.getElementById(
+"appLoader"
+).style.display =
+"none";
 
 }
 
@@ -6043,6 +6285,14 @@ document.getElementById(
 "companySelect"
 ).value;
 
+activeCompany = company;
+
+setTimeout(()=>{
+
+updateLoaderCompanyName();
+
+},50);
+
 /* VALIDATION */
 
 if(!company){
@@ -6075,7 +6325,6 @@ modal.style.opacity =
 
 /* ACTIVE */
 
-activeCompany = company;
 document.getElementById(
 "mainApp"
 ).style.display =
@@ -6108,7 +6357,10 @@ if(app){
 
 app.style.display =
 "block";
-
+document.getElementById(
+"appLoader"
+).style.display =
+"none";
 }
 
 /* LOGIN */
@@ -12382,6 +12634,7 @@ navigator.serviceWorker.register(
 }
 
 }
+
 
 function openCompanyModal(){
 
