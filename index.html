@@ -1509,6 +1509,23 @@ padding-bottom:80px;
 
 }
 
+
+#mainApp{
+display:block;
+width:100%;
+min-height:100vh;
+position:relative;
+overflow:auto;
+background:#f1f5f9;
+}
+
+html,body{
+width:100%;
+height:auto;
+min-height:100%;
+overflow:auto;
+}
+
 </style>
 
 <!-- FIREBASE -->
@@ -1583,7 +1600,45 @@ background:#16a34a;
 
 </div>
 
+<div id="companySelectModal"
+style="
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:999999;
+">
 
+<div style="
+background:#fff;
+padding:25px;
+border-radius:18px;
+width:95%;
+max-width:420px;
+">
+
+<h2 style="margin-bottom:15px;">
+🏢 Select Company
+</h2>
+
+<select
+id="companySelect"
+style="margin-bottom:15px;">
+</select>
+
+<button onclick="continueCompany()">
+➡ Continue
+</button>
+
+</div>
+
+</div>
+
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
 <!-- =========================
 TOP BAR
 ========================= -->
@@ -1759,41 +1814,6 @@ onclick="closeCompanySettings()">
 
 </div>
 
-<div id="companySelectModal"
-style="
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.5);
-display:none;
-align-items:center;
-justify-content:center;
-z-index:999999;
-">
-
-<div style="
-background:#fff;
-padding:25px;
-border-radius:18px;
-width:95%;
-max-width:420px;
-">
-
-<h2 style="margin-bottom:15px;">
-🏢 Select Company
-</h2>
-
-<select
-id="companySelect"
-style="margin-bottom:15px;">
-</select>
-
-<button onclick="continueCompany()">
-➡ Continue
-</button>
-
-</div>
-
-</div>
 
 
 
@@ -3965,24 +3985,29 @@ console.log(userCompanyAccess);
 
 /* LOAD COMPANIES */
 
-await loadCompanies();
+await loadCompanyList();
+
+/* CHECK SAVED COMPANY */
+
+/* CHECK SAVED COMPANY */
 
 /* CHECK SAVED COMPANY */
 
 let savedCompany =
-localStorage.getItem("activeCompany");
-
-/* AUTO LOAD */
+localStorage.getItem(
+"activeCompany"
+);
 
 if(savedCompany){
 
 activeCompany = savedCompany;
 
-/* SET DROPDOWN */
+/* SET COMPANY */
 
 document.getElementById(
 "companySelect"
-).value = savedCompany;
+).value =
+savedCompany;
 
 /* TOP TITLE */
 
@@ -3992,13 +4017,53 @@ document.getElementById(
 
 `🏢 ${savedCompany} | FY ${getFinancialYear()}`;
 
-/* HIDE POPUP */
+/* HIDE LOGIN */
 
+let loginScreen =
+document.getElementById(
+"loginScreen"
+);
+
+if(loginScreen){
+
+loginScreen.style.display =
+"none";
+
+}
+
+/* HIDE MODAL */
+
+let modal =
 document.getElementById(
 "companySelectModal"
-).style.display = "none";
+);
 
-/* LOAD DATA */
+if(modal){
+
+modal.style.display =
+"none";
+
+}
+
+/* SHOW APP */
+
+let app =
+document.getElementById(
+"mainApp"
+);
+
+if(app){
+
+app.style.display =
+"block";
+
+app.style.visibility =
+"visible";
+
+app.style.opacity =
+"1";
+
+}
 
 await loadCloudData();
 
@@ -4006,14 +4071,35 @@ loadNextBillNo();
 
 }else{
 
-/* FIRST TIME */
+/* HIDE APP */
 
+let app =
 document.getElementById(
-"companySelectModal"
-).style.display = "flex";
+"mainApp"
+);
+
+if(app){
+
+app.style.display =
+"none";
 
 }
 
+/* SHOW COMPANY MODAL */
+
+let modal =
+document.getElementById(
+"companySelectModal"
+);
+
+if(modal){
+
+modal.style.display =
+"flex";
+
+}
+
+}
 }else{
 
 currentUser = null;
@@ -4254,6 +4340,8 @@ document.getElementById(
 "companySelect"
 );
 
+if(!select) return;
+
 select.innerHTML = `
 <option value="">
 Select Company
@@ -4262,11 +4350,23 @@ Select Company
 
 try{
 
+/* SAFETY */
+
+if(!userCompanyAccess){
+
+userCompanyAccess = {};
+
+}
+
+/* COMPANY LIST */
+
 let snapshot = await db
 .collection("transportData")
 .doc(MASTER_ADMIN_UID)
 .collection("companies")
 .get();
+
+/* LOOP */
 
 snapshot.forEach(doc=>{
 
@@ -4284,9 +4384,12 @@ ${companyName}
 
 }
 
-/* USER ACCESS CHECK */
+/* USER ACCESS */
 
-else if(userCompanyAccess[companyName]){
+else if(
+userCompanyAccess &&
+userCompanyAccess[companyName] === true
+){
 
 select.innerHTML += `
 <option value="${companyName}">
@@ -4298,9 +4401,14 @@ ${companyName}
 
 });
 
-/* ACTIVE SELECT */
+/* AUTO SELECT */
 
-if(activeCompany){
+if(
+activeCompany &&
+select.querySelector(
+`option[value="${activeCompany}"]`
+)
+){
 
 select.value = activeCompany;
 
@@ -4308,14 +4416,18 @@ select.value = activeCompany;
 
 }catch(err){
 
-console.error(err);
+console.error(
+"LOAD COMPANY ERROR:",
+err
+);
 
-alert("Company Load Failed");
+alert(
+"Company Load Failed"
+);
 
 }
 
 }
-
 function changeCompany(){
 
 activeCompany =
@@ -5753,37 +5865,38 @@ showToast(
 }
 
 async function continueCompany(){
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+try{
 
-activeCompany =
+console.log(
+"continueCompany RUNNING"
+);
+
+let company =
 document.getElementById(
 "companySelect"
-).value.trim();
+).value;
 
-/* ACCESS CHECK */
+if(!company){
 
-if(
-
-!isAdmin()
-
-&&
-
-!userCompanyAccess[
-activeCompany
-]
-
-){
-
-alert("Access Denied");
+showToast(
+"Select Company",
+"error"
+);
 
 return;
 
 }
 
-/* SAVE */
+/* ACTIVE COMPANY */
+
+activeCompany = company;
 
 localStorage.setItem(
 "activeCompany",
-activeCompany
+company
 );
 
 /* TOP TITLE */
@@ -5792,13 +5905,65 @@ document.getElementById(
 "topCompanyName"
 ).innerHTML =
 
-`🏢 ${activeCompany} | FY ${getFinancialYear()}`;
+`🏢 ${company} | FY ${getFinancialYear()}`;
 
-/* CLOSE MODAL */
+/* HIDE LOGIN */
 
+let loginScreen =
+document.getElementById(
+"loginScreen"
+);
+
+if(loginScreen){
+
+loginScreen.style.display =
+"none";
+
+}
+
+/* HIDE MODAL */
+
+let modal =
 document.getElementById(
 "companySelectModal"
-).style.display = "none";
+);
+
+if(modal){
+
+modal.style.display =
+"none";
+
+}
+
+/* SHOW MAIN APP */
+
+let app =
+document.getElementById(
+"mainApp"
+);
+
+console.log(
+"MAIN APP:",
+app
+);
+
+if(app){
+
+app.style.display =
+"block";
+
+app.style.visibility =
+"visible";
+
+app.style.opacity =
+"1";
+
+}
+
+/* FORCE BODY */
+
+document.body.style.display =
+"block";
 
 /* LOAD DATA */
 
@@ -5806,27 +5971,68 @@ await loadCloudData();
 
 loadNextBillNo();
 
+/* SUCCESS */
+
+showToast(
+"Company Loaded"
+);
+
+console.log(
+"MAIN WINDOW OPENED"
+);
+
 /* INSTALL POPUP */
 
 setTimeout(()=>{
 
-showFirstTimePopup();
+if(
+typeof showFirstTimePopup
+=== "function"
+){
 
-},800);
+showFirstTimePopup();
 
 }
 
+},5000);
+
+}catch(err){
+
+console.error(
+"CONTINUE COMPANY ERROR:",
+err
+);
+
+alert(
+err.message
+);
+
+}
+
+}
 /* ESC CLOSE */
 
 document.addEventListener(
 "keydown",
 function(e){
 
-if(e.key === "Escape"){
+if(
+e.key === "Escape"
+){
+
+/* ONLY CLOSE IF APP OPEN */
+
+if(
+document.getElementById(
+"mainApp"
+).style.display === "block"
+){
 
 document.getElementById(
 "companySelectModal"
 ).style.display = "none";
+
+}
 
 }
 
@@ -5840,10 +6046,22 @@ document.getElementById(
 "click",
 function(e){
 
-if(e.target.id ===
-"companySelectModal"){
+if(
+e.target.id ===
+"companySelectModal"
+){
+
+/* ONLY CLOSE IF APP OPEN */
+
+if(
+document.getElementById(
+"mainApp"
+).style.display === "block"
+){
 
 this.style.display = "none";
+
+}
 
 }
 
@@ -11984,7 +12202,7 @@ document.getElementById(
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+</div>
 <div id="billPDFContainer"
 style="
 position:absolute;
