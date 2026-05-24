@@ -1514,16 +1514,16 @@ padding-bottom:80px;
 display:block;
 width:100%;
 min-height:100vh;
-position:relative;
-overflow:auto;
 background:#f1f5f9;
 }
 
-html,body{
+html,
+body{
 width:100%;
 height:auto;
 min-height:100%;
 overflow:auto;
+background:#f1f5f9;
 }
 
 </style>
@@ -1538,8 +1538,7 @@ overflow:auto;
 
 </head>
 
-<body>
-
+<body style="background:#f1f5f9;">
 
 <!-- LOGIN SCREEN -->
 
@@ -3762,6 +3761,58 @@ document.getElementById(
 
 }
 
+function showLoginScreen(){
+
+document.getElementById(
+"loginScreen"
+).style.display = "flex";
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+document.getElementById(
+"mainApp"
+).style.display = "none";
+
+}
+
+function showCompanySelector(){
+
+document.getElementById(
+"loginScreen"
+).style.display = "none";
+
+document.getElementById(
+"companySelectModal"
+).style.display = "flex";
+
+document.getElementById(
+"mainApp"
+).style.display = "none";
+
+}
+
+function showMainApp(){
+
+document.getElementById(
+"loginScreen"
+).style.display = "none";
+
+document.getElementById(
+"companySelectModal"
+).style.display = "none";
+
+let app =
+document.getElementById(
+"mainApp"
+);
+
+app.style.display = "block";
+app.style.visibility = "visible";
+app.style.opacity = "1";
+
+}
 
 /* =========================
 AUTH
@@ -3923,14 +3974,56 @@ alert(err.message);
 
 auth.onAuthStateChanged(async user=>{
 
-if(user){
+try{
 
-/* CHECK APPROVAL */
+/* HIDE BODY */
+
+
+/* RESET */
+
+document.getElementById(
+"loginScreen"
+).style.display =
+"none";
+
+document.getElementById(
+"companySelectModal"
+).style.display =
+"none";
+
+document.getElementById(
+"mainApp"
+).style.display =
+"none";
+
+/* NO USER */
+
+if(!user){
+
+currentUser = null;
+
+setTimeout(()=>{
+
+document.getElementById(
+"loginScreen"
+).style.display =
+"flex";
+
+
+},100);
+
+return;
+
+}
+
+/* USER DOC */
 
 let doc = await db
 .collection("users")
 .doc(user.uid)
 .get();
+
+/* USER NOT FOUND */
 
 if(!doc.exists){
 
@@ -3940,12 +4033,20 @@ alert(
 "User data not found"
 );
 
+document.getElementById(
+"loginScreen"
+).style.display =
+"flex";
+
+
 return;
 
 }
 
 let userData =
 doc.data();
+
+/* APPROVAL */
 
 if(!userData.approved){
 
@@ -3955,11 +4056,17 @@ alert(
 "Pending Admin Approval"
 );
 
+document.getElementById(
+"loginScreen"
+).style.display =
+"flex";
+
+
 return;
 
 }
 
-/* CURRENT USER */
+/* USER */
 
 currentUser = user;
 
@@ -3967,49 +4074,77 @@ currentUser = user;
 
 resetAutoLogout();
 
-/* HIDE LOGIN */
-
-document.getElementById(
-"loginScreen"
-).style.display = "none";
-
-/* ADMIN UI */
+/* ADMIN */
 
 updateAdminUI();
 
-/* LOAD USER ACCESS */
+/* ACCESS */
 
-await loadUserCompanyAccess();
+/* FAST POPUP */
 
-console.log(userCompanyAccess);
+loadUserCompanyAccess();
 
-/* LOAD COMPANIES */
+loadCompanies();
 
-await loadCompanyList();
-
-/* CHECK SAVED COMPANY */
-
-/* CHECK SAVED COMPANY */
-
-/* CHECK SAVED COMPANY */
+/* SAVED */
 
 let savedCompany =
 localStorage.getItem(
 "activeCompany"
 );
 
-if(savedCompany){
+/* VALID */
+
+if(
+savedCompany &&
+(
+isAdmin() ||
+userCompanyAccess[savedCompany]
+)
+){
 
 activeCompany = savedCompany;
 
-/* SET COMPANY */
+/* SHOW APP FAST */
 
 document.getElementById(
+"mainApp"
+).style.display =
+"block";
+
+/* LOAD CLOUD BACKGROUND */
+
+setTimeout(async ()=>{
+
+try{
+
+await loadCloudData();
+
+loadNextBillNo();
+
+}catch(err){
+
+console.error(err);
+
+}
+
+},0);
+
+/* SELECT */
+
+let select =
+document.getElementById(
 "companySelect"
-).value =
+);
+
+if(select){
+
+select.value =
 savedCompany;
 
-/* TOP TITLE */
+}
+
+/* TITLE */
 
 document.getElementById(
 "topCompanyName"
@@ -4017,110 +4152,126 @@ document.getElementById(
 
 `🏢 ${savedCompany} | FY ${getFinancialYear()}`;
 
-/* HIDE LOGIN */
-
-let loginScreen =
-document.getElementById(
-"loginScreen"
-);
-
-if(loginScreen){
-
-loginScreen.style.display =
-"none";
-
-}
-
-/* HIDE MODAL */
-
-let modal =
-document.getElementById(
-"companySelectModal"
-);
-
-if(modal){
-
-modal.style.display =
-"none";
-
-}
-
-/* SHOW APP */
+/* APP */
 
 let app =
 document.getElementById(
 "mainApp"
 );
 
-if(app){
+/* SHOW APP INSTANT */
 
 app.style.display =
 "block";
 
-app.style.visibility =
-"visible";
 
-app.style.opacity =
-"1";
 
-}
 
-await loadCloudData();
+
+/* BACKGROUND LOAD */
+
+setTimeout(async ()=>{
+
+try{
 
 loadNextBillNo();
 
-}else{
+requestIdleCallback(()=>{
 
-/* HIDE APP */
-
-let app =
-document.getElementById(
-"mainApp"
-);
-
-if(app){
-
-app.style.display =
-"none";
-
-}
-
-/* SHOW COMPANY MODAL */
-
-let modal =
-document.getElementById(
-"companySelectModal"
-);
-
-if(modal){
-
-modal.style.display =
-"flex";
-
-}
-
-}
-}else{
-
-currentUser = null;
-
-/* SHOW LOGIN */
-
-document.getElementById(
-"loginScreen"
-).style.display = "flex";
-
-/* HIDE COMPANY */
-
-document.getElementById(
-"companySelectModal"
-).style.display = "none";
-
-}
+loadTankers();
 
 });
 
+requestIdleCallback(()=>{
+
+loadRoutePoints();
+
+});
+
+requestIdleCallback(()=>{
+
+showTrips();
+
+});
+
+requestIdleCallback(()=>{
+
+updateDashboard();
+
+});
+
+
+loadDropdown(
+"partyList",
+"partyList"
+);
+
+loadDropdown(
+"loadingPartyList",
+"loadingPartyList"
+);
+
+loadDropdown(
+"consigneeList",
+"consigneeList"
+);
+
+loadDropdown(
+"materialList",
+"materialList"
+);
+
+/* SHOW APP */
+
+requestAnimationFrame(()=>{
+
+
+
+});
+
+}catch(err){
+
+console.error(err);
+
+}
+
+},50);
+
+}
+
+/* NO COMPANY */
+
+else{
+
+document.getElementById(
+"companySelectModal"
+).style.display =
+"flex";
+
+
+}
+
+}catch(err){
+
+console.error(
+"AUTH ERROR:",
+err
+);
+
+document.getElementById(
+"loginScreen"
+).style.display =
+"flex";
+
+
+}
+});
+
 async function logoutUser(){
+
+try{
+
+/* CLEAR STORAGE */
 
 localStorage.removeItem("activeCompany");
 
@@ -4132,35 +4283,29 @@ localStorage.removeItem("tankers");
 
 localStorage.removeItem("routeRates");
 
-activeCompany = "";
+/* RESET */
 
-await auth.signOut();
+activeCompany = "";
 
 currentUser = null;
 
-/* HIDE APP */
+/* SIGN OUT */
 
-document.getElementById(
-"mainApp"
-).style.display = "none";
+await auth.signOut();
 
-/* HIDE MODALS */
+/* UI */
 
-document.getElementById(
-"companySelectModal"
-).style.display = "none";
-
-document.getElementById(
-"installPopup"
-).style.display = "none";
-
-/* SHOW LOGIN */
-
-document.getElementById(
-"loginScreen"
-).style.display = "flex";
+showLoginScreen();
 
 showToast("Logged Out");
+
+}catch(err){
+
+console.error(err);
+
+alert(err.message);
+
+}
 
 }
 
@@ -4460,13 +4605,29 @@ async ()=>{
 
 try{
 
+/* CLEAR */
+
+localStorage.removeItem(
+"activeCompany"
+);
+
+/* SIGNOUT */
+
 await auth.signOut();
+
+/* RESET */
+
+currentUser = null;
+
+activeCompany = "";
+
+/* UI */
+
+showLoginScreen();
 
 alert(
 "Logged out due to inactivity"
 );
-
-location.reload();
 
 }catch(err){
 
@@ -4475,8 +4636,8 @@ console.error(err);
 }
 
 },
-1 * 60 * 1000
-); // 30 Minutes
+30 * 60 * 1000
+);
 
 }
 
@@ -5864,20 +6025,25 @@ showToast(
 
 }
 
+
+
+
 async function continueCompany(){
-document.getElementById(
-"companySelectModal"
-).style.display = "none";
+
 try{
 
 console.log(
 "continueCompany RUNNING"
 );
 
+/* COMPANY */
+
 let company =
 document.getElementById(
 "companySelect"
 ).value;
+
+/* VALIDATION */
 
 if(!company){
 
@@ -5890,16 +6056,38 @@ return;
 
 }
 
-/* ACTIVE COMPANY */
+/* MODAL */
+
+let modal =
+document.getElementById(
+"companySelectModal"
+);
+
+if(modal){
+
+modal.style.pointerEvents =
+"none";
+
+modal.style.opacity =
+".7";
+
+}
+
+/* ACTIVE */
 
 activeCompany = company;
+document.getElementById(
+"mainApp"
+).style.display =
+"block";
+/* SAVE */
 
 localStorage.setItem(
 "activeCompany",
 company
 );
 
-/* TOP TITLE */
+/* TITLE */
 
 document.getElementById(
 "topCompanyName"
@@ -5907,7 +6095,23 @@ document.getElementById(
 
 `🏢 ${company} | FY ${getFinancialYear()}`;
 
-/* HIDE LOGIN */
+/* APP */
+
+/* APP */
+
+let app =
+document.getElementById(
+"mainApp"
+);
+
+if(app){
+
+app.style.display =
+"block";
+
+}
+
+/* LOGIN */
 
 let loginScreen =
 document.getElementById(
@@ -5921,57 +6125,77 @@ loginScreen.style.display =
 
 }
 
-/* HIDE MODAL */
+/* LOAD */
 
-let modal =
-document.getElementById(
-"companySelectModal"
+setTimeout(async ()=>{
+
+try{
+
+setTimeout(async ()=>{
+
+try{
+
+await loadCloudData();
+
+loadNextBillNo();
+
+}catch(err){
+
+console.error(err);
+
+}
+
+},0);
+
+
+loadTankers();
+
+loadRoutePoints();
+
+showTrips();
+
+updateDashboard();
+
+/* DROPDOWNS */
+
+loadDropdown(
+"partyList",
+"partyList"
 );
+
+loadDropdown(
+"loadingPartyList",
+"loadingPartyList"
+);
+
+loadDropdown(
+"consigneeList",
+"consigneeList"
+);
+
+loadDropdown(
+"materialList",
+"materialList"
+);
+
+/* HIDE MODAL */
 
 if(modal){
 
 modal.style.display =
 "none";
 
-}
+modal.style.pointerEvents =
+"auto";
 
-/* SHOW MAIN APP */
-
-let app =
-document.getElementById(
-"mainApp"
-);
-
-console.log(
-"MAIN APP:",
-app
-);
-
-if(app){
-
-app.style.display =
-"block";
-
-app.style.visibility =
-"visible";
-
-app.style.opacity =
+modal.style.opacity =
 "1";
 
 }
 
-/* FORCE BODY */
+/* SHOW BODY */
 
-document.body.style.display =
-"block";
 
-/* LOAD DATA */
-
-await loadCloudData();
-
-loadNextBillNo();
-
-/* SUCCESS */
 
 showToast(
 "Company Loaded"
@@ -5981,7 +6205,20 @@ console.log(
 "MAIN WINDOW OPENED"
 );
 
-/* INSTALL POPUP */
+}catch(loadErr){
+
+console.error(loadErr);
+
+showToast(
+"Data Load Failed",
+"error"
+);
+
+}
+
+},50);
+
+/* INSTALL */
 
 setTimeout(()=>{
 
@@ -6003,13 +6240,28 @@ console.error(
 err
 );
 
-alert(
-err.message
+showToast(
+err.message,
+"error"
 );
 
-}
+/* RECOVER */
+
+document.getElementById(
+"companySelectModal"
+).style.display =
+"flex";
+
+document.getElementById(
+"mainApp"
+).style.display =
+"none";
+
+
 
 }
+}
+
 /* ESC CLOSE */
 
 document.addEventListener(
@@ -7612,7 +7864,7 @@ showTrips();
 /* SHOW TRIPS */
 
 function showTrips(){
-
+console.time("showTrips");
 let body =
 document.getElementById("tripBody");
 
@@ -8075,7 +8327,7 @@ onclick="deleteTrip(${index})">
 `;
 
 });
-
+console.timeEnd("showTrips");
 }
 
 
@@ -12032,22 +12284,6 @@ loadNextBillNo();
 
 /* AUTO CURRENT DATE */
 
-window.onload = function(){
-
-let today = new Date();
-
-let yyyy = today.getFullYear();
-
-let mm = String(today.getMonth()+1).padStart(2,'0');
-
-let dd = String(today.getDate()).padStart(2,'0');
-
-let currentDate = `${yyyy}-${mm}-${dd}`;
-
-document.getElementById("dispatchDate").value = currentDate;
-
-};
-
 
 function numberToWords(num){
 
@@ -12096,16 +12332,10 @@ return inWords(num).replace(/\s+/g," ").trim();
 
 }
 
-/* INIT */
-loadCompanySettings();
-showCustomers();
-loadCustomers();
-loadTankers();
-showTrips();
-updateDashboard();
-loadNextBillNo();
 
 window.onload = function(){
+
+/* BILL */
 
 let fyKey =
 "lastBill_" + getFinancialYear();
@@ -12113,56 +12343,23 @@ let fyKey =
 let savedBill =
 localStorage.getItem(fyKey);
 
-/* FIX OLD FORMAT */
-
-if(
-!savedBill
-||
-!savedBill.startsWith("HL/")
-){
-
-
-}
-
 document.getElementById(
 "billNo"
-).value = savedBill;
+).value =
+savedBill || "";
 
-  // TODAY DATE AUTO
-  let today = new Date().toISOString().split("T")[0];
+/* DATE */
 
-  document.getElementById("dispatchDate").value = today;
+let today =
+new Date()
+.toISOString()
+.split("T")[0];
 
-loadTankers();
-loadRoutePoints();
-showTrips();
+document.getElementById(
+"dispatchDate"
+).value = today;
 
-updateDashboard();
-
-
-/* DROPDOWNS */
-
-loadDropdown(
-"partyList",
-"partyList"
-);
-
-loadDropdown(
-"loadingPartyList",
-"loadingPartyList"
-);
-
-loadDropdown(
-"consigneeList",
-"consigneeList"
-);
-
-loadDropdown(
-"materialList",
-"materialList"
-);
-
-}
+};
 
 if("serviceWorker" in navigator){
 
@@ -12174,9 +12371,13 @@ console.log(
 
 }else{
 
+setTimeout(()=>{
+
 navigator.serviceWorker.register(
 "sw.js"
 );
+
+},3000);
 
 }
 
@@ -12184,9 +12385,21 @@ navigator.serviceWorker.register(
 
 function openCompanyModal(){
 
+let modal =
 document.getElementById(
 "companySelectModal"
-).style.display = "flex";
+);
+
+if(!modal) return;
+
+if(
+modal.style.display === "flex"
+){
+return;
+}
+
+modal.style.display =
+"flex";
 
 }
 
