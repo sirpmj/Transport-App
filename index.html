@@ -4297,22 +4297,21 @@ updateAdminUI();
 
 /* ACCESS */
 
-/* FAST POPUP */
+/* ACCESS */
 
-loadUserCompanyAccess();
+await loadUserCompanyAccess();
 
-loadCompanies();
+await loadCompanies();
 
-/* SAVED */
+/* SAVED COMPANY */
 
-let savedCompany =
-localStorage.getItem(
+let savedCompany = localStorage.getItem(
 "activeCompany"
-);
+) || "";
+
 if(savedCompany){
 
-activeCompany =
-savedCompany;
+activeCompany = savedCompany;
 
 updateLoaderCompanyName();
 
@@ -5886,13 +5885,29 @@ await db
 .collection("transportData")
 .doc(MASTER_ADMIN_UID)
 .collection("companies")
-.doc(companyName)
+.doc(docName)
 .set({
 
 companyInfo: company,
 updatedAt: Date.now()
 
-},{merge:true})
+},{merge:true});
+
+/* DELETE OLD DOC IF RENAMED */
+
+if(
+oldCompany &&
+oldCompany !== companyName
+){
+
+await db
+.collection("transportData")
+.doc(MASTER_ADMIN_UID)
+.collection("companies")
+.doc(oldCompany)
+.delete();
+
+}
 
 }
 
@@ -5918,7 +5933,8 @@ document.getElementById(
 if(topName){
 
 topName.textContent =
-`🏢 ${savedCompany} | FY ${getFinancialYear()}`;
+`🏢 ${companyName} | FY ${getFinancialYear()}`;
+
 }
 
 /* RELOAD LIST */
@@ -6098,13 +6114,25 @@ JSON.stringify(company)
 );
 
 /* FIREBASE */
+/* FIREBASE */
+
+if(companyName){
+
 activeCompany = companyName;
+
+localStorage.setItem(
+"activeCompany",
+companyName
+);
+
+}
+
 await saveCompanyToFirebase(
 company,
 companyName,
 oldCompany
 );
-await loadCompanyList();
+await loadCompanies();
 /* UI UPDATE */
 
 updateCompanyUI(
