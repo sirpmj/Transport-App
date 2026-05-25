@@ -255,6 +255,7 @@ text-align:left;
 white-space:nowrap;
 }
 
+
 .status{
 padding:2px 7px;
 border-radius:12px;
@@ -4853,7 +4854,7 @@ localStorage.removeItem(
 "activeCompany"
 );
 
-/* SIGNOUT */
+/* SIGN OUT */
 
 await auth.signOut();
 
@@ -4868,7 +4869,7 @@ activeCompany = "";
 showLoginScreen();
 
 alert(
-"Logged out due to inactivity"
+"Security logout due to inactivity"
 );
 
 }catch(err){
@@ -4887,7 +4888,6 @@ console.error(err);
 
 [
 "click",
-"mousemove",
 "keydown",
 "scroll",
 "touchstart"
@@ -4899,6 +4899,10 @@ resetAutoLogout
 );
 
 });
+
+/* START TIMER */
+
+resetAutoLogout();
 
 function formatAmount(num){
 
@@ -9191,7 +9195,7 @@ th:nth-child(13), td:nth-child(13){
 
   @page{
     size:A4 portrait;
-    margin:8mm;
+    margin:6mm;
   }
 
   body{
@@ -9205,7 +9209,7 @@ th:nth-child(13), td:nth-child(13){
   }
 
   th,td{
-    font-size:10px;
+    font-size:9.5px;
     padding:4px;
   }
 
