@@ -4049,6 +4049,14 @@ currentUser.email === ADMIN_EMAIL;
 
 }
 
+function isDemoUser(){
+
+return currentUser &&
+currentUser.email ===
+"demo@gmail.com";
+
+}
+
 async function loadUserCompanyAccess(){
 
 if(!currentUser) return;
@@ -4286,6 +4294,20 @@ return;
 /* USER */
 
 currentUser = user;
+if(
+currentUser.email ===
+"demo@gmail.com"
+){
+
+activeCompany =
+"Demo Company";
+
+localStorage.setItem(
+"activeCompany",
+"Demo Company"
+);
+
+}
 
 /* AUTO LOGOUT */
 
@@ -7267,6 +7289,18 @@ ${p}
 /* OPEN EDIT */
 
 function editTrip(index){
+
+if(isDemoUser()){
+
+showToast(
+"Demo Mode: Edit Disabled",
+"error"
+);
+
+return;
+
+}
+
 loadEditDropdowns();
 currentTripIndex = index;
 
@@ -8658,6 +8692,17 @@ showTrips();
 /* DELETE */
 
 function deleteTrip(index){
+
+if(isDemoUser()){
+
+showToast(
+"Demo Mode: Delete Disabled",
+"error"
+);
+
+return;
+
+}
 
 if(!confirm("Delete Trip?"))
 return;
