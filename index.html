@@ -21,6 +21,7 @@ padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
+
 body{
 background:#f1f5f9;
 padding:8px;
@@ -100,6 +101,7 @@ gap:3px !important;
 margin-top:4px;
 
 }
+
 .btn-row button{
 
 font-size:13px;
@@ -4709,12 +4711,58 @@ String(year).slice(2);
 
 }
 
-function addNewCompany(){
+async function addNewCompany(){
+
+try{
 
 let name =
 prompt("Enter Company Name");
 
 if(!name) return;
+
+name = name.trim();
+
+if(!name){
+
+alert("Invalid Company Name");
+return;
+
+}
+
+/* REF */
+
+let ref = db
+.collection("transportData")
+.doc(MASTER_ADMIN_UID)
+.collection("companies")
+.doc(name);
+
+/* CHECK */
+
+let doc =
+await ref.get();
+
+if(doc.exists){
+
+alert(
+"Company already exists"
+);
+
+return;
+
+}
+
+/* SAVE FIREBASE */
+
+await ref.set({
+
+companyName:name,
+createdAt:
+firebase.firestore.FieldValue.serverTimestamp()
+
+});
+
+/* LOCAL BACKUP */
 
 let companies =
 JSON.parse(
@@ -4722,12 +4770,7 @@ localStorage.getItem("companies")
 || "[]"
 );
 
-if(companies.includes(name)){
-
-alert("Company already exists");
-return;
-
-}
+if(!companies.includes(name)){
 
 companies.push(name);
 
@@ -4736,7 +4779,44 @@ localStorage.setItem(
 JSON.stringify(companies)
 );
 
-loadCompanies();
+}
+
+/* RELOAD */
+
+await loadCompanies();
+
+/* AUTO SELECT */
+
+document.getElementById(
+"companySelect"
+).value = name;
+
+activeCompany = name;
+
+localStorage.setItem(
+"activeCompany",
+name
+);
+
+console.log(
+"COMPANY SAVED:",
+name
+);
+
+showToast(
+"Company Added"
+);
+
+}catch(err){
+
+console.error(
+"ADD COMPANY ERROR:",
+err
+);
+
+alert(err.message);
+
+}
 
 }
 
@@ -4749,6 +4829,8 @@ document.getElementById(
 
 if(!select) return;
 
+/* RESET */
+
 select.innerHTML = `
 <option value="">
 Select Company
@@ -4757,54 +4839,43 @@ Select Company
 
 try{
 
-/* SAFETY */
-
-if(!userCompanyAccess){
-
-userCompanyAccess = {};
-
-}
-
-/* COMPANY LIST */
-
 let snapshot = await db
 .collection("transportData")
 .doc(MASTER_ADMIN_UID)
 .collection("companies")
 .get();
 
+console.log(
+"SNAPSHOT SIZE:",
+snapshot.size
+);
+
 /* LOOP */
 
 snapshot.forEach(doc=>{
 
-let companyName = doc.id;
+let companyName =
+(doc.id || "").trim();
 
-/* ADMIN */
+console.log(
+"ADDING:",
+companyName
+);
 
-if(isAdmin()){
+let option =
+document.createElement(
+"option"
+);
 
-select.innerHTML += `
-<option value="${companyName}">
-${companyName}
-</option>
-`;
+option.value =
+companyName;
 
-}
+option.textContent =
+companyName;
 
-/* USER ACCESS */
-
-else if(
-userCompanyAccess &&
-userCompanyAccess[companyName] === true
-){
-
-select.innerHTML += `
-<option value="${companyName}">
-${companyName}
-</option>
-`;
-
-}
+select.appendChild(
+option
+);
 
 });
 
@@ -4817,7 +4888,8 @@ select.querySelector(
 )
 ){
 
-select.value = activeCompany;
+select.value =
+activeCompany;
 
 }
 
