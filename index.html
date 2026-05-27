@@ -4044,8 +4044,11 @@ return userCompanyAccess[email] || [];
 
 function isAdmin(){
 
-return currentUser &&
-currentUser.email === ADMIN_EMAIL;
+return (
+firebase.auth().currentUser &&
+firebase.auth().currentUser.uid ===
+MASTER_ADMIN_UID
+);
 
 }
 
@@ -4845,22 +4848,14 @@ let snapshot = await db
 .collection("companies")
 .get();
 
-console.log(
-"SNAPSHOT SIZE:",
-snapshot.size
-);
-
-/* LOOP */
-
 snapshot.forEach(doc=>{
 
 let companyName =
 (doc.id || "").trim();
 
-console.log(
-"ADDING:",
-companyName
-);
+/* ADMIN */
+
+if(isAdmin()){
 
 let option =
 document.createElement(
@@ -4876,6 +4871,32 @@ companyName;
 select.appendChild(
 option
 );
+
+}
+
+/* USER ACCESS */
+
+else if(
+userCompanyAccess &&
+userCompanyAccess[companyName] === true
+){
+
+let option =
+document.createElement(
+"option"
+);
+
+option.value =
+companyName;
+
+option.textContent =
+companyName;
+
+select.appendChild(
+option
+);
+
+}
 
 });
 
@@ -4907,6 +4928,7 @@ alert(
 }
 
 }
+
 function changeCompany(){
 
 activeCompany =
