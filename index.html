@@ -4025,7 +4025,10 @@ document.getElementById(
 /* =========================
 AUTH
 ========================= */
+
 let currentUser = null;
+
+let currentUserRole = "user";
 
 const ADMIN_EMAIL = "sirpmj@gmail.com";
 
@@ -4044,11 +4047,7 @@ return userCompanyAccess[email] || [];
 
 function isAdmin(){
 
-return (
-firebase.auth().currentUser &&
-firebase.auth().currentUser.uid ===
-MASTER_ADMIN_UID
-);
+return currentUserRole === "admin";
 
 }
 
@@ -4274,21 +4273,18 @@ return;
 let userData =
 doc.data();
 
+currentUserRole =
+userData.role || "user";
+
 /* APPROVAL */
 
 if(!userData.approved){
 
-await auth.signOut();
-
 alert(
-"Pending Admin Approval"
+"Waiting for admin approval"
 );
 
-document.getElementById(
-"loginScreen"
-).style.display =
-"flex";
-
+auth.signOut();
 
 return;
 
