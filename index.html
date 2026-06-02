@@ -2350,16 +2350,20 @@ onchange="applyEditRouteFreight()">
 Select Group
 </option>
 
-<option value="CSL">
-CSL
+<option value="Liquid1 ">
+Liquid1 
 </option>
 
-<option value="Powder">
-Powder
+<option value="Powder1">
+Powder1
 </option>
 
-<option value="Hypo">
-Hypo
+<option value="Liquid2">
+Liquid2
+</option>
+
+<option value="Powder2">
+Powder2
 </option>
 
 </select>
@@ -2676,16 +2680,20 @@ placeholder="Unloading Point">
 Select Group
 </option>
 
-<option value="CSL">
-CSL
+<option value="Liquid1">
+Liquid1 
 </option>
 
-<option value="Powder">
-Powder
+<option value="Powder1">
+Powder1
 </option>
 
-<option value="Hypo">
-Hypo
+<option value="Liquid2">
+Liquid2
+</option>
+
+<option value="Powder2">
+Powder2
 </option>
 
 </select>
@@ -2800,16 +2808,20 @@ onchange="applyRouteFreight()">
 Select Group
 </option>
 
-<option value="CSL">
-CSL
+<option value="Liquid1 ">
+Liquid1
 </option>
 
-<option value="Powder">
-Powder
+<option value="Powder1">
+Powder1
 </option>
 
-<option value="Hypo">
-Hypo
+<option value="Liquid2">
+Liquid2
+</option>
+
+<option value="Powder2">
+Powder2
 </option>
 
 </select>
@@ -3801,6 +3813,7 @@ document.getElementById(
 }
 
 function addCompanyMode(){
+
 if(!isAdmin()){
 
 showToast(
@@ -3811,7 +3824,11 @@ showToast(
 return;
 
 }
+
 companyEditMode = false;
+
+/* IMPORTANT FIX */
+originalCompanyName = "";
 
 /* OPEN POPUP */
 
@@ -3832,29 +3849,12 @@ setCompanyFieldsReadonly(false);
 
 /* BLANK FORM */
 
-document.getElementById(
-"setCompanyName"
-).value = "";
-
-document.getElementById(
-"setCompanyAddress"
-).value = "";
-
-document.getElementById(
-"setCompanyMobile"
-).value = "";
-
-document.getElementById(
-"setCompanyEmail"
-).value = "";
-
-document.getElementById(
-"setCompanyGST"
-).value = "";
-
-document.getElementById(
-"setCompanyTerms"
-).value = "";
+document.getElementById("setCompanyName").value = "";
+document.getElementById("setCompanyAddress").value = "";
+document.getElementById("setCompanyMobile").value = "";
+document.getElementById("setCompanyEmail").value = "";
+document.getElementById("setCompanyGST").value = "";
+document.getElementById("setCompanyTerms").value = "";
 
 /* BUTTONS */
 
@@ -3867,6 +3867,7 @@ document.getElementById(
 ).style.display = "block";
 
 }
+
 
 function showToast(message,type="success"){
 
@@ -6175,11 +6176,18 @@ document.getElementById(
 .value
 .trim();
 
+
 /* OLD COMPANY */
 
-let oldCompany =
+let oldCompany = "";
+
+if(companyEditMode){
+
+oldCompany =
 originalCompanyName ||
 activeCompany;
+
+}
 
 /* VALIDATION */
 
