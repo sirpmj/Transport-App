@@ -2383,9 +2383,13 @@ id="editMaterial">
 
 <label>Loading From</label>
 
-<select
+<input
+type="text"
 id="editLoadingPoint"
+list="editLoadingPointList"
 onchange="applyEditRouteFreight()">
+
+<datalist id="editLoadingPointList"></datalist>
 
 <option value="">
 Select Loading Point
@@ -2399,9 +2403,13 @@ Select Loading Point
 
 <label>Unload To</label>
 
-<select
+<input
+type="text"
 id="editUnloadingPoint"
+list="editUnloadingPointList"
 onchange="applyEditRouteFreight()">
+
+<datalist id="editUnloadingPointList"></datalist>
 
 <option value="">
 Select Unloading Point
@@ -2416,7 +2424,10 @@ Select Unloading Point
 
 <input
 type="text"
-id="editTanker">
+id="editTanker"
+list="editTankerList">
+
+<datalist id="editTankerList"></datalist>
 
 </div>
 
@@ -2840,10 +2851,13 @@ onchange="applyRouteFreight()">
 
 <label>Loading From</label>
 
-<select
+<input
+type="text"
 id="loadingPoint"
+list="loadingPointList"
 onchange="applyRouteFreight()">
-</select>
+
+<datalist id="loadingPointList"></datalist>
 
 </div>
 
@@ -2851,17 +2865,25 @@ onchange="applyRouteFreight()">
 
 <label>Unload To</label>
 
-<select
+<input
+type="text"
 id="unloadingPoint"
+list="unloadingPointList"
 onchange="applyRouteFreight()">
-</select>
+
+<datalist id="unloadingPointList"></datalist>
 
 </div>
 
 
 <div class="field">
 <label>Vehicle No</label>
-<select id="tripTanker"></select>
+<input
+type="text"
+id="tripTanker"
+list="tripTankerList">
+
+<datalist id="tripTankerList"></datalist>
 </div>
 
 
@@ -7331,31 +7353,44 @@ let currentTripIndex = null;
 
 function loadRoutePoints(){
 
-let loading =
-document.getElementById("loadingPoint");
+let loadingList =
+document.getElementById("loadingPointList");
 
-let unloading =
-document.getElementById("unloadingPoint");
+let unloadingList =
+document.getElementById("unloadingPointList");
 
-if(!loading || !unloading) return;
+let editLoadingList =
+document.getElementById("editLoadingPointList");
+
+let editUnloadingList =
+document.getElementById("editUnloadingPointList");
+
+if(!loadingList || !unloadingList) return;
 
 /* RESET */
 
+loadingList.innerHTML = "";
+unloadingList.innerHTML = "";
 
+if(editLoadingList)
+editLoadingList.innerHTML = "";
+
+if(editUnloadingList)
+editUnloadingList.innerHTML = "";
 
 /* UNIQUE POINTS */
 
 let points = [];
 
-/* FROM */
+/* FROM + TO */
 
 routeRates.forEach(r=>{
 
-if(!points.includes(r.from)){
+if(r.from && !points.includes(r.from)){
 points.push(r.from);
 }
 
-if(!points.includes(r.to)){
+if(r.to && !points.includes(r.to)){
 points.push(r.to);
 }
 
@@ -7365,17 +7400,17 @@ points.push(r.to);
 
 points.forEach(p=>{
 
-loading.innerHTML += `
-<option value="${p}">
-${p}
-</option>
-`;
+let option =
+`<option value="${p}"></option>`;
 
-unloading.innerHTML += `
-<option value="${p}">
-${p}
-</option>
-`;
+loadingList.innerHTML += option;
+unloadingList.innerHTML += option;
+
+if(editLoadingList)
+editLoadingList.innerHTML += option;
+
+if(editUnloadingList)
+editUnloadingList.innerHTML += option;
 
 });
 
@@ -7881,24 +7916,36 @@ console.log(tankers);
 
 function loadTankers(){
 
-let select =
-document.getElementById("tripTanker");
+let tripList =
+document.getElementById("tripTankerList");
 
-if(!select) return;
+let editList =
+document.getElementById("editTankerList");
 
-select.innerHTML = "";
+if(!tripList) return;
+
+/* RESET */
+
+tripList.innerHTML = "";
+
+if(editList)
+editList.innerHTML = "";
+
+/* ADD */
 
 tankers.forEach(t=>{
 
-select.innerHTML += `
+let option =
 
-<option value="${t.vehicleNo}">
+`<option value="${t.vehicleNo}"></option>`;
 
-${t.vehicleNo}
+tripList.innerHTML += option;
 
-</option>
+if(editList){
 
-`;
+editList.innerHTML += option;
+
+}
 
 });
 
