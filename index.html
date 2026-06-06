@@ -3569,13 +3569,13 @@ JSON.stringify(routeRates)
 
 /* COMPANY INFO */
 
+console.log("FULL DATA:", data);
+
 localStorage.setItem(
 "companyInfo",
-
 JSON.stringify(
 data.companyInfo || {}
 )
-
 );
 
 /* REFRESH */
@@ -6245,6 +6245,7 @@ gstin: gstin,
 terms: terms
 
 };
+console.log("SAVE COMPANY OBJECT:", company);
 
 /* LOCAL SAVE */
 
@@ -6272,7 +6273,24 @@ company,
 companyName,
 oldCompany
 );
+
+await db
+.collection("transportData")
+.doc(MASTER_ADMIN_UID)
+.collection("companies")
+.doc(companyName)
+.collection(getFinancialYear())
+.doc("data")
+.set({
+
+companyInfo: company,
+
+updatedAt: Date.now()
+
+},{merge:true});
+
 await loadCompanies();
+
 /* UI UPDATE */
 
 updateCompanyUI(
@@ -8325,7 +8343,6 @@ showTrips();
 /* SHOW TRIPS */
 
 function showTrips(){
-console.time("showTrips");
 let body =
 document.getElementById("tripBody");
 
@@ -8788,7 +8805,6 @@ onclick="deleteTrip(${index})">
 `;
 
 });
-console.timeEnd("showTrips");
 }
 
 
