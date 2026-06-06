@@ -5920,7 +5920,7 @@ return false;
 
 if(
 mobile &&
-!/^\d{10}$/.test(mobile)
+!/^\d{10}(\s*\/\s*\d{10})?$/.test(mobile)
 ){
 
 showToast(
